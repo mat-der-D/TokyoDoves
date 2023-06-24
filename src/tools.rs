@@ -26,6 +26,7 @@ impl TryFrom<WinnerJudgement> for WinnerJudgementNoDraw {
 }
 
 /// Value of board
+#[derive(Debug, Clone, Copy)]
 pub enum BoardValue {
     /// `Win(n)` means the player will win in `n` turns at least
     Win(usize),
