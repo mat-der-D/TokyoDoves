@@ -141,6 +141,7 @@
 <a href="#141" id="141">141</a>
 <a href="#142" id="142">142</a>
 <a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Convenient tools to analyze the game
 </span><span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, Color, SurroundedStatus, WinnerJudgement};
 
@@ -169,6 +170,7 @@
 }
 
 <span class="doccomment">/// Value of board
+</span><span class="attr">#[derive(Debug, Clone, Copy)]
 </span><span class="kw">pub enum </span>BoardValue {
     <span class="doccomment">/// `Win(n)` means the player will win in `n` turns at least
     </span>Win(usize),
