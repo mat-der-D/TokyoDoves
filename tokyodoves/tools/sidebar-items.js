@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["BoardValue","WinnerJudgementConvertError","WinnerJudgementNoDraw"],"fn":["compare_board_value"]};
