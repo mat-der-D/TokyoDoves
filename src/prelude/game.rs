@@ -58,6 +58,22 @@ impl GameRule {
         }
     }
 
+    pub fn allow_remove(&self) -> &bool {
+        &self.allow_remove
+    }
+
+    pub fn first_player(&self) -> &Color {
+        &self.first_player
+    }
+
+    pub fn simultaneous_surrounding(&self) -> &WinnerJudgement {
+        &self.simultaneous_surrounding
+    }
+
+    pub fn initial_board(&self) -> &Board {
+        &self.initial_board
+    }
+
     /// Update whether allow `Remove` in the game or not
     pub fn set_allow_remove(self, allow_remove: bool) -> Self {
         Self {

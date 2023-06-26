@@ -1,28 +1,23 @@
 //! Convenient tools to analyze the game
-use crate::prelude::{Board, Color, SurroundedStatus, WinnerJudgement};
+use crate::prelude::{Board, Color, GameRule, SurroundedStatus, WinnerJudgement};
 
 #[derive(Debug, Clone, Copy, thiserror::Error)]
-pub enum WinnerJudgementConvertError {
-    #[error("[DrawProhibited]")]
-    DrawProhibited,
+pub enum CompareBoardValueError {
+    #[error("[BoardAlreadyFinished]")]
+    BoardAlreadyFinished,
+
+    #[error("[BoardValueError]")]
+    BoardValueError { error_type: BoardValueErrorType },
+
+    #[error("[DrawNotSupportedError]")]
+    DrawNotSupportedError,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum WinnerJudgementNoDraw {
-    LastPlayer,
-    NextPlayer,
-}
-
-impl TryFrom<WinnerJudgement> for WinnerJudgementNoDraw {
-    type Error = WinnerJudgementConvertError;
-    fn try_from(judgement: WinnerJudgement) -> Result<Self, Self::Error> {
-        use WinnerJudgement::*;
-        match judgement {
-            NextPlayer => Ok(WinnerJudgementNoDraw::NextPlayer),
-            LastPlayer => Ok(WinnerJudgementNoDraw::LastPlayer),
-            Draw => Err(WinnerJudgementConvertError::DrawProhibited),
-        }
-    }
+pub enum BoardValueErrorType {
+    WinArgMustOdd(usize),
+    LoseArgMustPositiveEven(usize),
+    UnknownNotSupported,
 }
 
 /// Value of board
@@ -43,37 +38,54 @@ pub fn compare_board_value(
     value: &BoardValue,
     board: &Board,
     player: Color,
-    allow_remove: bool,
-    surrounding_judgement: WinnerJudgementNoDraw,
-) -> Result<i8, &'static str> {
+    rule: GameRule,
+) -> Result<i8, CompareBoardValueError> {
     use BoardValue::*;
+    use CompareBoardValueError::*;
     use SurroundedStatus::*;
     if !matches!(board.surrounded_status(), None) {
-        return Err("invalid board: already finished");
+        return Err(BoardAlreadyFinished);
     }
+
+    use BoardValueErrorType::*;
     let n = match value {
         Win(n) => {
             if n % 2 == 1 {
                 *n
             } else {
-                return Err("n of BoardValue::Win(n) must be odd");
+                return Err(BoardValueError {
+                    error_type: WinArgMustOdd(*n),
+                });
             }
         }
         Lose(n) => {
             if (*n != 0) && (n % 2 == 0) {
                 *n
             } else {
-                return Err("n of BoardValue::Lose(n) must be positive and even");
+                return Err(BoardValueError {
+                    error_type: LoseArgMustPositiveEven(*n),
+                });
             }
         }
-        Unknown => return Err("BoardValue::Unknown is not supported"),
+        Unknown => {
+            return Err(BoardValueError {
+                error_type: UnknownNotSupported,
+            })
+        }
     };
-    let wins_if_both = matches!(surrounding_judgement, WinnerJudgementNoDraw::LastPlayer);
+
+    use WinnerJudgement::*;
+    let wins_if_both = match rule.simultaneous_surrounding() {
+        LastPlayer => true,
+        NextPlayer => false,
+        Draw => return Err(DrawNotSupportedError),
+    };
+    let allow_remove = rule.allow_remove();
     Ok(compare_board_value_core(
         n,
         board,
         player,
-        allow_remove,
+        *allow_remove,
         wins_if_both,
     ))
 }
@@ -122,8 +134,7 @@ mod tests {
     fn test_compare_value() {
         use std::str::FromStr;
         use tools::BoardValue::*;
-        let allow_remove = true;
-        let judge = tools::WinnerJudgementNoDraw::NextPlayer;
+        let rule = GameRule::new(true).with_simultaneous_surrounding(WinnerJudgement::NextPlayer);
         let board_value = [
             (" B; a;TH y;b mM", Win(5)),
             (" By;H  a;A m;  Yb", Win(3)),
@@ -137,8 +148,8 @@ mod tests {
         ];
         for (s, val) in board_value {
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            let cmp = tools::compare_board_value(&val, &board, Color::Red, allow_remove, judge);
-            assert_eq!(cmp, Ok(0));
+            let cmp = tools::compare_board_value(&val, &board, Color::Red, rule);
+            assert!(matches!(cmp, Ok(0)));
         }
     }
 }
