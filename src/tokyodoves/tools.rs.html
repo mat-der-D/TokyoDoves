@@ -142,31 +142,37 @@
 <a href="#142" id="142">142</a>
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Convenient tools to analyze the game
-</span><span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, Color, SurroundedStatus, WinnerJudgement};
+</span><span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, Color, GameRule, SurroundedStatus, WinnerJudgement};
 
 <span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
-</span><span class="kw">pub enum </span>WinnerJudgementConvertError {
-    <span class="attr">#[error(<span class="string">&quot;[DrawProhibited]&quot;</span>)]
-    </span>DrawProhibited,
+</span><span class="kw">pub enum </span>CompareBoardValueError {
+    <span class="attr">#[error(<span class="string">&quot;[BoardAlreadyFinished]&quot;</span>)]
+    </span>BoardAlreadyFinished,
+
+    <span class="attr">#[error(<span class="string">&quot;[BoardValueError]&quot;</span>)]
+    </span>BoardValueError { error_type: BoardValueErrorType },
+
+    <span class="attr">#[error(<span class="string">&quot;[DrawNotSupportedError]&quot;</span>)]
+    </span>DrawNotSupportedError,
 }
 
 <span class="attr">#[derive(Debug, Clone, Copy)]
-</span><span class="kw">pub enum </span>WinnerJudgementNoDraw {
-    LastPlayer,
-    NextPlayer,
-}
-
-<span class="kw">impl </span>TryFrom&lt;WinnerJudgement&gt; <span class="kw">for </span>WinnerJudgementNoDraw {
-    <span class="kw">type </span>Error = WinnerJudgementConvertError;
-    <span class="kw">fn </span>try_from(judgement: WinnerJudgement) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">use </span>WinnerJudgement::<span class="kw-2">*</span>;
-        <span class="kw">match </span>judgement {
-            NextPlayer =&gt; <span class="prelude-val">Ok</span>(WinnerJudgementNoDraw::NextPlayer),
-            LastPlayer =&gt; <span class="prelude-val">Ok</span>(WinnerJudgementNoDraw::LastPlayer),
-            Draw =&gt; <span class="prelude-val">Err</span>(WinnerJudgementConvertError::DrawProhibited),
-        }
-    }
+</span><span class="kw">pub enum </span>BoardValueErrorType {
+    WinArgMustOdd(usize),
+    LoseArgMustPositiveEven(usize),
+    UnknownNotSupported,
 }
 
 <span class="doccomment">/// Value of board
@@ -187,37 +193,54 @@
     value: <span class="kw-2">&amp;</span>BoardValue,
     board: <span class="kw-2">&amp;</span>Board,
     player: Color,
-    allow_remove: bool,
-    surrounding_judgement: WinnerJudgementNoDraw,
-) -&gt; <span class="prelude-ty">Result</span>&lt;i8, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; {
+    rule: GameRule,
+) -&gt; <span class="prelude-ty">Result</span>&lt;i8, CompareBoardValueError&gt; {
     <span class="kw">use </span>BoardValue::<span class="kw-2">*</span>;
+    <span class="kw">use </span>CompareBoardValueError::<span class="kw-2">*</span>;
     <span class="kw">use </span>SurroundedStatus::<span class="kw-2">*</span>;
     <span class="kw">if </span>!<span class="macro">matches!</span>(board.surrounded_status(), <span class="prelude-val">None</span>) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;invalid board: already finished&quot;</span>);
+        <span class="kw">return </span><span class="prelude-val">Err</span>(BoardAlreadyFinished);
     }
+
+    <span class="kw">use </span>BoardValueErrorType::<span class="kw-2">*</span>;
     <span class="kw">let </span>n = <span class="kw">match </span>value {
         Win(n) =&gt; {
             <span class="kw">if </span>n % <span class="number">2 </span>== <span class="number">1 </span>{
                 <span class="kw-2">*</span>n
             } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;n of BoardValue::Win(n) must be odd&quot;</span>);
+                <span class="kw">return </span><span class="prelude-val">Err</span>(BoardValueError {
+                    error_type: WinArgMustOdd(<span class="kw-2">*</span>n),
+                });
             }
         }
         Lose(n) =&gt; {
             <span class="kw">if </span>(<span class="kw-2">*</span>n != <span class="number">0</span>) &amp;&amp; (n % <span class="number">2 </span>== <span class="number">0</span>) {
                 <span class="kw-2">*</span>n
             } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;n of BoardValue::Lose(n) must be positive and even&quot;</span>);
+                <span class="kw">return </span><span class="prelude-val">Err</span>(BoardValueError {
+                    error_type: LoseArgMustPositiveEven(<span class="kw-2">*</span>n),
+                });
             }
         }
-        Unknown =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;BoardValue::Unknown is not supported&quot;</span>),
+        Unknown =&gt; {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(BoardValueError {
+                error_type: UnknownNotSupported,
+            })
+        }
     };
-    <span class="kw">let </span>wins_if_both = <span class="macro">matches!</span>(surrounding_judgement, WinnerJudgementNoDraw::LastPlayer);
+
+    <span class="kw">use </span>WinnerJudgement::<span class="kw-2">*</span>;
+    <span class="kw">let </span>wins_if_both = <span class="kw">match </span>rule.simultaneous_surrounding() {
+        LastPlayer =&gt; <span class="bool-val">true</span>,
+        NextPlayer =&gt; <span class="bool-val">false</span>,
+        Draw =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(DrawNotSupportedError),
+    };
+    <span class="kw">let </span>allow_remove = rule.allow_remove();
     <span class="prelude-val">Ok</span>(compare_board_value_core(
         n,
         board,
         player,
-        allow_remove,
+        <span class="kw-2">*</span>allow_remove,
         wins_if_both,
     ))
 }
@@ -266,8 +289,7 @@
     </span><span class="kw">fn </span>test_compare_value() {
         <span class="kw">use </span>std::str::FromStr;
         <span class="kw">use </span>tools::BoardValue::<span class="kw-2">*</span>;
-        <span class="kw">let </span>allow_remove = <span class="bool-val">true</span>;
-        <span class="kw">let </span>judge = tools::WinnerJudgementNoDraw::NextPlayer;
+        <span class="kw">let </span>rule = GameRule::new(<span class="bool-val">true</span>).with_simultaneous_surrounding(WinnerJudgement::NextPlayer);
         <span class="kw">let </span>board_value = [
             (<span class="string">&quot; B; a;TH y;b mM&quot;</span>, Win(<span class="number">5</span>)),
             (<span class="string">&quot; By;H  a;A m;  Yb&quot;</span>, Win(<span class="number">3</span>)),
@@ -281,8 +303,8 @@
         ];
         <span class="kw">for </span>(s, val) <span class="kw">in </span>board_value {
             <span class="kw">let </span>board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            <span class="kw">let </span>cmp = tools::compare_board_value(<span class="kw-2">&amp;</span>val, <span class="kw-2">&amp;</span>board, Color::Red, allow_remove, judge);
-            <span class="macro">assert_eq!</span>(cmp, <span class="prelude-val">Ok</span>(<span class="number">0</span>));
+            <span class="kw">let </span>cmp = tools::compare_board_value(<span class="kw-2">&amp;</span>val, <span class="kw-2">&amp;</span>board, Color::Red, rule);
+            <span class="macro">assert!</span>(<span class="macro">matches!</span>(cmp, <span class="prelude-val">Ok</span>(<span class="number">0</span>)));
         }
     }
 }
