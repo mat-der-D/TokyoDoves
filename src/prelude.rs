@@ -1,6 +1,7 @@
 mod board;
 mod builder;
 mod game;
+mod macros;
 
 pub mod error;
 pub use board::*;

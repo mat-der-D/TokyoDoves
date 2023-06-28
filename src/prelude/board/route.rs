@@ -3,7 +3,7 @@
 use array_macro::array;
 
 use super::bitutil;
-use crate::prelude::{Dove, Shift};
+use crate::prelude::{macros, Dove, Shift};
 
 const BIT_ROUTE_SHIFTS: [TargetBitRouteShift; 64] = {
     array![
@@ -94,9 +94,8 @@ impl TargetBitRouteShift {
         // Note: the order of contents affects pack_moves
         let mut t = [(0, 0, (0, 0)); 16];
 
-        let mut i = 0;
         let mut route = 0;
-        while i < 4 {
+        macros::for_loop!(let mut i = 0; i < 4; i += 1 => {
             let shift = Shift {
                 dh: 0,
                 dv: -(i + 1),
@@ -104,12 +103,10 @@ impl TargetBitRouteShift {
             let bit = bitutil::apply_shift(origin_bit, shift);
             route |= bit;
             t[i as usize] = (bit, route, (0, -(i + 1)));
-            i += 1;
-        }
+        });
 
-        i = 0;
         route = 0;
-        while i < 4 {
+        macros::for_loop!(let mut i = 0; i < 4; i += 1 => {
             let shift = Shift {
                 dh: -(i + 1),
                 dv: 0,
@@ -117,28 +114,23 @@ impl TargetBitRouteShift {
             let bit = bitutil::apply_shift(origin_bit, shift);
             route |= bit;
             t[(i + 4) as usize] = (bit, route, (-(i + 1), 0));
-            i += 1;
-        }
+        });
 
-        i = 0;
         route = 0;
-        while i < 4 {
+        macros::for_loop!(let mut i = 0; i < 4; i += 1 => {
             let shift = Shift { dh: i + 1, dv: 0 };
             let bit = bitutil::apply_shift(origin_bit, shift);
             route |= bit;
             t[(i + 8) as usize] = (bit, route, (i + 1, 0));
-            i += 1;
-        }
+        });
 
-        i = 0;
         route = 0;
-        while i < 4 {
+        macros::for_loop!(let mut i = 0; i < 4; i += 1 => {
             let shift = Shift { dh: 0, dv: i + 1 };
             let bit = bitutil::apply_shift(origin_bit, shift);
             route |= bit;
             t[(i + 12) as usize] = (bit, route, (0, i + 1));
-            i += 1;
-        }
+        });
 
         t
     }

@@ -1,3 +1,5 @@
+use crate::prelude::macros;
+
 pub const CONGRUENT_MAPS: [[[usize; 16]; 8]; 16] = {
     // (hsize - 1) + 4 * (vsize - 1)
     let rotate_maps = [
@@ -15,44 +17,33 @@ pub const CONGRUENT_MAPS: [[[usize; 16]; 8]; 16] = {
     ];
 
     let mut cons = [[[0_usize; 16]; 8]; 16];
-    let mut vsize = 1;
-    while vsize < 5 {
-        let mut hsize = 1;
-        while hsize < 5 {
+    macros::for_loop!(let mut vsize = 1; vsize < 5; vsize += 1 => {
+        macros::for_loop!(let mut hsize = 1; hsize < 5; hsize += 1 => {
             let idx = (hsize - 1) + 4 * (vsize - 1);
             let mut count = 0;
             let mut base = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
-            let mut i = 0;
-            while i < 2 {
-                let mut j = 0;
-                while j < 2 {
-                    let mut k = 0;
-                    while k < 2 {
+            macros::for_loop!(let mut i = 0; i < 2; i += 1 => {
+                macros::for_loop!(let mut j = 0; j < 2; j += 1 => {
+                    macros::for_loop!(let mut k = 0; k < 2; k += 1 => {
                         let hvsize = if k % 2 == 0 { vsize } else { hsize };
                         base = compose(rotate_maps[hvsize - 1], base);
                         cons[idx][count] = base;
                         count += 1;
-                        k += 1;
-                    }
-                    j += 1;
-                }
+                    }); // k
+                }); // j
                 base = compose(reflect_maps[vsize - 1], base);
-                i += 1;
-            }
-            hsize += 1;
-        }
-        vsize += 1;
-    }
+            }); // i
+        }); // hsize
+    }); // vsize
+
     cons
 };
 
 const fn compose(a: [usize; 16], b: [usize; 16]) -> [usize; 16] {
     let mut a_after_b = [0_usize; 16];
-    let mut i = 0;
-    while i < 16 {
+    macros::for_loop!(let mut i = 0; i < 16; i += 1 => {
         a_after_b[i] = a[b[i]];
-        i += 1;
-    }
+    });
     a_after_b
 }
