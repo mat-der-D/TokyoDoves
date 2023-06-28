@@ -121,20 +121,6 @@
 <a href="#121" id="121">121</a>
 <a href="#122" id="122">122</a>
 <a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Move rules of each dove
 
 </span><span class="kw">use </span>array_macro::array;
@@ -231,43 +217,29 @@
         <span class="comment">// Note: the order of contents affects pack_moves
         </span><span class="kw">let </span><span class="kw-2">mut </span>t = [(<span class="number">0</span>, <span class="number">0</span>, (<span class="number">0</span>, <span class="number">0</span>)); <span class="number">16</span>];
 
-        <span class="kw">let </span><span class="kw-2">mut </span>route = <span class="number">0</span>;
-        <span class="macro">macros::for_loop!</span>(<span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i += <span class="number">1 </span>=&gt; {
-            <span class="kw">let </span>shift = Shift {
-                dh: <span class="number">0</span>,
-                dv: -(i + <span class="number">1</span>),
+        <span class="macro">macro_rules! </span>define_route_t {
+            ($({<span class="macro-nonterminal">$i</span>:ident, <span class="macro-nonterminal">$dh</span>:expr, <span class="macro-nonterminal">$dv</span>:expr, <span class="macro-nonterminal">$idx</span>:expr})<span class="kw-2">*</span>) =&gt; {
+                $(
+                    <span class="kw">let </span><span class="kw-2">mut </span>route = <span class="number">0</span>;
+                    <span class="macro">macros::for_loop!</span>(<span class="kw">let </span><span class="kw-2">mut </span><span class="macro-nonterminal">$i </span>= <span class="number">0</span>; <span class="macro-nonterminal">$i </span>&lt; <span class="number">4</span>; <span class="macro-nonterminal">$i </span>+= <span class="number">1 </span>=&gt; {
+                        <span class="kw">let </span>shift = Shift {
+                            dh: <span class="macro-nonterminal">$dh</span>,
+                            dv: <span class="macro-nonterminal">$dv</span>,
+                        };
+                        <span class="kw">let </span>bit = bitutil::apply_shift(origin_bit, shift);
+                        route |= bit;
+                        t[(<span class="macro-nonterminal">$idx</span>) <span class="kw">as </span>usize] = (bit, route, (<span class="macro-nonterminal">$dh</span>, <span class="macro-nonterminal">$dv</span>));
+                    });
+                )*
             };
-            <span class="kw">let </span>bit = bitutil::apply_shift(origin_bit, shift);
-            route |= bit;
-            t[i <span class="kw">as </span>usize] = (bit, route, (<span class="number">0</span>, -(i + <span class="number">1</span>)));
-        });
+        }
 
-        route = <span class="number">0</span>;
-        <span class="macro">macros::for_loop!</span>(<span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i += <span class="number">1 </span>=&gt; {
-            <span class="kw">let </span>shift = Shift {
-                dh: -(i + <span class="number">1</span>),
-                dv: <span class="number">0</span>,
-            };
-            <span class="kw">let </span>bit = bitutil::apply_shift(origin_bit, shift);
-            route |= bit;
-            t[(i + <span class="number">4</span>) <span class="kw">as </span>usize] = (bit, route, (-(i + <span class="number">1</span>), <span class="number">0</span>));
-        });
-
-        route = <span class="number">0</span>;
-        <span class="macro">macros::for_loop!</span>(<span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i += <span class="number">1 </span>=&gt; {
-            <span class="kw">let </span>shift = Shift { dh: i + <span class="number">1</span>, dv: <span class="number">0 </span>};
-            <span class="kw">let </span>bit = bitutil::apply_shift(origin_bit, shift);
-            route |= bit;
-            t[(i + <span class="number">8</span>) <span class="kw">as </span>usize] = (bit, route, (i + <span class="number">1</span>, <span class="number">0</span>));
-        });
-
-        route = <span class="number">0</span>;
-        <span class="macro">macros::for_loop!</span>(<span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i += <span class="number">1 </span>=&gt; {
-            <span class="kw">let </span>shift = Shift { dh: <span class="number">0</span>, dv: i + <span class="number">1 </span>};
-            <span class="kw">let </span>bit = bitutil::apply_shift(origin_bit, shift);
-            route |= bit;
-            t[(i + <span class="number">12</span>) <span class="kw">as </span>usize] = (bit, route, (<span class="number">0</span>, i + <span class="number">1</span>));
-        });
+        <span class="macro">define_route_t!</span>(
+            { i, <span class="number">0</span>, -(i + <span class="number">1</span>), i }
+            { i, -(i + <span class="number">1</span>), <span class="number">0</span>, i + <span class="number">4 </span>}
+            { i, i + <span class="number">1</span>, <span class="number">0</span>, i + <span class="number">8 </span>}
+            { i, <span class="number">0</span>, i + <span class="number">1</span>, i + <span class="number">12 </span>}
+        );
 
         t
     }
