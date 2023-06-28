@@ -917,7 +917,7 @@ impl Board {
     ///
     /// The order of 12 doves is "B > b > A > a > Y > y > M > m > T > t > H > h",
     /// where capital/lower cases mean red/green dove, respectively.
-    pub fn to_hash(&self) -> u64 {
+    pub fn to_u64(&self) -> u64 {
         let mut hash = 0;
         for (id, d) in Dove::iter().enumerate() {
             for (ic, c) in Color::iter().enumerate() {
@@ -938,11 +938,11 @@ impl Board {
 
     /// Returns a light expression of `u64` with a universality.
     ///
-    /// The composition of the returned value is the same as that of [`to_hash`](`Self::to_hash`).
+    /// The composition of the returned value is the same as that of [`to_u64`](`Self::to_u64`).
     /// "Universality" means that this method returns the same value for boards that
     /// - coinside with each other under reflection, rotation, translation, and any compositions of them.
     /// - coinside with each other after alternating next player and swapping colors of doves simultaneously.
-    pub fn to_canonical_hash(&self, next_player: Color) -> u64 {
+    pub fn to_canonical_u64(&self, next_player: Color) -> u64 {
         use Color::*;
         let mut board = *self;
         if matches!(next_player, Green) {
@@ -993,11 +993,11 @@ impl Board {
     ///     [None, None, None, None],
     ///     [None, None, None, None],
     /// ];
-    /// assert_eq!(board.to_matrix(), matrix);
+    /// assert_eq!(board.to_4x4_matrix(), matrix);
     /// # Ok(())
     /// # }
     /// ```
-    pub fn to_matrix(&self) -> [[Option<(Color, Dove)>; 4]; 4] {
+    pub fn to_4x4_matrix(&self) -> [[Option<(Color, Dove)>; 4]; 4] {
         let mut matrix: [[Option<(Color, Dove)>; 4]; 4] = Default::default();
 
         for c in Color::iter() {
@@ -1046,7 +1046,7 @@ impl Board {
     pub fn to_framed_string(&self) -> String {
         let hframe = "+---+---+---+---+".to_string();
         let mut lines = Vec::new();
-        for line in self.to_matrix().into_iter() {
+        for line in self.to_4x4_matrix().into_iter() {
             lines.push(hframe.clone());
             use Color::*;
             let line_str: String = line
@@ -1274,15 +1274,15 @@ mod tests {
     }
 
     #[test]
-    fn test_swap_color_canonical_hash() {
+    fn test_swap_color_canonical_u64() {
         let num_turns = 10_000;
         for (board, _, _) in RandomPlayIter::new().take(num_turns) {
             let mut board_swap = board;
             board_swap.swap_color();
             for player in Color::iter() {
                 assert_eq!(
-                    board.to_canonical_hash(player),
-                    board_swap.to_canonical_hash(!player),
+                    board.to_canonical_u64(player),
+                    board_swap.to_canonical_u64(!player),
                 );
             }
         }
