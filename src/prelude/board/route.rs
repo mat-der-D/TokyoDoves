@@ -94,43 +94,29 @@ impl TargetBitRouteShift {
         // Note: the order of contents affects pack_moves
         let mut t = [(0, 0, (0, 0)); 16];
 
-        let mut route = 0;
-        macros::for_loop!(let mut i = 0; i < 4; i += 1 => {
-            let shift = Shift {
-                dh: 0,
-                dv: -(i + 1),
+        macro_rules! define_route_t {
+            ($({$i:ident, $dh:expr, $dv:expr, $idx:expr})*) => {
+                $(
+                    let mut route = 0;
+                    macros::for_loop!(let mut $i = 0; $i < 4; $i += 1 => {
+                        let shift = Shift {
+                            dh: $dh,
+                            dv: $dv,
+                        };
+                        let bit = bitutil::apply_shift(origin_bit, shift);
+                        route |= bit;
+                        t[($idx) as usize] = (bit, route, ($dh, $dv));
+                    });
+                )*
             };
-            let bit = bitutil::apply_shift(origin_bit, shift);
-            route |= bit;
-            t[i as usize] = (bit, route, (0, -(i + 1)));
-        });
+        }
 
-        route = 0;
-        macros::for_loop!(let mut i = 0; i < 4; i += 1 => {
-            let shift = Shift {
-                dh: -(i + 1),
-                dv: 0,
-            };
-            let bit = bitutil::apply_shift(origin_bit, shift);
-            route |= bit;
-            t[(i + 4) as usize] = (bit, route, (-(i + 1), 0));
-        });
-
-        route = 0;
-        macros::for_loop!(let mut i = 0; i < 4; i += 1 => {
-            let shift = Shift { dh: i + 1, dv: 0 };
-            let bit = bitutil::apply_shift(origin_bit, shift);
-            route |= bit;
-            t[(i + 8) as usize] = (bit, route, (i + 1, 0));
-        });
-
-        route = 0;
-        macros::for_loop!(let mut i = 0; i < 4; i += 1 => {
-            let shift = Shift { dh: 0, dv: i + 1 };
-            let bit = bitutil::apply_shift(origin_bit, shift);
-            route |= bit;
-            t[(i + 12) as usize] = (bit, route, (0, i + 1));
-        });
+        define_route_t!(
+            { i, 0, -(i + 1), i }
+            { i, -(i + 1), 0, i + 4 }
+            { i, i + 1, 0, i + 8 }
+            { i, 0, i + 1, i + 12 }
+        );
 
         t
     }
