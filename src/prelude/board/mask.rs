@@ -6,6 +6,7 @@ use array_macro::array;
 use strum_macros::EnumIter;
 
 use crate::prelude::error;
+use crate::prelude::macros;
 
 const MASKS: [BitMask; 64] = {
     let mask0 = BitMask::new();
@@ -392,11 +393,9 @@ impl BitMask {
     const fn rotate_left_all(&self, n: u32) -> Self {
         const fn _make_rotated<const N: usize>(base: &[u64; N], n: u32) -> [u64; N] {
             let mut ret = [0; N];
-            let mut i = 0;
-            while i < N {
+            macros::for_loop!(let mut i = 0; i < N; i += 1 => {
                 ret[i] = base[i].rotate_left(n);
-                i += 1;
-            }
+            });
             ret
         }
 
