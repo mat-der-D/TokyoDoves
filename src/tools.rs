@@ -100,9 +100,7 @@ fn compare_board_value_core(
     let mut cmp = if n == 2 { 0 } else { -1 };
     for action in board.legal_actions(player, true, true, allow_remove) {
         // println!("n: {}, action: {:?}", n, action);
-        let next_board = board
-            .perform_unchecked_copied(action)
-            .expect("illegal action from Board::legal_actions");
+        let next_board = board.perform_unchecked_copied(action);
 
         use SurroundedStatus::*;
         let status = next_board.surrounded_status();
