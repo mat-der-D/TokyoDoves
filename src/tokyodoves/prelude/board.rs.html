@@ -1288,6 +1288,7 @@
 <a href="#1288" id="1288">1288</a>
 <a href="#1289" id="1289">1289</a>
 <a href="#1290" id="1290">1290</a>
+<a href="#1291" id="1291">1291</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>bitutil;
@@ -1434,7 +1435,7 @@
     /// ```
     </span><span class="kw">pub fn </span>perform(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
         <span class="self">self</span>.check_action(action)<span class="question-mark">?</span>;
-        <span class="self">self</span>.perform_unchecked(action)<span class="question-mark">?</span>;
+        <span class="self">self</span>.perform_unchecked_raw(action)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1480,7 +1481,7 @@
     /// ```
     </span><span class="kw">pub fn </span>perform_bwd(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
         <span class="self">self</span>.check_action_bwd(action)<span class="question-mark">?</span>;
-        <span class="self">self</span>.perform_unchecked(action)<span class="question-mark">?</span>;
+        <span class="self">self</span>.perform_unchecked_raw(action)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1519,10 +1520,9 @@
     /// This method is faster than [`perform`](`Self::perform`) and [`perform_bwd`](`Self::perform_bwd`)
     /// thanks to absence of legality check.
     ///
-    /// # Errors
+    /// # Panics
     ///
-    /// Returns `Err(error::BoardError::MaskShiftError { .. })`
-    /// if the target position of [`Action::Move`] or [`Action::Put`] is more than two squares
+    /// Panics if the target position of [`Action::Move`] or [`Action::Put`] is more than two squares
     /// far from the current 4x4 field (, which are clearly illegal).
     /// When it returns an error, `self` is not changed.
     ///
@@ -1534,12 +1534,15 @@
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut board = BoardBuilder::new().build()?;
     /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
-    /// let result = board.perform_unchecked(action);
-    /// assert!(result.is_ok());
+    /// board.perform_unchecked(action);
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>perform_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
+    </span><span class="kw">pub fn </span>perform_unchecked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) {
+        <span class="self">self</span>.perform_unchecked_raw(action).unwrap();
+    }
+
+    <span class="kw">fn </span>perform_unchecked_raw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
         <span class="kw">use </span>Action::<span class="kw-2">*</span>;
         <span class="kw">match </span>action {
             Put(c, d, s) =&gt; {
@@ -1566,10 +1569,9 @@
     <span class="doccomment">/// Returns the result of performing the specified action to `self`.
     /// It differs from [`perform_unchecked`](`Self::perform_unchecked`) in that it does not change `self`.
     ///
-    /// # Errors
+    /// # Panics
     ///
-    /// Returns `Err(error::BoardError::MaskShiftError { .. })`
-    /// if the target position of [`Action::Move`] or [`Action::Put`] is more than two squares
+    /// Panics if the target position of [`Action::Move`] or [`Action::Put`] is more than two squares
     /// far from the current 4x4 field (, which are clearly illegal).
     ///
     /// # Examples
@@ -1580,14 +1582,14 @@
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let board = BoardBuilder::new().build()?;
     /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
-    /// let next_board = board.perform_unchecked_copied(action)?;
+    /// let next_board = board.perform_unchecked_copied(action);
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>perform_unchecked_copied(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::BoardError&gt; {
+    </span><span class="kw">pub fn </span>perform_unchecked_copied(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>board = <span class="kw-2">*</span><span class="self">self</span>;
-        board.perform_unchecked(action)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(board)
+        board.perform_unchecked(action);
+        board
     }
 
     <span class="doccomment">/// Check if `action` is legal.
@@ -1607,7 +1609,7 @@
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>check_action(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
-        <span class="self">self</span>.check_action_fwd_bwd(action, <span class="bool-val">true</span>)
+        <span class="self">self</span>.check_action_core(action, <span class="bool-val">true</span>)
     }
 
     <span class="doccomment">/// Check if backward `action` is legal.
@@ -1627,10 +1629,10 @@
     /// # }
     /// ```
     </span><span class="kw">pub fn </span>check_action_bwd(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
-        <span class="self">self</span>.check_action_fwd_bwd(action, <span class="bool-val">false</span>)
+        <span class="self">self</span>.check_action_core(action, <span class="bool-val">false</span>)
     }
 
-    <span class="kw">fn </span>check_action_fwd_bwd(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action, fwd: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
+    <span class="kw">fn </span>check_action_core(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action, fwd: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
         <span class="kw">use </span>Action::<span class="kw-2">*</span>;
         <span class="kw">match </span>action {
             Put(c, d, s) =&gt; <span class="self">self</span>.check_put(c, d, s, fwd),
@@ -2387,7 +2389,7 @@
         <span class="kw">type </span>Item = (Board, Action, Color);
         <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
             <span class="kw">let </span>action = <span class="self">self</span>.next_action();
-            <span class="self">self</span>.board.perform_unchecked(action).unwrap();
+            <span class="self">self</span>.board.perform_unchecked_raw(action).unwrap();
 
             <span class="kw">match </span><span class="self">self</span>.board.surrounded_status() {
                 SurroundedStatus::None =&gt; <span class="self">self</span>.player = !<span class="self">self</span>.player,

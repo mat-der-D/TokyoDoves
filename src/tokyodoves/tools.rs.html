@@ -151,8 +151,6 @@
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
 <a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Convenient tools to analyze the game
 </span><span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, Color, GameRule, SurroundedStatus, WinnerJudgement};
 
@@ -255,9 +253,7 @@
     <span class="kw">let </span><span class="kw-2">mut </span>cmp = <span class="kw">if </span>n == <span class="number">2 </span>{ <span class="number">0 </span>} <span class="kw">else </span>{ -<span class="number">1 </span>};
     <span class="kw">for </span>action <span class="kw">in </span>board.legal_actions(player, <span class="bool-val">true</span>, <span class="bool-val">true</span>, allow_remove) {
         <span class="comment">// println!(&quot;n: {}, action: {:?}&quot;, n, action);
-        </span><span class="kw">let </span>next_board = board
-            .perform_unchecked_copied(action)
-            .expect(<span class="string">&quot;illegal action from Board::legal_actions&quot;</span>);
+        </span><span class="kw">let </span>next_board = board.perform_unchecked_copied(action);
 
         <span class="kw">use </span>SurroundedStatus::<span class="kw-2">*</span>;
         <span class="kw">let </span>status = next_board.surrounded_status();
