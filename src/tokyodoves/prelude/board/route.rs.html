@@ -135,20 +135,12 @@
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
-<a href="#141" id="141">141</a>
-<a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
-<a href="#145" id="145">145</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Move rules of each dove
 
 </span><span class="kw">use </span>array_macro::array;
 
 <span class="kw">use </span><span class="kw">super</span>::bitutil;
-<span class="kw">use </span><span class="kw">crate</span>::prelude::{Dove, Shift};
+<span class="kw">use </span><span class="kw">crate</span>::prelude::{macros, Dove, Shift};
 
 <span class="kw">const </span>BIT_ROUTE_SHIFTS: [TargetBitRouteShift; <span class="number">64</span>] = {
     <span class="macro">array!</span>[
@@ -239,9 +231,8 @@
         <span class="comment">// Note: the order of contents affects pack_moves
         </span><span class="kw">let </span><span class="kw-2">mut </span>t = [(<span class="number">0</span>, <span class="number">0</span>, (<span class="number">0</span>, <span class="number">0</span>)); <span class="number">16</span>];
 
-        <span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>route = <span class="number">0</span>;
-        <span class="kw">while </span>i &lt; <span class="number">4 </span>{
+        <span class="macro">macros::for_loop!</span>(<span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i += <span class="number">1 </span>=&gt; {
             <span class="kw">let </span>shift = Shift {
                 dh: <span class="number">0</span>,
                 dv: -(i + <span class="number">1</span>),
@@ -249,12 +240,10 @@
             <span class="kw">let </span>bit = bitutil::apply_shift(origin_bit, shift);
             route |= bit;
             t[i <span class="kw">as </span>usize] = (bit, route, (<span class="number">0</span>, -(i + <span class="number">1</span>)));
-            i += <span class="number">1</span>;
-        }
+        });
 
-        i = <span class="number">0</span>;
         route = <span class="number">0</span>;
-        <span class="kw">while </span>i &lt; <span class="number">4 </span>{
+        <span class="macro">macros::for_loop!</span>(<span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i += <span class="number">1 </span>=&gt; {
             <span class="kw">let </span>shift = Shift {
                 dh: -(i + <span class="number">1</span>),
                 dv: <span class="number">0</span>,
@@ -262,28 +251,23 @@
             <span class="kw">let </span>bit = bitutil::apply_shift(origin_bit, shift);
             route |= bit;
             t[(i + <span class="number">4</span>) <span class="kw">as </span>usize] = (bit, route, (-(i + <span class="number">1</span>), <span class="number">0</span>));
-            i += <span class="number">1</span>;
-        }
+        });
 
-        i = <span class="number">0</span>;
         route = <span class="number">0</span>;
-        <span class="kw">while </span>i &lt; <span class="number">4 </span>{
+        <span class="macro">macros::for_loop!</span>(<span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i += <span class="number">1 </span>=&gt; {
             <span class="kw">let </span>shift = Shift { dh: i + <span class="number">1</span>, dv: <span class="number">0 </span>};
             <span class="kw">let </span>bit = bitutil::apply_shift(origin_bit, shift);
             route |= bit;
             t[(i + <span class="number">8</span>) <span class="kw">as </span>usize] = (bit, route, (i + <span class="number">1</span>, <span class="number">0</span>));
-            i += <span class="number">1</span>;
-        }
+        });
 
-        i = <span class="number">0</span>;
         route = <span class="number">0</span>;
-        <span class="kw">while </span>i &lt; <span class="number">4 </span>{
+        <span class="macro">macros::for_loop!</span>(<span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i += <span class="number">1 </span>=&gt; {
             <span class="kw">let </span>shift = Shift { dh: <span class="number">0</span>, dv: i + <span class="number">1 </span>};
             <span class="kw">let </span>bit = bitutil::apply_shift(origin_bit, shift);
             route |= bit;
             t[(i + <span class="number">12</span>) <span class="kw">as </span>usize] = (bit, route, (<span class="number">0</span>, i + <span class="number">1</span>));
-            i += <span class="number">1</span>;
-        }
+        });
 
         t
     }
