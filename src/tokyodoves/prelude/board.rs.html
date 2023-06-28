@@ -2207,7 +2207,7 @@
     ///
     /// The order of 12 doves is &quot;B &gt; b &gt; A &gt; a &gt; Y &gt; y &gt; M &gt; m &gt; T &gt; t &gt; H &gt; h&quot;,
     /// where capital/lower cases mean red/green dove, respectively.
-    </span><span class="kw">pub fn </span>to_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
+    </span><span class="kw">pub fn </span>to_u64(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
         <span class="kw">let </span><span class="kw-2">mut </span>hash = <span class="number">0</span>;
         <span class="kw">for </span>(id, d) <span class="kw">in </span>Dove::iter().enumerate() {
             <span class="kw">for </span>(ic, c) <span class="kw">in </span>Color::iter().enumerate() {
@@ -2228,11 +2228,11 @@
 
     <span class="doccomment">/// Returns a light expression of `u64` with a universality.
     ///
-    /// The composition of the returned value is the same as that of [`to_hash`](`Self::to_hash`).
+    /// The composition of the returned value is the same as that of [`to_u64`](`Self::to_u64`).
     /// &quot;Universality&quot; means that this method returns the same value for boards that
     /// - coinside with each other under reflection, rotation, translation, and any compositions of them.
     /// - coinside with each other after alternating next player and swapping colors of doves simultaneously.
-    </span><span class="kw">pub fn </span>to_canonical_hash(<span class="kw-2">&amp;</span><span class="self">self</span>, next_player: Color) -&gt; u64 {
+    </span><span class="kw">pub fn </span>to_canonical_u64(<span class="kw-2">&amp;</span><span class="self">self</span>, next_player: Color) -&gt; u64 {
         <span class="kw">use </span>Color::<span class="kw-2">*</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>board = <span class="kw-2">*</span><span class="self">self</span>;
         <span class="kw">if </span><span class="macro">matches!</span>(next_player, Green) {
@@ -2283,11 +2283,11 @@
     ///     [None, None, None, None],
     ///     [None, None, None, None],
     /// ];
-    /// assert_eq!(board.to_matrix(), matrix);
+    /// assert_eq!(board.to_4x4_matrix(), matrix);
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>to_matrix(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; [[<span class="prelude-ty">Option</span>&lt;(Color, Dove)&gt;; <span class="number">4</span>]; <span class="number">4</span>] {
+    </span><span class="kw">pub fn </span>to_4x4_matrix(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; [[<span class="prelude-ty">Option</span>&lt;(Color, Dove)&gt;; <span class="number">4</span>]; <span class="number">4</span>] {
         <span class="kw">let </span><span class="kw-2">mut </span>matrix: [[<span class="prelude-ty">Option</span>&lt;(Color, Dove)&gt;; <span class="number">4</span>]; <span class="number">4</span>] = Default::default();
 
         <span class="kw">for </span>c <span class="kw">in </span>Color::iter() {
@@ -2336,7 +2336,7 @@
     </span><span class="kw">pub fn </span>to_framed_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">let </span>hframe = <span class="string">&quot;+---+---+---+---+&quot;</span>.to_string();
         <span class="kw">let </span><span class="kw-2">mut </span>lines = Vec::new();
-        <span class="kw">for </span>line <span class="kw">in </span><span class="self">self</span>.to_matrix().into_iter() {
+        <span class="kw">for </span>line <span class="kw">in </span><span class="self">self</span>.to_4x4_matrix().into_iter() {
             lines.push(hframe.clone());
             <span class="kw">use </span>Color::<span class="kw-2">*</span>;
             <span class="kw">let </span>line_str: String = line
@@ -2564,15 +2564,15 @@
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_swap_color_canonical_hash() {
+    </span><span class="kw">fn </span>test_swap_color_canonical_u64() {
         <span class="kw">let </span>num_turns = <span class="number">10_000</span>;
         <span class="kw">for </span>(board, <span class="kw">_</span>, <span class="kw">_</span>) <span class="kw">in </span>RandomPlayIter::new().take(num_turns) {
             <span class="kw">let </span><span class="kw-2">mut </span>board_swap = board;
             board_swap.swap_color();
             <span class="kw">for </span>player <span class="kw">in </span>Color::iter() {
                 <span class="macro">assert_eq!</span>(
-                    board.to_canonical_hash(player),
-                    board_swap.to_canonical_hash(!player),
+                    board.to_canonical_u64(player),
+                    board_swap.to_canonical_u64(!player),
                 );
             }
         }
