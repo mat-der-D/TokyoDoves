@@ -144,7 +144,7 @@ impl Board {
     /// ```
     pub fn perform(&mut self, action: Action) -> Result<(), error::BoardError> {
         self.check_action(action)?;
-        self.perform_unchecked(action)?;
+        self.perform_unchecked_raw(action)?;
         Ok(())
     }
 
@@ -190,7 +190,7 @@ impl Board {
     /// ```
     pub fn perform_bwd(&mut self, action: Action) -> Result<(), error::BoardError> {
         self.check_action_bwd(action)?;
-        self.perform_unchecked(action)?;
+        self.perform_unchecked_raw(action)?;
         Ok(())
     }
 
@@ -229,10 +229,9 @@ impl Board {
     /// This method is faster than [`perform`](`Self::perform`) and [`perform_bwd`](`Self::perform_bwd`)
     /// thanks to absence of legality check.
     ///
-    /// # Errors
+    /// # Panics
     ///
-    /// Returns `Err(error::BoardError::MaskShiftError { .. })`
-    /// if the target position of [`Action::Move`] or [`Action::Put`] is more than two squares
+    /// Panics if the target position of [`Action::Move`] or [`Action::Put`] is more than two squares
     /// far from the current 4x4 field (, which are clearly illegal).
     /// When it returns an error, `self` is not changed.
     ///
@@ -244,12 +243,15 @@ impl Board {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut board = BoardBuilder::new().build()?;
     /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
-    /// let result = board.perform_unchecked(action);
-    /// assert!(result.is_ok());
+    /// board.perform_unchecked(action);
     /// # Ok(())
     /// # }
     /// ```
-    pub fn perform_unchecked(&mut self, action: Action) -> Result<(), error::BoardError> {
+    pub fn perform_unchecked(&mut self, action: Action) {
+        self.perform_unchecked_raw(action).unwrap();
+    }
+
+    fn perform_unchecked_raw(&mut self, action: Action) -> Result<(), error::BoardError> {
         use Action::*;
         match action {
             Put(c, d, s) => {
@@ -276,10 +278,9 @@ impl Board {
     /// Returns the result of performing the specified action to `self`.
     /// It differs from [`perform_unchecked`](`Self::perform_unchecked`) in that it does not change `self`.
     ///
-    /// # Errors
+    /// # Panics
     ///
-    /// Returns `Err(error::BoardError::MaskShiftError { .. })`
-    /// if the target position of [`Action::Move`] or [`Action::Put`] is more than two squares
+    /// Panics if the target position of [`Action::Move`] or [`Action::Put`] is more than two squares
     /// far from the current 4x4 field (, which are clearly illegal).
     ///
     /// # Examples
@@ -290,14 +291,14 @@ impl Board {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let board = BoardBuilder::new().build()?;
     /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
-    /// let next_board = board.perform_unchecked_copied(action)?;
+    /// let next_board = board.perform_unchecked_copied(action);
     /// # Ok(())
     /// # }
     /// ```
-    pub fn perform_unchecked_copied(&self, action: Action) -> Result<Self, error::BoardError> {
+    pub fn perform_unchecked_copied(&self, action: Action) -> Self {
         let mut board = *self;
-        board.perform_unchecked(action)?;
-        Ok(board)
+        board.perform_unchecked(action);
+        board
     }
 
     /// Check if `action` is legal.
@@ -317,7 +318,7 @@ impl Board {
     /// # }
     /// ```
     pub fn check_action(&self, action: Action) -> Result<(), error::BoardError> {
-        self.check_action_fwd_bwd(action, true)
+        self.check_action_core(action, true)
     }
 
     /// Check if backward `action` is legal.
@@ -337,10 +338,10 @@ impl Board {
     /// # }
     /// ```
     pub fn check_action_bwd(&self, action: Action) -> Result<(), error::BoardError> {
-        self.check_action_fwd_bwd(action, false)
+        self.check_action_core(action, false)
     }
 
-    fn check_action_fwd_bwd(&self, action: Action, fwd: bool) -> Result<(), error::BoardError> {
+    fn check_action_core(&self, action: Action, fwd: bool) -> Result<(), error::BoardError> {
         use Action::*;
         match action {
             Put(c, d, s) => self.check_put(c, d, s, fwd),
@@ -1097,7 +1098,7 @@ mod tests {
         type Item = (Board, Action, Color);
         fn next(&mut self) -> Option<Self::Item> {
             let action = self.next_action();
-            self.board.perform_unchecked(action).unwrap();
+            self.board.perform_unchecked_raw(action).unwrap();
 
             match self.board.surrounded_status() {
                 SurroundedStatus::None => self.player = !self.player,
