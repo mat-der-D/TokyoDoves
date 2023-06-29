@@ -722,21 +722,6 @@
 <a href="#722" id="722">722</a>
 <a href="#723" id="723">723</a>
 <a href="#724" id="724">724</a>
-<a href="#725" id="725">725</a>
-<a href="#726" id="726">726</a>
-<a href="#727" id="727">727</a>
-<a href="#728" id="728">728</a>
-<a href="#729" id="729">729</a>
-<a href="#730" id="730">730</a>
-<a href="#731" id="731">731</a>
-<a href="#732" id="732">732</a>
-<a href="#733" id="733">733</a>
-<a href="#734" id="734">734</a>
-<a href="#735" id="735">735</a>
-<a href="#736" id="736">736</a>
-<a href="#737" id="737">737</a>
-<a href="#738" id="738">738</a>
-<a href="#739" id="739">739</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Bit-mask utility [`BitMask`] and viewer to it [`MaskViewer`].
 //!
 //! This module consists of [`BitMask`] and [`MaskViewer`].
@@ -1138,16 +1123,15 @@
             ret
         }
 
+        <span class="macro">macro_rules! </span>define_rotated {
+            ($(<span class="macro-nonterminal">$field</span>:ident),<span class="kw-2">*</span>) =&gt; {
+                $(<span class="kw">let </span><span class="macro-nonterminal">$field </span>= _make_rotated(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="macro-nonterminal">$field</span>, n);)*
+            };
+        }
+
         <span class="kw">let </span>core = <span class="self">self</span>.core.rotate_left(n);
         <span class="kw">let </span>outfield = <span class="self">self</span>.outfield.rotate_left(n);
-        <span class="kw">let </span>pieces = _make_rotated(<span class="kw-2">&amp;</span><span class="self">self</span>.pieces, n);
-        <span class="kw">let </span>edges = _make_rotated(<span class="kw-2">&amp;</span><span class="self">self</span>.edges, n);
-        <span class="kw">let </span>walls = _make_rotated(<span class="kw-2">&amp;</span><span class="self">self</span>.walls, n);
-        <span class="kw">let </span>for_hmin = _make_rotated(<span class="kw-2">&amp;</span><span class="self">self</span>.for_hmin, n);
-        <span class="kw">let </span>for_hmax = _make_rotated(<span class="kw-2">&amp;</span><span class="self">self</span>.for_hmax, n);
-        <span class="kw">let </span>for_vmin = _make_rotated(<span class="kw-2">&amp;</span><span class="self">self</span>.for_vmin, n);
-        <span class="kw">let </span>for_vmax = _make_rotated(<span class="kw-2">&amp;</span><span class="self">self</span>.for_vmax, n);
-        <span class="kw">let </span>for_idx = _make_rotated(<span class="kw-2">&amp;</span><span class="self">self</span>.for_idx, n);
+        <span class="macro">define_rotated!</span>(pieces, edges, walls, for_hmin, for_hmax, for_vmin, for_vmax, for_idx);
 
         <span class="self">Self </span>{
             core,
@@ -1261,37 +1245,23 @@
     ///
     /// See the documents given to [`super::Board::minimum_rectangle`].
     </span><span class="kw">pub fn </span>minimum_rectangle(<span class="kw-2">&amp;</span><span class="self">self</span>, bits: u64) -&gt; Rectangle {
-        <span class="kw">let </span><span class="kw-2">mut </span>hmin = <span class="number">0</span>;
-        <span class="kw">for </span>(i, m) <span class="kw">in </span><span class="self">self</span>.for_hmin.into_iter().enumerate() {
-            <span class="kw">if </span>bits &amp; m == bits {
-                hmin = <span class="number">3 </span>- i;
-                <span class="kw">break</span>;
-            }
+        <span class="macro">macro_rules! </span>calc_edge {
+            (<span class="macro-nonterminal">$field</span>:ident, <span class="macro-nonterminal">$default</span>:expr, <span class="macro-nonterminal">$i</span>:ident, <span class="macro-nonterminal">$eval</span>:expr) =&gt; {{
+                <span class="kw">let </span><span class="kw-2">mut </span>val = <span class="macro-nonterminal">$default</span>;
+                <span class="kw">for </span>(<span class="macro-nonterminal">$i</span>, m) <span class="kw">in </span><span class="self">self</span>.<span class="macro-nonterminal">$field</span>.into_iter().enumerate() {
+                    <span class="kw">if </span>bits &amp; m == bits {
+                        val = <span class="macro-nonterminal">$eval</span>;
+                        <span class="kw">break</span>;
+                    }
+                }
+                val
+            }};
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>hmax = <span class="number">3</span>;
-        <span class="kw">for </span>(i, m) <span class="kw">in </span><span class="self">self</span>.for_hmax.into_iter().enumerate() {
-            <span class="kw">if </span>bits &amp; m == bits {
-                hmax = i;
-                <span class="kw">break</span>;
-            }
-        }
-
-        <span class="kw">let </span><span class="kw-2">mut </span>vmin = <span class="number">0</span>;
-        <span class="kw">for </span>(i, m) <span class="kw">in </span><span class="self">self</span>.for_vmin.into_iter().enumerate() {
-            <span class="kw">if </span>bits &amp; m == bits {
-                vmin = <span class="number">3 </span>- i;
-                <span class="kw">break</span>;
-            }
-        }
-
-        <span class="kw">let </span><span class="kw-2">mut </span>vmax = <span class="number">3</span>;
-        <span class="kw">for </span>(i, m) <span class="kw">in </span><span class="self">self</span>.for_vmax.into_iter().enumerate() {
-            <span class="kw">if </span>bits &amp; m == bits {
-                vmax = i;
-                <span class="kw">break</span>;
-            }
-        }
+        <span class="kw">let </span>hmin = <span class="macro">calc_edge!</span>(for_hmin, <span class="number">0</span>, i, <span class="number">3 </span>- i);
+        <span class="kw">let </span>hmax = <span class="macro">calc_edge!</span>(for_hmax, <span class="number">3</span>, i, i);
+        <span class="kw">let </span>vmin = <span class="macro">calc_edge!</span>(for_vmin, <span class="number">0</span>, i, <span class="number">3 </span>- i);
+        <span class="kw">let </span>vmax = <span class="macro">calc_edge!</span>(for_vmax, <span class="number">3</span>, i, i);
 
         Rectangle {
             hmin,
