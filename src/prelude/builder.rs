@@ -89,15 +89,27 @@ impl BoardBuilder {
     }
 
     pub fn new() -> Self {
-        Self::manual_bits([[1 << 8, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]])
+        Self::from_u64_bits([[1 << 8, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]])
     }
 
     pub fn empty() -> Self {
-        Self::manual_bits([[0; 6]; 2])
+        Self::from_u64_bits([[0; 6]; 2])
     }
 
-    pub fn manual_bits(positions: [[u64; 6]; 2]) -> Self {
-        Self { positions }
+    /// Create `BoardBuilder` by indicating positions of doves in `u64` directly.
+    ///
+    /// It is faster than [`from_u16_bits`](`Self::from_u16_bits`),
+    /// but it does not ensure that all doves are included in the 4x4 region.
+    pub fn from_u64_bits(positions: [[u64; 6]; 2]) -> Self {
+        Self::from(positions)
+    }
+
+    /// Create `BoardBuilder` by indicating positions of doves in `u16` directly.
+    ///
+    /// It ensures that all doves are included in the 4x4 region,
+    /// in the cost of conversion from `u16` to `u64`.
+    pub fn from_u16_bits(positions: [[u16; 6]; 2]) -> Self {
+        Self::from(positions)
     }
 
     /// Alias of [`try_from::<..>`](`Self::try_from`)
@@ -187,6 +199,33 @@ impl BoardBuilder {
             });
         }
         Ok(board)
+    }
+}
+
+impl From<[[u64; 6]; 2]> for BoardBuilder {
+    fn from(bits: [[u64; 6]; 2]) -> Self {
+        Self { positions: bits }
+    }
+}
+
+impl From<[[u16; 6]; 2]> for BoardBuilder {
+    fn from(bits: [[u16; 6]; 2]) -> Self {
+        fn extend_u16_to_u64(x: u16) -> u64 {
+            let mut x_u64 = 0;
+            x_u64 |= (x & 0xf) as u64;
+            x_u64 |= ((x & 0xf0) as u64) << 4;
+            x_u64 |= ((x & 0xf00) as u64) << 8;
+            x_u64 |= ((x & 0xf000) as u64) << 12;
+            x_u64
+        }
+
+        let mut bits_u64 = [[0; 6]; 2];
+        for icolor in 0..2 {
+            for idove in 0..6 {
+                bits_u64[icolor][idove] = extend_u16_to_u64(bits[icolor][idove]);
+            }
+        }
+        Self::from(bits_u64)
     }
 }
 
