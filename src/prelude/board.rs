@@ -1224,6 +1224,52 @@ mod tests {
     }
 
     #[test]
+    fn test_err_unchanged() {
+        let num_turns = 1_000;
+        use std::collections::HashMap;
+        let mut all_action_map = HashMap::new();
+        for p in Color::iter() {
+            all_action_map.insert(p, normal_actions(p));
+        }
+
+        for (board, _, player) in RandomPlayIter::new().take(num_turns) {
+            for a in all_action_map.get(&player).unwrap().iter() {
+                let mut b_tmp = board;
+                if b_tmp.perform(*a).is_err() {
+                    assert_eq!(b_tmp.to_u64(), board.to_u64());
+                }
+                let mut b_tmp_bwd = board;
+                if b_tmp_bwd.perform_bwd(*a).is_err() {
+                    assert_eq!(b_tmp_bwd.to_u64(), board.to_u64());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_err_unchanged_strange() {
+        let num_turns = 1_000;
+        use std::collections::HashMap;
+        let mut strange_action_map = HashMap::new();
+        for p in Color::iter() {
+            strange_action_map.insert(p, strange_actions(p));
+        }
+
+        for (board, _, player) in RandomPlayIter::new().take(num_turns) {
+            for a in strange_action_map.get(&player).unwrap().iter() {
+                let mut b_tmp = board;
+                if b_tmp.perform(*a).is_err() {
+                    assert_eq!(b_tmp.to_u64(), board.to_u64());
+                }
+                let mut b_tmp_bwd = board;
+                if b_tmp_bwd.perform_bwd(*a).is_err() {
+                    assert_eq!(b_tmp_bwd.to_u64(), board.to_u64());
+                }
+            }
+        }
+    }
+
+    #[test]
     fn test_dove_count() {
         let num_turns = 10_000;
         for (board, _, _) in RandomPlayIter::new().take(num_turns) {
