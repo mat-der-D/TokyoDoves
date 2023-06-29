@@ -1262,7 +1262,7 @@ mod tests {
                     assert_eq!(b_tmp.to_u64(), board.to_u64());
                 }
                 let mut b_tmp_bwd = board;
-                if b_tmp_bwd.perform(*a).is_err() {
+                if b_tmp_bwd.perform_bwd(*a).is_err() {
                     assert_eq!(b_tmp_bwd.to_u64(), board.to_u64());
                 }
             }
