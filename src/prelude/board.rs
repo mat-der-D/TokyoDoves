@@ -121,6 +121,20 @@ impl std::fmt::Display for Board {
     }
 }
 
+impl PartialEq for Board {
+    fn eq(&self, other: &Self) -> bool {
+        self.to_u64() == other.to_u64()
+    }
+}
+
+impl Eq for Board {}
+
+impl std::hash::Hash for Board {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u64(self.to_u64());
+    }
+}
+
 // *******************************************************************
 //  Methods For Actions Check
 // *******************************************************************
@@ -1167,6 +1181,37 @@ mod tests {
             }
         }
         actions
+    }
+
+    #[test]
+    fn test_equality_consistency() {
+        let num_turns = 10_000;
+        let mut board_set = std::collections::HashSet::new();
+        for (board, _, _) in RandomPlayIter::new().take(num_turns) {
+            // --- u64 base recreation ---
+            let board2 = BoardBuilder::from_u64(board.to_u64()).build_unchecked();
+
+            assert_eq!(board, board2);
+            assert_eq!(board.to_u64(), board2.to_u64());
+            assert_eq!(board.to_4x4_matrix(), board2.to_4x4_matrix());
+            board_set.clear();
+            board_set.insert(board);
+            board_set.insert(board2);
+            assert_eq!(board_set.len(), 1);
+
+            // --- matrix base recreation ---
+            let board3 = BoardBuilder::try_from_4x4_matrix(board.to_4x4_matrix())
+                .unwrap()
+                .build_unchecked();
+
+            assert_eq!(board, board3);
+            assert_eq!(board.to_u64(), board3.to_u64());
+            assert_eq!(board.to_4x4_matrix(), board3.to_4x4_matrix());
+            board_set.clear();
+            board_set.insert(board);
+            board_set.insert(board3);
+            assert_eq!(board_set.len(), 1);
+        }
     }
 
     #[test]
