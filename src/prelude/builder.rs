@@ -108,7 +108,7 @@ impl BoardBuilder {
     }
 
     /// Alias of [`from::<u64>`](`Self::from`)
-    pub fn from_hash(hash: u64) -> Self {
+    pub fn from_u64(hash: u64) -> Self {
         Self::from(hash)
     }
 
