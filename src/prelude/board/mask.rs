@@ -399,16 +399,15 @@ impl BitMask {
             ret
         }
 
+        macro_rules! define_rotated {
+            ($($field:ident),*) => {
+                $(let $field = _make_rotated(&self.$field, n);)*
+            };
+        }
+
         let core = self.core.rotate_left(n);
         let outfield = self.outfield.rotate_left(n);
-        let pieces = _make_rotated(&self.pieces, n);
-        let edges = _make_rotated(&self.edges, n);
-        let walls = _make_rotated(&self.walls, n);
-        let for_hmin = _make_rotated(&self.for_hmin, n);
-        let for_hmax = _make_rotated(&self.for_hmax, n);
-        let for_vmin = _make_rotated(&self.for_vmin, n);
-        let for_vmax = _make_rotated(&self.for_vmax, n);
-        let for_idx = _make_rotated(&self.for_idx, n);
+        define_rotated!(pieces, edges, walls, for_hmin, for_hmax, for_vmin, for_vmax, for_idx);
 
         Self {
             core,
@@ -522,37 +521,23 @@ impl BitMask {
     ///
     /// See the documents given to [`super::Board::minimum_rectangle`].
     pub fn minimum_rectangle(&self, bits: u64) -> Rectangle {
-        let mut hmin = 0;
-        for (i, m) in self.for_hmin.into_iter().enumerate() {
-            if bits & m == bits {
-                hmin = 3 - i;
-                break;
-            }
+        macro_rules! calc_edge {
+            ($field:ident, $default:expr, $i:ident, $eval:expr) => {{
+                let mut val = $default;
+                for ($i, m) in self.$field.into_iter().enumerate() {
+                    if bits & m == bits {
+                        val = $eval;
+                        break;
+                    }
+                }
+                val
+            }};
         }
 
-        let mut hmax = 3;
-        for (i, m) in self.for_hmax.into_iter().enumerate() {
-            if bits & m == bits {
-                hmax = i;
-                break;
-            }
-        }
-
-        let mut vmin = 0;
-        for (i, m) in self.for_vmin.into_iter().enumerate() {
-            if bits & m == bits {
-                vmin = 3 - i;
-                break;
-            }
-        }
-
-        let mut vmax = 3;
-        for (i, m) in self.for_vmax.into_iter().enumerate() {
-            if bits & m == bits {
-                vmax = i;
-                break;
-            }
-        }
+        let hmin = calc_edge!(for_hmin, 0, i, 3 - i);
+        let hmax = calc_edge!(for_hmax, 3, i, i);
+        let vmin = calc_edge!(for_vmin, 0, i, 3 - i);
+        let vmax = calc_edge!(for_vmax, 3, i, i);
 
         Rectangle {
             hmin,
