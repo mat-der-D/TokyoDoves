@@ -135,6 +135,16 @@ impl BoardBuilder {
         self
     }
 
+    pub fn prune_outside_4x4(&mut self) -> &mut Self {
+        let core = 0x0f0f0f0f;
+        for icolor in 0..2 {
+            for idove in 0..6 {
+                self.positions[icolor][idove] &= core;
+            }
+        }
+        self
+    }
+
     pub fn build_unchecked(&self) -> Board {
         let viewer = MaskViewer::new();
         let positions = ColorDovePositions::new([
@@ -153,12 +163,18 @@ impl BoardBuilder {
                 error_type: BossNotFound,
             });
         }
+        let core = 0x0f0f0f0f;
         let mut bit_sum = 0;
         for colored_positions in self.positions {
             for bit in colored_positions {
                 if bit & bit_sum != 0 {
                     return Err(BoardCreateError {
                         error_type: PositionDuplicated,
+                    });
+                }
+                if bit & core != bit {
+                    return Err(BoardCreateError {
+                        error_type: PositionOutOfRange,
                     });
                 }
                 bit_sum |= bit;
