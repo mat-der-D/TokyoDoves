@@ -100,7 +100,7 @@ pub enum SurroundedStatus {
 }
 
 // *******************************************************************
-//  Board Creation
+//  Implement Traits
 // *******************************************************************
 /// An implementation of Tokyo Doves board based on bitboard techniques
 #[derive(Debug, Clone, Copy, Default)]
@@ -135,10 +135,10 @@ impl std::hash::Hash for Board {
     }
 }
 
-// *******************************************************************
-//  Methods For Actions Check
-// *******************************************************************
 impl Board {
+    // *******************************************************************
+    //  Methods For Peforming Actions
+    // *******************************************************************
     /// Performs the specified `action` to `self`.
     ///
     /// # Errors
@@ -315,6 +315,9 @@ impl Board {
         board
     }
 
+    // *******************************************************************
+    //  Methods For Actions Check
+    // *******************************************************************
     /// Check if `action` is legal.
     ///
     /// # Errors

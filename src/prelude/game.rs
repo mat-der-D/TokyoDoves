@@ -169,7 +169,7 @@ pub enum GameStatus {
 ///     loop {
 ///         turn += 1;
 ///         // Collects all possible actions
-///         let actions = game.actions();
+///         let actions = game.legal_actions();
 ///         // Selects one of them by methods of ActionContainer trait
 ///         let action = actions[turn % actions.len()];
 ///         println!("  --> {}", action.to_ssn(game.board())?);
@@ -275,7 +275,7 @@ impl Game {
     }
 
     /// Returns an [`ActionContainer`](`super::container::ActionContainer`) of legal [`Action`]s.
-    pub fn actions(&self) -> ActionsFwd {
+    pub fn legal_actions(&self) -> ActionsFwd {
         self.board
             .legal_actions(self.player, true, true, self.rule.allow_remove)
     }
