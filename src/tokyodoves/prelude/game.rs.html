@@ -507,7 +507,7 @@
 ///     loop {
 ///         turn += 1;
 ///         // Collects all possible actions
-///         let actions = game.actions();
+///         let actions = game.legal_actions();
 ///         // Selects one of them by methods of ActionContainer trait
 ///         let action = actions[turn % actions.len()];
 ///         println!(&quot;  --&gt; {}&quot;, action.to_ssn(game.board())?);
@@ -613,7 +613,7 @@
     }
 
     <span class="doccomment">/// Returns an [`ActionContainer`](`super::container::ActionContainer`) of legal [`Action`]s.
-    </span><span class="kw">pub fn </span>actions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ActionsFwd {
+    </span><span class="kw">pub fn </span>legal_actions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ActionsFwd {
         <span class="self">self</span>.board
             .legal_actions(<span class="self">self</span>.player, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="self">self</span>.rule.allow_remove)
     }
