@@ -276,6 +276,45 @@
 <a href="#276" id="276">276</a>
 <a href="#277" id="277">277</a>
 <a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::str::FromStr;
 
 <span class="kw">use </span>strum::IntoEnumIterator;
@@ -367,15 +406,27 @@
     }
 
     <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::manual_bits([[<span class="number">1 </span>&lt;&lt; <span class="number">8</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]])
+        <span class="self">Self</span>::from_u64_bits([[<span class="number">1 </span>&lt;&lt; <span class="number">8</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]])
     }
 
     <span class="kw">pub fn </span>empty() -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::manual_bits([[<span class="number">0</span>; <span class="number">6</span>]; <span class="number">2</span>])
+        <span class="self">Self</span>::from_u64_bits([[<span class="number">0</span>; <span class="number">6</span>]; <span class="number">2</span>])
     }
 
-    <span class="kw">pub fn </span>manual_bits(positions: [[u64; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ positions }
+    <span class="doccomment">/// Create `BoardBuilder` by indicating positions of doves in `u64` directly.
+    ///
+    /// It is faster than [`from_u16_bits`](`Self::from_u16_bits`),
+    /// but it does not ensure that all doves are included in the 4x4 region.
+    </span><span class="kw">pub fn </span>from_u64_bits(positions: [[u64; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::from(positions)
+    }
+
+    <span class="doccomment">/// Create `BoardBuilder` by indicating positions of doves in `u16` directly.
+    ///
+    /// It ensures that all doves are included in the 4x4 region,
+    /// in the cost of conversion from `u16` to `u64`.
+    </span><span class="kw">pub fn </span>from_u16_bits(positions: [[u16; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::from(positions)
     }
 
     <span class="doccomment">/// Alias of [`try_from::&lt;..&gt;`](`Self::try_from`)
@@ -465,6 +516,33 @@
             });
         }
         <span class="prelude-val">Ok</span>(board)
+    }
+}
+
+<span class="kw">impl </span>From&lt;[[u64; <span class="number">6</span>]; <span class="number">2</span>]&gt; <span class="kw">for </span>BoardBuilder {
+    <span class="kw">fn </span>from(bits: [[u64; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ positions: bits }
+    }
+}
+
+<span class="kw">impl </span>From&lt;[[u16; <span class="number">6</span>]; <span class="number">2</span>]&gt; <span class="kw">for </span>BoardBuilder {
+    <span class="kw">fn </span>from(bits: [[u16; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
+        <span class="kw">fn </span>extend_u16_to_u64(x: u16) -&gt; u64 {
+            <span class="kw">let </span><span class="kw-2">mut </span>x_u64 = <span class="number">0</span>;
+            x_u64 |= (x &amp; <span class="number">0xf</span>) <span class="kw">as </span>u64;
+            x_u64 |= ((x &amp; <span class="number">0xf0</span>) <span class="kw">as </span>u64) &lt;&lt; <span class="number">4</span>;
+            x_u64 |= ((x &amp; <span class="number">0xf00</span>) <span class="kw">as </span>u64) &lt;&lt; <span class="number">8</span>;
+            x_u64 |= ((x &amp; <span class="number">0xf000</span>) <span class="kw">as </span>u64) &lt;&lt; <span class="number">12</span>;
+            x_u64
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>bits_u64 = [[<span class="number">0</span>; <span class="number">6</span>]; <span class="number">2</span>];
+        <span class="kw">for </span>icolor <span class="kw">in </span><span class="number">0</span>..<span class="number">2 </span>{
+            <span class="kw">for </span>idove <span class="kw">in </span><span class="number">0</span>..<span class="number">6 </span>{
+                bits_u64[icolor][idove] = extend_u16_to_u64(bits[icolor][idove]);
+            }
+        }
+        <span class="self">Self</span>::from(bits_u64)
     }
 }
 
