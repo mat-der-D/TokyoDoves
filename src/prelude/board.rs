@@ -1083,6 +1083,21 @@ impl Board {
         lines.push(hframe);
         lines.join("\n")
     }
+
+    pub fn to_simple_string(&self, empty: char, delimiter: &str) -> String {
+        let mut lines = Vec::new();
+        for line in self.to_4x4_matrix().into_iter() {
+            let line_str: String = line
+                .into_iter()
+                .map(|x| match x {
+                    Some((c, d)) => color_dove_to_char(c, d),
+                    None => empty,
+                })
+                .collect();
+            lines.push(line_str);
+        }
+        lines.join(delimiter)
+    }
 }
 
 #[cfg(test)]
