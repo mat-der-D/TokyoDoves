@@ -239,24 +239,10 @@
 <a href="#239" id="239">239</a>
 <a href="#240" id="240">240</a>
 <a href="#241" id="241">241</a>
-<a href="#242" id="242">242</a>
-<a href="#243" id="243">243</a>
-<a href="#244" id="244">244</a>
-<a href="#245" id="245">245</a>
-<a href="#246" id="246">246</a>
-<a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
-<a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
 </pre></div><pre class="rust"><code><span class="kw">use super</span>::{
     board::Board,
     error,
-    pieces::{try_char_to_color_dove, Color, Dove},
+    pieces::{color_dove_to_char, try_char_to_color_dove, Color, Dove},
     Shift,
 };
 
@@ -305,15 +291,6 @@
 
     <span class="doccomment">/// Converts `self` into `String` in Standard Short Notation (SSN)
     </span><span class="kw">pub fn </span>to_ssn(<span class="self">self</span>, board: <span class="kw-2">&amp;</span>Board) -&gt; <span class="prelude-ty">Result</span>&lt;String, error::ActionConvertError&gt; {
-        <span class="kw">fn </span>_color_dove_to_string(color: Color, dove: Dove) -&gt; String {
-            <span class="kw">use </span>Color::<span class="kw-2">*</span>;
-            <span class="kw">let </span>base = <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, dove);
-            <span class="kw">match </span>color {
-                Red =&gt; base.to_ascii_uppercase(),
-                Green =&gt; base.to_ascii_lowercase(),
-            }
-        }
-
         <span class="kw">fn </span>_shift_to_string(shift: Shift) -&gt; String {
             <span class="kw">let </span>(ns, ns_num) = <span class="kw">match </span>shift.dv {
                 x <span class="kw">if </span>x &gt; <span class="number">0 </span>=&gt; (<span class="string">&quot;S&quot;</span>, x.to_string()),
@@ -338,7 +315,7 @@
                 };
                 <span class="kw">let </span>exp = <span class="macro">format!</span>(
                     <span class="string">&quot;+{}{}&quot;</span>,
-                    _color_dove_to_string(c, d),
+                    color_dove_to_char(c, d),
                     _shift_to_string(s + pos_boss)
                 );
                 <span class="prelude-val">Ok</span>(exp)
@@ -347,15 +324,11 @@
                 <span class="kw">let </span><span class="prelude-val">Some</span>(pos) = board.position_in_rbcc(c, d) <span class="kw">else </span>{
                     <span class="kw">return </span><span class="prelude-val">Err</span>(SSNEncodingError { error_type: DoveNotFound(c, d) });
                 };
-                <span class="kw">let </span>exp = <span class="macro">format!</span>(
-                    <span class="string">&quot;{}{}&quot;</span>,
-                    _color_dove_to_string(c, d),
-                    _shift_to_string(pos + s)
-                );
+                <span class="kw">let </span>exp = <span class="macro">format!</span>(<span class="string">&quot;{}{}&quot;</span>, color_dove_to_char(c, d), _shift_to_string(pos + s));
                 <span class="prelude-val">Ok</span>(exp)
             }
             Remove(c, d) =&gt; {
-                <span class="kw">let </span>exp = <span class="macro">format!</span>(<span class="string">&quot;-{}&quot;</span>, _color_dove_to_string(c, d));
+                <span class="kw">let </span>exp = <span class="macro">format!</span>(<span class="string">&quot;-{}&quot;</span>, color_dove_to_char(c, d));
                 <span class="prelude-val">Ok</span>(exp)
             }
         }
@@ -434,8 +407,7 @@
                     <span class="string">&#39;E&#39; </span>=&gt; <span class="self">self</span>.dh_sign = Sign::Plus,
                     <span class="string">&#39;W&#39; </span>=&gt; <span class="self">self</span>.dh_sign = Sign::Minus,
                     x <span class="kw">if </span><span class="self">Self</span>::COLOR_DOVE_CHAR.contains(<span class="kw-2">&amp;</span>x) =&gt; {
-                        <span class="comment">// let dove = Dove::from_str(&amp;x.to_string()).unwrap();
-                        </span><span class="kw">let </span><span class="prelude-val">Some</span>((color, dove)) = try_char_to_color_dove(x) <span class="kw">else </span>{
+                        <span class="kw">let </span><span class="prelude-val">Some</span>((color, dove)) = try_char_to_color_dove(x) <span class="kw">else </span>{
                             <span class="macro">unreachable!</span>();
                         };
                         <span class="self">self</span>.dove = <span class="prelude-val">Some</span>(dove);
