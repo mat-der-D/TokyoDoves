@@ -205,7 +205,7 @@
 <a href="#205" id="205">205</a>
 <a href="#206" id="206">206</a>
 <a href="#207" id="207">207</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>strum_macros::{EnumIter, EnumString};
+</pre></div><pre class="rust"><code><span class="kw">use </span>strum_macros::EnumIter;
 
 <span class="doccomment">/// Two colors of player, just like black and white in chess.
 </span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
@@ -226,7 +226,7 @@
 }
 
 <span class="doccomment">/// Six types of doves.
-</span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter, EnumString)]
+</span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
 </span><span class="kw">pub enum </span>Dove {
     <span class="doccomment">/// Represents **B**oss-hato,
     /// which can move to adjacent squares in all eight directions,
