@@ -1,7 +1,7 @@
 use super::{
     board::Board,
     error,
-    pieces::{try_char_to_color_dove, Color, Dove},
+    pieces::{color_dove_to_char, try_char_to_color_dove, Color, Dove},
     Shift,
 };
 
@@ -50,15 +50,6 @@ impl Action {
 
     /// Converts `self` into `String` in Standard Short Notation (SSN)
     pub fn to_ssn(self, board: &Board) -> Result<String, error::ActionConvertError> {
-        fn _color_dove_to_string(color: Color, dove: Dove) -> String {
-            use Color::*;
-            let base = format!("{:?}", dove);
-            match color {
-                Red => base.to_ascii_uppercase(),
-                Green => base.to_ascii_lowercase(),
-            }
-        }
-
         fn _shift_to_string(shift: Shift) -> String {
             let (ns, ns_num) = match shift.dv {
                 x if x > 0 => ("S", x.to_string()),
@@ -83,7 +74,7 @@ impl Action {
                 };
                 let exp = format!(
                     "+{}{}",
-                    _color_dove_to_string(c, d),
+                    color_dove_to_char(c, d),
                     _shift_to_string(s + pos_boss)
                 );
                 Ok(exp)
@@ -92,15 +83,11 @@ impl Action {
                 let Some(pos) = board.position_in_rbcc(c, d) else {
                     return Err(SSNEncodingError { error_type: DoveNotFound(c, d) });
                 };
-                let exp = format!(
-                    "{}{}",
-                    _color_dove_to_string(c, d),
-                    _shift_to_string(pos + s)
-                );
+                let exp = format!("{}{}", color_dove_to_char(c, d), _shift_to_string(pos + s));
                 Ok(exp)
             }
             Remove(c, d) => {
-                let exp = format!("-{}", _color_dove_to_string(c, d));
+                let exp = format!("-{}", color_dove_to_char(c, d));
                 Ok(exp)
             }
         }
@@ -179,7 +166,6 @@ impl Action {
                     'E' => self.dh_sign = Sign::Plus,
                     'W' => self.dh_sign = Sign::Minus,
                     x if Self::COLOR_DOVE_CHAR.contains(&x) => {
-                        // let dove = Dove::from_str(&x.to_string()).unwrap();
                         let Some((color, dove)) = try_char_to_color_dove(x) else {
                             unreachable!();
                         };
