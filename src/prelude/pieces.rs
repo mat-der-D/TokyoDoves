@@ -38,7 +38,6 @@ pub enum Dove {
     /// |   |   |   |   |   |
     /// +---+---+---+---+---+
     /// ```
-    #[strum(ascii_case_insensitive)]
     B,
     /// Represents **A**niki-hato,
     /// which can move to adjacent squares in all eight directions,
@@ -56,7 +55,6 @@ pub enum Dove {
     /// |   |   |   |   |   |
     /// +---+---+---+---+---+
     /// ```
-    #[strum(ascii_case_insensitive)]
     A,
     /// Represents **Y**aibato,
     /// which can move to four adjacent squares,
@@ -75,7 +73,6 @@ pub enum Dove {
     /// |   |   |   |   |   |
     /// +---+---+---+---+---+
     /// ```
-    #[strum(ascii_case_insensitive)]
     Y,
     /// Represents **M**amedeppo-bato,
     /// which can move to four diagonally adjacent squares,
@@ -93,7 +90,6 @@ pub enum Dove {
     /// |   |   |   |   |   |
     /// +---+---+---+---+---+
     /// ```
-    #[strum(ascii_case_insensitive)]
     M,
     /// Represents **T**otsu-hato,
     /// which can move forward, backward or sideways,
@@ -112,7 +108,6 @@ pub enum Dove {
     /// |   |   | * |   |   |
     /// +---+---+---+---+---+
     /// ```
-    #[strum(ascii_case_insensitive)]
     T,
     /// Represents **H**ajike-hato,
     /// which can move (or jump) like the Knight in chess.
@@ -129,7 +124,6 @@ pub enum Dove {
     /// |   | * |   | * |   |
     /// +---+---+---+---+---+
     /// ```
-    #[strum(ascii_case_insensitive)]
     H,
 }
 
@@ -156,7 +150,7 @@ pub(crate) fn dove_to_index(dove: Dove) -> usize {
 }
 
 #[inline]
-pub(crate) fn color_dove_to_char(color: Color, dove: Dove) -> char {
+pub fn color_dove_to_char(color: Color, dove: Dove) -> char {
     use Color::*;
     use Dove::*;
     match (color, dove) {
@@ -176,7 +170,7 @@ pub(crate) fn color_dove_to_char(color: Color, dove: Dove) -> char {
 }
 
 #[inline]
-pub(crate) fn try_char_to_color_dove(c: char) -> Option<(Color, Dove)> {
+pub fn try_char_to_color_dove(c: char) -> Option<(Color, Dove)> {
     use Color::*;
     use Dove::*;
     let color_dove = match c {
