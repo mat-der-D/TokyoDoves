@@ -1383,6 +1383,9 @@
 <a href="#1383" id="1383">1383</a>
 <a href="#1384" id="1384">1384</a>
 <a href="#1385" id="1385">1385</a>
+<a href="#1386" id="1386">1386</a>
+<a href="#1387" id="1387">1387</a>
+<a href="#1388" id="1388">1388</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>bitutil;
@@ -1392,7 +1395,8 @@
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>position;
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>route;
 
-<span class="kw">use </span><span class="kw">crate</span>::prelude::{error, Action, Color, Dove, Shift};
+<span class="kw">use </span><span class="kw">crate</span>::prelude::pieces::{color_dove_to_char, color_to_index, dove_to_index, Color, Dove};
+<span class="kw">use </span><span class="kw">crate</span>::prelude::{error, Action, Shift};
 
 <span class="kw">use </span>bitutil::<span class="kw-2">*</span>;
 <span class="kw">use </span>canonicalizer::<span class="kw-2">*</span>;
@@ -2322,8 +2326,10 @@
     /// where capital/lower cases mean red/green dove, respectively.
     </span><span class="kw">pub fn </span>to_u64(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
         <span class="kw">let </span><span class="kw-2">mut </span>hash = <span class="number">0</span>;
-        <span class="kw">for </span>(id, d) <span class="kw">in </span>Dove::iter().enumerate() {
-            <span class="kw">for </span>(ic, c) <span class="kw">in </span>Color::iter().enumerate() {
+        <span class="kw">for </span>d <span class="kw">in </span>Dove::iter() {
+            <span class="kw">let </span>id = dove_to_index(d);
+            <span class="kw">for </span>c <span class="kw">in </span>Color::iter() {
+                <span class="kw">let </span>ic = color_to_index(c);
                 <span class="kw">let </span>pos = <span class="self">self</span>.positions.position_of(c, d);
                 <span class="kw">if </span>pos == <span class="number">0 </span>{
                     <span class="kw">continue</span>;
@@ -2363,8 +2369,10 @@
 
         <span class="kw">let </span>cons = CONGRUENT_MAPS[(hsize - <span class="number">1</span>) + <span class="number">4 </span>* (vsize - <span class="number">1</span>)];
         <span class="kw">let </span>idx_shift = hmin + <span class="number">4 </span>* vmin;
-        <span class="kw">for </span>(id, d) <span class="kw">in </span>Dove::iter().enumerate() {
-            <span class="kw">for </span>(ic, c) <span class="kw">in </span>Color::iter().enumerate() {
+        <span class="kw">for </span>d <span class="kw">in </span>Dove::iter() {
+            <span class="kw">let </span>id = dove_to_index(d);
+            <span class="kw">for </span>c <span class="kw">in </span>Color::iter() {
+                <span class="kw">let </span>ic = color_to_index(c);
                 <span class="kw">let </span>pos = board.positions.position_of(c, d);
                 <span class="kw">if </span>pos == <span class="number">0 </span>{
                     <span class="kw">continue</span>;
@@ -2451,12 +2459,10 @@
         <span class="kw">let </span><span class="kw-2">mut </span>lines = Vec::new();
         <span class="kw">for </span>line <span class="kw">in </span><span class="self">self</span>.to_4x4_matrix().into_iter() {
             lines.push(hframe.clone());
-            <span class="kw">use </span>Color::<span class="kw-2">*</span>;
             <span class="kw">let </span>line_str: String = line
                 .into_iter()
                 .map(|x| <span class="kw">match </span>x {
-                    <span class="prelude-val">Some</span>((Red, d)) =&gt; <span class="macro">format!</span>(<span class="string">&quot;| {:?} &quot;</span>, d).to_ascii_uppercase(),
-                    <span class="prelude-val">Some</span>((Green, d)) =&gt; <span class="macro">format!</span>(<span class="string">&quot;| {:?} &quot;</span>, d).to_ascii_lowercase(),
+                    <span class="prelude-val">Some</span>((c, d)) =&gt; <span class="macro">format!</span>(<span class="string">&quot;| {:?} &quot;</span>, color_dove_to_char(c, d)),
                     <span class="prelude-val">None </span>=&gt; <span class="string">&quot;|   &quot;</span>.to_string(),
                 })
                 .collect();

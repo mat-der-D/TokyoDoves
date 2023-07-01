@@ -293,35 +293,14 @@
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
 <a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::str::FromStr;
 
 <span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">use </span><span class="kw">super</span>::board::{mask::<span class="kw-2">*</span>, position::<span class="kw-2">*</span>, Board};
 <span class="kw">use </span><span class="kw">super</span>::error;
-<span class="kw">use </span><span class="kw">crate</span>::prelude::{Color, Dove};
+<span class="kw">use </span><span class="kw">crate</span>::prelude::pieces::{color_to_index, dove_to_index, Color, Dove};
+<span class="kw">use </span><span class="kw">crate</span>::try_char_to_color_dove;
 
 <span class="doccomment">/// A builder of [`Board`]
 ///
@@ -386,25 +365,6 @@
 }
 
 <span class="kw">impl </span>BoardBuilder {
-    <span class="kw">fn </span>color_to_index(color: Color) -&gt; usize {
-        <span class="kw">match </span>color {
-            Color::Red =&gt; <span class="number">0</span>,
-            Color::Green =&gt; <span class="number">1</span>,
-        }
-    }
-
-    <span class="kw">fn </span>dove_to_index(dove: Dove) -&gt; usize {
-        <span class="kw">use </span>Dove::<span class="kw-2">*</span>;
-        <span class="kw">match </span>dove {
-            B =&gt; <span class="number">0</span>,
-            A =&gt; <span class="number">1</span>,
-            Y =&gt; <span class="number">2</span>,
-            M =&gt; <span class="number">3</span>,
-            T =&gt; <span class="number">4</span>,
-            H =&gt; <span class="number">5</span>,
-        }
-    }
-
     <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::from_u64_bits([[<span class="number">1 </span>&lt;&lt; <span class="number">8</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]])
     }
@@ -442,24 +402,24 @@
     }
 
     <span class="kw">fn </span>position(<span class="kw-2">&amp;</span><span class="self">self</span>, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;</span>u64 {
-        <span class="kw">let </span>icolor = <span class="self">Self</span>::color_to_index(color);
-        <span class="kw">let </span>idove = <span class="self">Self</span>::dove_to_index(dove);
+        <span class="kw">let </span>icolor = color_to_index(color);
+        <span class="kw">let </span>idove = dove_to_index(dove);
         <span class="kw-2">&amp;</span><span class="self">self</span>.positions[icolor][idove]
     }
 
     <span class="kw">pub fn </span>put_dove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos_v: usize, pos_h: usize, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>pos_v &lt; <span class="number">4 </span>&amp;&amp; pos_h &lt; <span class="number">4 </span>{
             <span class="kw">let </span>pos = <span class="number">1 </span>&lt;&lt; (pos_h + <span class="number">8 </span>* pos_v);
-            <span class="kw">let </span>icolor = <span class="self">Self</span>::color_to_index(color);
-            <span class="kw">let </span>idove = <span class="self">Self</span>::dove_to_index(dove);
+            <span class="kw">let </span>icolor = color_to_index(color);
+            <span class="kw">let </span>idove = dove_to_index(dove);
             <span class="self">self</span>.positions[icolor][idove] = pos;
         }
         <span class="self">self
     </span>}
 
     <span class="kw">pub fn </span>remove_dove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let </span>icolor = <span class="self">Self</span>::color_to_index(color);
-        <span class="kw">let </span>idove = <span class="self">Self</span>::dove_to_index(dove);
+        <span class="kw">let </span>icolor = color_to_index(color);
+        <span class="kw">let </span>idove = dove_to_index(dove);
         <span class="self">self</span>.positions[icolor][idove] = <span class="number">0</span>;
         <span class="self">self
     </span>}
@@ -576,8 +536,10 @@
         <span class="kw">let </span><span class="kw-2">mut </span>onoff_mask = <span class="number">1_u64 </span>&lt;&lt; <span class="number">59</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>pos_mask = <span class="number">0xf_u64 </span>&lt;&lt; <span class="number">44</span>;
 
-        <span class="kw">for </span>(id, d) <span class="kw">in </span>Dove::iter().enumerate() {
-            <span class="kw">for </span>(ic, c) <span class="kw">in </span>Color::iter().enumerate() {
+        <span class="kw">for </span>d <span class="kw">in </span>Dove::iter() {
+            <span class="kw">let </span>id = dove_to_index(d);
+            <span class="kw">for </span>c <span class="kw">in </span>Color::iter() {
+                <span class="kw">let </span>ic = color_to_index(c);
                 <span class="kw">let </span>ishift = <span class="number">11 </span>- (<span class="number">2 </span>* id + ic);
                 <span class="kw">if </span>onoff_mask &amp; hash != <span class="number">0 </span>{
                     <span class="kw">let </span>ipos = ((hash &amp; pos_mask) &gt;&gt; (<span class="number">4 </span>* ishift)) <span class="kw">as </span>usize;
@@ -612,13 +574,7 @@
                 <span class="kw">continue</span>;
             }
 
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>(dove) = Dove::from_str(<span class="kw-2">&amp;</span>c.to_string()) {
-                <span class="kw">let </span>color = <span class="kw">if </span>c.is_ascii_uppercase() {
-                    Color::Red
-                } <span class="kw">else </span>{
-                    Color::Green
-                };
-
+            <span class="kw">if let </span><span class="prelude-val">Some</span>((color, dove)) = try_char_to_color_dove(c) {
                 <span class="kw">if </span><span class="kw-2">*</span>builder.position(color, dove) != <span class="number">0 </span>{
                     <span class="kw">return </span><span class="prelude-val">Err</span>(BoardCreateError {
                         error_type: DoveDuplicated,

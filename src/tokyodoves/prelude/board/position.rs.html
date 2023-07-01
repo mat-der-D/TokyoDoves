@@ -114,31 +114,11 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Position holders
 
 </span><span class="kw">use </span><span class="kw">super</span>::bitutil::calc_adjacents;
 <span class="kw">use </span><span class="kw">super</span>::container::DoveSet;
-<span class="kw">use </span><span class="kw">crate</span>::prelude::{Color, Dove};
+<span class="kw">use </span><span class="kw">crate</span>::prelude::pieces::{color_to_index, dove_to_index, Color, Dove};
 
 <span class="doccomment">/// [`Dove`] -&gt; position
 </span><span class="attr">#[derive(Debug, Clone, Copy, Default)]
@@ -151,25 +131,13 @@
         DovePositions { positions }
     }
 
-    <span class="kw">fn </span>dove_to_index(dove: Dove) -&gt; usize {
-        <span class="kw">use </span>Dove::<span class="kw-2">*</span>;
-        <span class="kw">match </span>dove {
-            B =&gt; <span class="number">0</span>,
-            A =&gt; <span class="number">1</span>,
-            Y =&gt; <span class="number">2</span>,
-            M =&gt; <span class="number">3</span>,
-            T =&gt; <span class="number">4</span>,
-            H =&gt; <span class="number">5</span>,
-        }
-    }
-
     <span class="kw">fn </span>set_position(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dove: Dove, bit: u64) {
-        <span class="kw">let </span>i = <span class="self">Self</span>::dove_to_index(dove);
+        <span class="kw">let </span>i = dove_to_index(dove);
         <span class="self">self</span>.positions[i] = bit;
     }
 
     <span class="kw">fn </span>position_of(<span class="kw-2">&amp;</span><span class="self">self</span>, dove: Dove) -&gt; u64 {
-        <span class="kw">let </span>i = <span class="self">Self</span>::dove_to_index(dove);
+        <span class="kw">let </span>i = dove_to_index(dove);
         <span class="self">self</span>.positions[i]
     }
 
@@ -178,7 +146,7 @@
     }
 
     <span class="kw">fn </span>union_except(<span class="kw-2">&amp;</span><span class="self">self</span>, dove: Dove) -&gt; u64 {
-        <span class="kw">let </span>index = <span class="self">Self</span>::dove_to_index(dove);
+        <span class="kw">let </span>index = dove_to_index(dove);
         (<span class="number">0</span>..<span class="number">6</span>)
             .filter(|i| <span class="kw-2">*</span>i != index)
             .fold(<span class="number">0</span>, |union, i| union | <span class="self">self</span>.positions[i])
@@ -215,21 +183,13 @@
         <span class="self">Self </span>{ positions }
     }
 
-    <span class="kw">fn </span>color_to_index(color: Color) -&gt; usize {
-        <span class="kw">use </span>Color::<span class="kw-2">*</span>;
-        <span class="kw">match </span>color {
-            Red =&gt; <span class="number">0</span>,
-            Green =&gt; <span class="number">1</span>,
-        }
-    }
-
     <span class="kw">pub fn </span>dove_positions(<span class="kw-2">&amp;</span><span class="self">self</span>, color: Color) -&gt; <span class="kw-2">&amp;</span>DovePositions {
-        <span class="kw">let </span>i = <span class="self">Self</span>::color_to_index(color);
+        <span class="kw">let </span>i = color_to_index(color);
         <span class="kw-2">&amp;</span><span class="self">self</span>.positions[i]
     }
 
     <span class="kw">pub fn </span>dove_positions_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color) -&gt; <span class="kw-2">&amp;mut </span>DovePositions {
-        <span class="kw">let </span>i = <span class="self">Self</span>::color_to_index(color);
+        <span class="kw">let </span>i = color_to_index(color);
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.positions[i]
     }
 
