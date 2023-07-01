@@ -136,9 +136,9 @@
         <span class="self">self</span>.positions[i] = bit;
     }
 
-    <span class="kw">fn </span>position_of(<span class="kw-2">&amp;</span><span class="self">self</span>, dove: Dove) -&gt; u64 {
+    <span class="kw">fn </span>position_of(<span class="kw-2">&amp;</span><span class="self">self</span>, dove: Dove) -&gt; <span class="kw-2">&amp;</span>u64 {
         <span class="kw">let </span>i = dove_to_index(dove);
-        <span class="self">self</span>.positions[i]
+        <span class="kw-2">&amp;</span><span class="self">self</span>.positions[i]
     }
 
     <span class="kw">fn </span>union(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
@@ -197,7 +197,7 @@
         <span class="self">self</span>.dove_positions_mut(color).set_position(dove, bit);
     }
 
-    <span class="kw">pub fn </span>position_of(<span class="kw-2">&amp;</span><span class="self">self</span>, color: Color, dove: Dove) -&gt; u64 {
+    <span class="kw">pub fn </span>position_of(<span class="kw-2">&amp;</span><span class="self">self</span>, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;</span>u64 {
         <span class="self">self</span>.dove_positions(color).position_of(dove)
     }
 

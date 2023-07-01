@@ -1659,7 +1659,7 @@
         <span class="kw">match </span>action {
             Put(c, d, s) =&gt; {
                 <span class="kw">let </span>boss_pos = <span class="self">self</span>.positions.position_of(c, Dove::B);
-                <span class="kw">let </span>pos = apply_shift(boss_pos, s);
+                <span class="kw">let </span>pos = apply_shift(<span class="kw-2">*</span>boss_pos, s);
                 <span class="self">self</span>.viewer
                     .shift_toward(pos)
                     .map_err(|<span class="kw">_</span>| error::BoardError::MaskShiftError)<span class="question-mark">?</span>;
@@ -1667,7 +1667,7 @@
             }
             Move(c, d, s) =&gt; {
                 <span class="kw">let </span>pos_now = <span class="self">self</span>.positions.position_of(c, d);
-                <span class="kw">let </span>pos_next = apply_shift(pos_now, s);
+                <span class="kw">let </span>pos_next = apply_shift(<span class="kw-2">*</span>pos_now, s);
                 <span class="self">self</span>.viewer
                     .shift_toward(pos_next)
                     .map_err(|<span class="kw">_</span>| error::BoardError::MaskShiftError)<span class="question-mark">?</span>;
@@ -1765,7 +1765,7 @@
             Action::Put(c_, d_, s_)
         }
 
-        <span class="kw">if </span><span class="self">self</span>.positions.position_of(c, d) != <span class="number">0 </span>{
+        <span class="kw">if </span><span class="kw-2">*</span><span class="self">self</span>.positions.position_of(c, d) != <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
                 error_type: AlreadyOnBoard,
                 action: _restore_cmd(c, d, s),
@@ -1778,7 +1778,7 @@
             });
         }
         <span class="kw">let </span>boss_pos = <span class="self">self</span>.positions.position_of(c, Dove::B);
-        <span class="kw">let </span>pos = apply_shift(boss_pos, s);
+        <span class="kw">let </span>pos = apply_shift(<span class="kw-2">*</span>boss_pos, s);
         <span class="kw">let </span><span class="prelude-val">Ok</span>(next_mask) = <span class="self">self</span>.viewer.view_mask_at(pos) <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError { error_type: OutOfField, action: _restore_cmd(c, d, s) });
         };
@@ -1793,7 +1793,7 @@
 
         <span class="kw">if </span>fwd {
             <span class="kw">let </span>another_boss_pos = <span class="self">self</span>.positions.position_of(!c, Dove::B);
-            <span class="kw">let </span>another_boss_sides = sides_of_bit(another_boss_pos);
+            <span class="kw">let </span>another_boss_sides = sides_of_bit(<span class="kw-2">*</span>another_boss_pos);
             <span class="kw">let </span>adj_ours = calc_adjacents(<span class="self">self</span>.positions.union_in_color(c));
             <span class="kw">if </span>pos &amp; !all &amp; !another_boss_sides &amp; adj_ours != pos {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
@@ -1823,7 +1823,7 @@
         }
 
         <span class="kw">let </span>pos = <span class="self">self</span>.positions.position_of(c, d);
-        <span class="kw">if </span>pos == <span class="number">0 </span>{
+        <span class="kw">if </span><span class="kw-2">*</span>pos == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
                 error_type: NotOnBoard,
                 action: _restore_cmd(c, d, s),
@@ -1832,7 +1832,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>new_pos = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>route = <span class="number">0_u64</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>found = <span class="bool-val">false</span>;
-        <span class="kw">for </span>(p, r, (dh, dv)) <span class="kw">in </span>bit_route_shift(pos, d) {
+        <span class="kw">for </span>(p, r, (dh, dv)) <span class="kw">in </span>bit_route_shift(<span class="kw-2">*</span>pos, d) {
             <span class="kw">if </span>(s.dh, s.dv) == (<span class="kw-2">*</span>dh, <span class="kw-2">*</span>dv) {
                 found = <span class="bool-val">true</span>;
                 route = <span class="kw-2">*</span>r;
@@ -1900,7 +1900,7 @@
             });
         }
         <span class="kw">let </span>pos = <span class="self">self</span>.positions.position_of(c, d);
-        <span class="kw">if </span>pos == <span class="number">0 </span>{
+        <span class="kw">if </span><span class="kw-2">*</span>pos == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
                 error_type: NotOnBoard,
                 action: _restore_cmd(c, d),
@@ -1909,10 +1909,10 @@
 
         <span class="kw">if </span>!fwd {
             <span class="kw">let </span>another_boss_pos = <span class="self">self</span>.positions.position_of(!c, Dove::B);
-            <span class="kw">let </span>another_boss_sides = sides_of_bit(another_boss_pos);
+            <span class="kw">let </span>another_boss_sides = sides_of_bit(<span class="kw-2">*</span>another_boss_pos);
             <span class="kw">let </span>adj_ours = calc_adjacents(<span class="self">self</span>.positions.union_in_color(c));
 
-            <span class="kw">if </span>pos &amp; !another_boss_sides &amp; adj_ours != pos {
+            <span class="kw">if </span>pos &amp; !another_boss_sides &amp; adj_ours != <span class="kw-2">*</span>pos {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
                     error_type: InvalidPosition,
                     action: _restore_cmd(c, d),
@@ -2037,7 +2037,7 @@
 
             <span class="kw">let </span>possibles = <span class="kw">if </span>fwd {
                 <span class="kw">let </span>another_boss_pos = <span class="self">self</span>.positions.position_of(!player, Dove::B);
-                <span class="kw">let </span>another_boss_sides = sides_of_bit(another_boss_pos);
+                <span class="kw">let </span>another_boss_sides = sides_of_bit(<span class="kw-2">*</span>another_boss_pos);
                 <span class="kw">let </span>adj_ours = calc_adjacents(<span class="self">self</span>.positions.union_in_color(player));
                 mask_sum &amp; !all &amp; !another_boss_sides &amp; adj_ours
             } <span class="kw">else </span>{
@@ -2047,7 +2047,7 @@
 
             <span class="kw">let </span>boss_pos = <span class="self">self</span>.positions.position_of(player, Dove::B);
             <span class="kw">for </span>dst <span class="kw">in </span>HotBitIter::from(possibles) {
-                <span class="kw">let </span>shift = create_shift_from_bits(boss_pos, dst);
+                <span class="kw">let </span>shift = create_shift_from_bits(<span class="kw-2">*</span>boss_pos, dst);
                 <span class="kw">for </span>d <span class="kw">in </span>doves_in_hand {
                     actions.push(Action::Put(player, d, shift));
                 }
@@ -2062,7 +2062,7 @@
             <span class="kw">let </span>pos_now = <span class="self">self</span>.positions.position_of(player, d);
             <span class="kw">let </span>others = <span class="self">self</span>.positions.union_except(player, d);
             <span class="kw">let </span>adj_others = calc_adjacents(others);
-            <span class="kw">for </span>(pos_next, route, (dh, dv)) <span class="kw">in </span>bit_route_shift(pos_now, d) {
+            <span class="kw">for </span>(pos_next, route, (dh, dv)) <span class="kw">in </span>bit_route_shift(<span class="kw-2">*</span>pos_now, d) {
                 <span class="kw">if </span>route &amp; (others | outfield) != <span class="number">0 </span>{
                     <span class="kw">continue</span>; <span class="comment">// obstacle in route
                 </span>}
@@ -2099,7 +2099,7 @@
             } <span class="kw">else </span>{
                 adj_ours = calc_adjacents(<span class="self">self</span>.positions.union_in_color(player));
                 <span class="kw">let </span>another_boss_pos = <span class="self">self</span>.positions.position_of(!player, Dove::B);
-                another_boss_sides = sides_of_bit(another_boss_pos);
+                another_boss_sides = sides_of_bit(<span class="kw-2">*</span>another_boss_pos);
             }
 
             <span class="kw">for </span>d <span class="kw">in </span>doves_on_field {
@@ -2109,7 +2109,7 @@
 
                 <span class="kw">if </span>!fwd {
                     <span class="kw">let </span>pos = <span class="self">self</span>.positions.position_of(player, d);
-                    <span class="kw">if </span>pos &amp; !another_boss_sides &amp; adj_ours != pos {
+                    <span class="kw">if </span>pos &amp; !another_boss_sides &amp; adj_ours != <span class="kw-2">*</span>pos {
                         <span class="kw">continue</span>;
                     }
                 }
@@ -2156,11 +2156,11 @@
     /// ```
     </span><span class="kw">pub fn </span>position_in_rbcc(<span class="kw-2">&amp;</span><span class="self">self</span>, player: Color, dove: Dove) -&gt; <span class="prelude-ty">Option</span>&lt;Shift&gt; {
         <span class="kw">let </span>pos = <span class="self">self</span>.positions.position_of(player, dove);
-        <span class="kw">if </span>pos == <span class="number">0 </span>{
+        <span class="kw">if </span><span class="kw-2">*</span>pos == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
         <span class="kw">let </span>red_boss_pos = <span class="self">self</span>.positions.position_of(Color::Red, Dove::B);
-        <span class="kw">let </span>shift = create_shift_from_bits(red_boss_pos, pos);
+        <span class="kw">let </span>shift = create_shift_from_bits(<span class="kw-2">*</span>red_boss_pos, <span class="kw-2">*</span>pos);
         <span class="prelude-val">Some</span>(shift)
     }
 
@@ -2186,12 +2186,12 @@
 
     <span class="doccomment">/// Returns `true` if the `player`&#39;s `dove` is on the field.
     </span><span class="kw">pub fn </span>is_on_field(<span class="kw-2">&amp;</span><span class="self">self</span>, player: Color, dove: Dove) -&gt; bool {
-        <span class="self">self</span>.positions.position_of(player, dove) != <span class="number">0
+        <span class="kw-2">*</span><span class="self">self</span>.positions.position_of(player, dove) != <span class="number">0
     </span>}
 
     <span class="doccomment">/// Returns `true` if the `player`&#39;s `dove` is in their hand.
     </span><span class="kw">pub fn </span>is_in_hand(<span class="kw-2">&amp;</span><span class="self">self</span>, player: Color, dove: Dove) -&gt; bool {
-        <span class="self">self</span>.positions.position_of(player, dove) == <span class="number">0
+        <span class="kw-2">*</span><span class="self">self</span>.positions.position_of(player, dove) == <span class="number">0
     </span>}
 
     <span class="doccomment">/// Returns &quot;liberty&quot; of `player`&#39;s `dove`,
@@ -2224,10 +2224,10 @@
         <span class="kw">let </span>all = <span class="self">self</span>.positions.union();
         <span class="kw">let </span>walls = <span class="self">self</span>.viewer.view_mask().calc_wall_bits(all);
         <span class="kw">let </span>pos = <span class="self">self</span>.positions.position_of(player, dove);
-        <span class="kw">if </span>pos == <span class="number">0 </span>{
+        <span class="kw">if </span><span class="kw-2">*</span>pos == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
-        <span class="kw">let </span>sides = sides_of_bit(pos);
+        <span class="kw">let </span>sides = sides_of_bit(<span class="kw-2">*</span>pos);
         <span class="prelude-val">Some</span>((sides &amp; !all &amp; !walls).count_ones() <span class="kw">as </span>usize)
     }
 
@@ -2331,11 +2331,11 @@
             <span class="kw">for </span>c <span class="kw">in </span>Color::iter() {
                 <span class="kw">let </span>ic = color_to_index(c);
                 <span class="kw">let </span>pos = <span class="self">self</span>.positions.position_of(c, d);
-                <span class="kw">if </span>pos == <span class="number">0 </span>{
+                <span class="kw">if </span><span class="kw-2">*</span>pos == <span class="number">0 </span>{
                     <span class="kw">continue</span>;
                 }
                 <span class="kw">let </span>ishift = <span class="number">11 </span>- (<span class="number">2 </span>* id + ic);
-                <span class="kw">let </span><span class="prelude-val">Some</span>(ipos) = <span class="self">self</span>.viewer.view_mask().field_idx(pos) <span class="kw">else </span>{
+                <span class="kw">let </span><span class="prelude-val">Some</span>(ipos) = <span class="self">self</span>.viewer.view_mask().field_idx(<span class="kw-2">*</span>pos) <span class="kw">else </span>{
                     <span class="kw">continue</span>;
                 };
                 hash |= (ipos <span class="kw">as </span>u64) &lt;&lt; (<span class="number">4 </span>* ishift);
@@ -2374,11 +2374,11 @@
             <span class="kw">for </span>c <span class="kw">in </span>Color::iter() {
                 <span class="kw">let </span>ic = color_to_index(c);
                 <span class="kw">let </span>pos = board.positions.position_of(c, d);
-                <span class="kw">if </span>pos == <span class="number">0 </span>{
+                <span class="kw">if </span><span class="kw-2">*</span>pos == <span class="number">0 </span>{
                     <span class="kw">continue</span>;
                 }
                 <span class="kw">let </span>ishift = <span class="number">11 </span>- (<span class="number">2 </span>* id + ic);
-                <span class="kw">let </span><span class="prelude-val">Some</span>(ipos_raw) = board.viewer.view_mask().field_idx(pos) <span class="kw">else </span>{ <span class="kw">continue</span>; };
+                <span class="kw">let </span><span class="prelude-val">Some</span>(ipos_raw) = board.viewer.view_mask().field_idx(<span class="kw-2">*</span>pos) <span class="kw">else </span>{ <span class="kw">continue</span>; };
                 <span class="kw">let </span>ipos = ipos_raw - idx_shift;
                 <span class="kw">for </span>(i, hash) <span class="kw">in </span>hashes.iter_mut().enumerate() {
                     <span class="kw">let </span>new_pos = cons[i][ipos] <span class="kw">as </span>u64;
@@ -2414,11 +2414,11 @@
         <span class="kw">for </span>c <span class="kw">in </span>Color::iter() {
             <span class="kw">for </span>d <span class="kw">in </span>Dove::iter() {
                 <span class="kw">let </span>pos = <span class="self">self</span>.positions.position_of(c, d);
-                <span class="kw">if </span>pos != <span class="number">0 </span>{
+                <span class="kw">if </span><span class="kw-2">*</span>pos != <span class="number">0 </span>{
                     <span class="kw">let </span><span class="prelude-val">Some</span>(idx) = <span class="self">self
                     </span>.viewer
                     .view_mask()
-                    .field_idx(pos) <span class="kw">else </span>{
+                    .field_idx(<span class="kw-2">*</span>pos) <span class="kw">else </span>{
                         <span class="kw">continue</span>;
                     };
 
