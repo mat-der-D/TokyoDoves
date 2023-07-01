@@ -4,7 +4,8 @@ use strum::IntoEnumIterator;
 
 use super::board::{mask::*, position::*, Board};
 use super::error;
-use crate::prelude::{Color, Dove};
+use crate::prelude::pieces::{color_to_index, dove_to_index, Color, Dove};
+use crate::try_char_to_color_dove;
 
 /// A builder of [`Board`]
 ///
@@ -69,25 +70,6 @@ pub struct BoardBuilder {
 }
 
 impl BoardBuilder {
-    fn color_to_index(color: Color) -> usize {
-        match color {
-            Color::Red => 0,
-            Color::Green => 1,
-        }
-    }
-
-    fn dove_to_index(dove: Dove) -> usize {
-        use Dove::*;
-        match dove {
-            B => 0,
-            A => 1,
-            Y => 2,
-            M => 3,
-            T => 4,
-            H => 5,
-        }
-    }
-
     pub fn new() -> Self {
         Self::from_u64_bits([[1 << 8, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]])
     }
@@ -125,24 +107,24 @@ impl BoardBuilder {
     }
 
     fn position(&self, color: Color, dove: Dove) -> &u64 {
-        let icolor = Self::color_to_index(color);
-        let idove = Self::dove_to_index(dove);
+        let icolor = color_to_index(color);
+        let idove = dove_to_index(dove);
         &self.positions[icolor][idove]
     }
 
     pub fn put_dove(&mut self, pos_v: usize, pos_h: usize, color: Color, dove: Dove) -> &mut Self {
         if pos_v < 4 && pos_h < 4 {
             let pos = 1 << (pos_h + 8 * pos_v);
-            let icolor = Self::color_to_index(color);
-            let idove = Self::dove_to_index(dove);
+            let icolor = color_to_index(color);
+            let idove = dove_to_index(dove);
             self.positions[icolor][idove] = pos;
         }
         self
     }
 
     pub fn remove_dove(&mut self, color: Color, dove: Dove) -> &mut Self {
-        let icolor = Self::color_to_index(color);
-        let idove = Self::dove_to_index(dove);
+        let icolor = color_to_index(color);
+        let idove = dove_to_index(dove);
         self.positions[icolor][idove] = 0;
         self
     }
@@ -259,8 +241,10 @@ impl From<u64> for BoardBuilder {
         let mut onoff_mask = 1_u64 << 59;
         let mut pos_mask = 0xf_u64 << 44;
 
-        for (id, d) in Dove::iter().enumerate() {
-            for (ic, c) in Color::iter().enumerate() {
+        for d in Dove::iter() {
+            let id = dove_to_index(d);
+            for c in Color::iter() {
+                let ic = color_to_index(c);
                 let ishift = 11 - (2 * id + ic);
                 if onoff_mask & hash != 0 {
                     let ipos = ((hash & pos_mask) >> (4 * ishift)) as usize;
@@ -295,13 +279,7 @@ impl FromStr for BoardBuilder {
                 continue;
             }
 
-            if let Ok(dove) = Dove::from_str(&c.to_string()) {
-                let color = if c.is_ascii_uppercase() {
-                    Color::Red
-                } else {
-                    Color::Green
-                };
-
+            if let Some((color, dove)) = try_char_to_color_dove(c) {
                 if *builder.position(color, dove) != 0 {
                     return Err(BoardCreateError {
                         error_type: DoveDuplicated,

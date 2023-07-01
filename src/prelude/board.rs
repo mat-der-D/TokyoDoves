@@ -7,7 +7,8 @@ pub(super) mod mask;
 pub(super) mod position;
 pub(super) mod route;
 
-use crate::prelude::{error, Action, Color, Dove, Shift};
+use crate::prelude::pieces::{color_dove_to_char, color_to_index, dove_to_index, Color, Dove};
+use crate::prelude::{error, Action, Shift};
 
 use bitutil::*;
 use canonicalizer::*;
@@ -937,8 +938,10 @@ impl Board {
     /// where capital/lower cases mean red/green dove, respectively.
     pub fn to_u64(&self) -> u64 {
         let mut hash = 0;
-        for (id, d) in Dove::iter().enumerate() {
-            for (ic, c) in Color::iter().enumerate() {
+        for d in Dove::iter() {
+            let id = dove_to_index(d);
+            for c in Color::iter() {
+                let ic = color_to_index(c);
                 let pos = self.positions.position_of(c, d);
                 if pos == 0 {
                     continue;
@@ -978,8 +981,10 @@ impl Board {
 
         let cons = CONGRUENT_MAPS[(hsize - 1) + 4 * (vsize - 1)];
         let idx_shift = hmin + 4 * vmin;
-        for (id, d) in Dove::iter().enumerate() {
-            for (ic, c) in Color::iter().enumerate() {
+        for d in Dove::iter() {
+            let id = dove_to_index(d);
+            for c in Color::iter() {
+                let ic = color_to_index(c);
                 let pos = board.positions.position_of(c, d);
                 if pos == 0 {
                     continue;
@@ -1066,12 +1071,10 @@ impl Board {
         let mut lines = Vec::new();
         for line in self.to_4x4_matrix().into_iter() {
             lines.push(hframe.clone());
-            use Color::*;
             let line_str: String = line
                 .into_iter()
                 .map(|x| match x {
-                    Some((Red, d)) => format!("| {:?} ", d).to_ascii_uppercase(),
-                    Some((Green, d)) => format!("| {:?} ", d).to_ascii_lowercase(),
+                    Some((c, d)) => format!("| {:?} ", color_dove_to_char(c, d)),
                     None => "|   ".to_string(),
                 })
                 .collect();

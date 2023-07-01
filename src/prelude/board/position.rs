@@ -2,7 +2,7 @@
 
 use super::bitutil::calc_adjacents;
 use super::container::DoveSet;
-use crate::prelude::{Color, Dove};
+use crate::prelude::pieces::{color_to_index, dove_to_index, Color, Dove};
 
 /// [`Dove`] -> position
 #[derive(Debug, Clone, Copy, Default)]
@@ -15,25 +15,13 @@ impl DovePositions {
         DovePositions { positions }
     }
 
-    fn dove_to_index(dove: Dove) -> usize {
-        use Dove::*;
-        match dove {
-            B => 0,
-            A => 1,
-            Y => 2,
-            M => 3,
-            T => 4,
-            H => 5,
-        }
-    }
-
     fn set_position(&mut self, dove: Dove, bit: u64) {
-        let i = Self::dove_to_index(dove);
+        let i = dove_to_index(dove);
         self.positions[i] = bit;
     }
 
     fn position_of(&self, dove: Dove) -> u64 {
-        let i = Self::dove_to_index(dove);
+        let i = dove_to_index(dove);
         self.positions[i]
     }
 
@@ -42,7 +30,7 @@ impl DovePositions {
     }
 
     fn union_except(&self, dove: Dove) -> u64 {
-        let index = Self::dove_to_index(dove);
+        let index = dove_to_index(dove);
         (0..6)
             .filter(|i| *i != index)
             .fold(0, |union, i| union | self.positions[i])
@@ -79,21 +67,13 @@ impl ColorDovePositions {
         Self { positions }
     }
 
-    fn color_to_index(color: Color) -> usize {
-        use Color::*;
-        match color {
-            Red => 0,
-            Green => 1,
-        }
-    }
-
     pub fn dove_positions(&self, color: Color) -> &DovePositions {
-        let i = Self::color_to_index(color);
+        let i = color_to_index(color);
         &self.positions[i]
     }
 
     pub fn dove_positions_mut(&mut self, color: Color) -> &mut DovePositions {
-        let i = Self::color_to_index(color);
+        let i = color_to_index(color);
         &mut self.positions[i]
     }
 
