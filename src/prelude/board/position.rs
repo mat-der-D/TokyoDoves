@@ -20,9 +20,9 @@ impl DovePositions {
         self.positions[i] = bit;
     }
 
-    fn position_of(&self, dove: Dove) -> u64 {
+    fn position_of(&self, dove: Dove) -> &u64 {
         let i = dove_to_index(dove);
-        self.positions[i]
+        &self.positions[i]
     }
 
     fn union(&self) -> u64 {
@@ -81,7 +81,7 @@ impl ColorDovePositions {
         self.dove_positions_mut(color).set_position(dove, bit);
     }
 
-    pub fn position_of(&self, color: Color, dove: Dove) -> u64 {
+    pub fn position_of(&self, color: Color, dove: Dove) -> &u64 {
         self.dove_positions(color).position_of(dove)
     }
 

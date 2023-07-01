@@ -271,7 +271,7 @@ impl Board {
         match action {
             Put(c, d, s) => {
                 let boss_pos = self.positions.position_of(c, Dove::B);
-                let pos = apply_shift(boss_pos, s);
+                let pos = apply_shift(*boss_pos, s);
                 self.viewer
                     .shift_toward(pos)
                     .map_err(|_| error::BoardError::MaskShiftError)?;
@@ -279,7 +279,7 @@ impl Board {
             }
             Move(c, d, s) => {
                 let pos_now = self.positions.position_of(c, d);
-                let pos_next = apply_shift(pos_now, s);
+                let pos_next = apply_shift(*pos_now, s);
                 self.viewer
                     .shift_toward(pos_next)
                     .map_err(|_| error::BoardError::MaskShiftError)?;
@@ -377,7 +377,7 @@ impl Board {
             Action::Put(c_, d_, s_)
         }
 
-        if self.positions.position_of(c, d) != 0 {
+        if *self.positions.position_of(c, d) != 0 {
             return Err(ActionPerformError {
                 error_type: AlreadyOnBoard,
                 action: _restore_cmd(c, d, s),
@@ -390,7 +390,7 @@ impl Board {
             });
         }
         let boss_pos = self.positions.position_of(c, Dove::B);
-        let pos = apply_shift(boss_pos, s);
+        let pos = apply_shift(*boss_pos, s);
         let Ok(next_mask) = self.viewer.view_mask_at(pos) else {
             return Err(ActionPerformError { error_type: OutOfField, action: _restore_cmd(c, d, s) });
         };
@@ -405,7 +405,7 @@ impl Board {
 
         if fwd {
             let another_boss_pos = self.positions.position_of(!c, Dove::B);
-            let another_boss_sides = sides_of_bit(another_boss_pos);
+            let another_boss_sides = sides_of_bit(*another_boss_pos);
             let adj_ours = calc_adjacents(self.positions.union_in_color(c));
             if pos & !all & !another_boss_sides & adj_ours != pos {
                 return Err(ActionPerformError {
@@ -435,7 +435,7 @@ impl Board {
         }
 
         let pos = self.positions.position_of(c, d);
-        if pos == 0 {
+        if *pos == 0 {
             return Err(ActionPerformError {
                 error_type: NotOnBoard,
                 action: _restore_cmd(c, d, s),
@@ -444,7 +444,7 @@ impl Board {
         let mut new_pos = 0;
         let mut route = 0_u64;
         let mut found = false;
-        for (p, r, (dh, dv)) in bit_route_shift(pos, d) {
+        for (p, r, (dh, dv)) in bit_route_shift(*pos, d) {
             if (s.dh, s.dv) == (*dh, *dv) {
                 found = true;
                 route = *r;
@@ -512,7 +512,7 @@ impl Board {
             });
         }
         let pos = self.positions.position_of(c, d);
-        if pos == 0 {
+        if *pos == 0 {
             return Err(ActionPerformError {
                 error_type: NotOnBoard,
                 action: _restore_cmd(c, d),
@@ -521,10 +521,10 @@ impl Board {
 
         if !fwd {
             let another_boss_pos = self.positions.position_of(!c, Dove::B);
-            let another_boss_sides = sides_of_bit(another_boss_pos);
+            let another_boss_sides = sides_of_bit(*another_boss_pos);
             let adj_ours = calc_adjacents(self.positions.union_in_color(c));
 
-            if pos & !another_boss_sides & adj_ours != pos {
+            if pos & !another_boss_sides & adj_ours != *pos {
                 return Err(ActionPerformError {
                     error_type: InvalidPosition,
                     action: _restore_cmd(c, d),
@@ -649,7 +649,7 @@ impl Board {
 
             let possibles = if fwd {
                 let another_boss_pos = self.positions.position_of(!player, Dove::B);
-                let another_boss_sides = sides_of_bit(another_boss_pos);
+                let another_boss_sides = sides_of_bit(*another_boss_pos);
                 let adj_ours = calc_adjacents(self.positions.union_in_color(player));
                 mask_sum & !all & !another_boss_sides & adj_ours
             } else {
@@ -659,7 +659,7 @@ impl Board {
 
             let boss_pos = self.positions.position_of(player, Dove::B);
             for dst in HotBitIter::from(possibles) {
-                let shift = create_shift_from_bits(boss_pos, dst);
+                let shift = create_shift_from_bits(*boss_pos, dst);
                 for d in doves_in_hand {
                     actions.push(Action::Put(player, d, shift));
                 }
@@ -674,7 +674,7 @@ impl Board {
             let pos_now = self.positions.position_of(player, d);
             let others = self.positions.union_except(player, d);
             let adj_others = calc_adjacents(others);
-            for (pos_next, route, (dh, dv)) in bit_route_shift(pos_now, d) {
+            for (pos_next, route, (dh, dv)) in bit_route_shift(*pos_now, d) {
                 if route & (others | outfield) != 0 {
                     continue; // obstacle in route
                 }
@@ -711,7 +711,7 @@ impl Board {
             } else {
                 adj_ours = calc_adjacents(self.positions.union_in_color(player));
                 let another_boss_pos = self.positions.position_of(!player, Dove::B);
-                another_boss_sides = sides_of_bit(another_boss_pos);
+                another_boss_sides = sides_of_bit(*another_boss_pos);
             }
 
             for d in doves_on_field {
@@ -721,7 +721,7 @@ impl Board {
 
                 if !fwd {
                     let pos = self.positions.position_of(player, d);
-                    if pos & !another_boss_sides & adj_ours != pos {
+                    if pos & !another_boss_sides & adj_ours != *pos {
                         continue;
                     }
                 }
@@ -768,11 +768,11 @@ impl Board {
     /// ```
     pub fn position_in_rbcc(&self, player: Color, dove: Dove) -> Option<Shift> {
         let pos = self.positions.position_of(player, dove);
-        if pos == 0 {
+        if *pos == 0 {
             return None;
         }
         let red_boss_pos = self.positions.position_of(Color::Red, Dove::B);
-        let shift = create_shift_from_bits(red_boss_pos, pos);
+        let shift = create_shift_from_bits(*red_boss_pos, *pos);
         Some(shift)
     }
 
@@ -798,12 +798,12 @@ impl Board {
 
     /// Returns `true` if the `player`'s `dove` is on the field.
     pub fn is_on_field(&self, player: Color, dove: Dove) -> bool {
-        self.positions.position_of(player, dove) != 0
+        *self.positions.position_of(player, dove) != 0
     }
 
     /// Returns `true` if the `player`'s `dove` is in their hand.
     pub fn is_in_hand(&self, player: Color, dove: Dove) -> bool {
-        self.positions.position_of(player, dove) == 0
+        *self.positions.position_of(player, dove) == 0
     }
 
     /// Returns "liberty" of `player`'s `dove`,
@@ -836,10 +836,10 @@ impl Board {
         let all = self.positions.union();
         let walls = self.viewer.view_mask().calc_wall_bits(all);
         let pos = self.positions.position_of(player, dove);
-        if pos == 0 {
+        if *pos == 0 {
             return None;
         }
-        let sides = sides_of_bit(pos);
+        let sides = sides_of_bit(*pos);
         Some((sides & !all & !walls).count_ones() as usize)
     }
 
@@ -943,11 +943,11 @@ impl Board {
             for c in Color::iter() {
                 let ic = color_to_index(c);
                 let pos = self.positions.position_of(c, d);
-                if pos == 0 {
+                if *pos == 0 {
                     continue;
                 }
                 let ishift = 11 - (2 * id + ic);
-                let Some(ipos) = self.viewer.view_mask().field_idx(pos) else {
+                let Some(ipos) = self.viewer.view_mask().field_idx(*pos) else {
                     continue;
                 };
                 hash |= (ipos as u64) << (4 * ishift);
@@ -986,11 +986,11 @@ impl Board {
             for c in Color::iter() {
                 let ic = color_to_index(c);
                 let pos = board.positions.position_of(c, d);
-                if pos == 0 {
+                if *pos == 0 {
                     continue;
                 }
                 let ishift = 11 - (2 * id + ic);
-                let Some(ipos_raw) = board.viewer.view_mask().field_idx(pos) else { continue; };
+                let Some(ipos_raw) = board.viewer.view_mask().field_idx(*pos) else { continue; };
                 let ipos = ipos_raw - idx_shift;
                 for (i, hash) in hashes.iter_mut().enumerate() {
                     let new_pos = cons[i][ipos] as u64;
@@ -1026,11 +1026,11 @@ impl Board {
         for c in Color::iter() {
             for d in Dove::iter() {
                 let pos = self.positions.position_of(c, d);
-                if pos != 0 {
+                if *pos != 0 {
                     let Some(idx) = self
                     .viewer
                     .view_mask()
-                    .field_idx(pos) else {
+                    .field_idx(*pos) else {
                         continue;
                     };
 
