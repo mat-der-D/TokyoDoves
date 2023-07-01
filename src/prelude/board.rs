@@ -93,7 +93,7 @@ impl_mutable_action_container! {
 }
 
 /// An enum returned by [`Board::surrounded_status`]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SurroundedStatus {
     Both,
     OneSide(Color),

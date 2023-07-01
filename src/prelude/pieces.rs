@@ -1,4 +1,4 @@
-use strum_macros::{EnumIter, EnumString};
+use strum_macros::EnumIter;
 
 /// Two colors of player, just like black and white in chess.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
@@ -19,7 +19,7 @@ impl std::ops::Not for Color {
 }
 
 /// Six types of doves.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter, EnumString)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
 pub enum Dove {
     /// Represents **B**oss-hato,
     /// which can move to adjacent squares in all eight directions,

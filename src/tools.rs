@@ -42,8 +42,7 @@ pub fn compare_board_value(
 ) -> Result<i8, CompareBoardValueError> {
     use BoardValue::*;
     use CompareBoardValueError::*;
-    use SurroundedStatus::*;
-    if !matches!(board.surrounded_status(), None) {
+    if !matches!(board.surrounded_status(), SurroundedStatus::None) {
         return Err(BoardAlreadyFinished);
     }
 

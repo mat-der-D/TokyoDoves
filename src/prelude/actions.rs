@@ -1,9 +1,7 @@
-use std::str::FromStr;
-
 use super::{
     board::Board,
     error,
-    pieces::{Color, Dove},
+    pieces::{try_char_to_color_dove, Color, Dove},
     Shift,
 };
 
@@ -181,11 +179,9 @@ impl Action {
                     'E' => self.dh_sign = Sign::Plus,
                     'W' => self.dh_sign = Sign::Minus,
                     x if Self::COLOR_DOVE_CHAR.contains(&x) => {
-                        let dove = Dove::from_str(&x.to_string()).unwrap();
-                        let color = if x.is_ascii_uppercase() {
-                            Color::Red
-                        } else {
-                            Color::Green
+                        // let dove = Dove::from_str(&x.to_string()).unwrap();
+                        let Some((color, dove)) = try_char_to_color_dove(x) else {
+                            unreachable!();
                         };
                         self.dove = Some(dove);
                         self.color = Some(color);
