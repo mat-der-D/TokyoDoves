@@ -157,7 +157,7 @@
             </span>.positions
             .into_iter()
             .enumerate()
-            .fold(<span class="number">0</span>, |cum, (i, x)| <span class="kw">if </span>x == <span class="number">0 </span>{ cum | (<span class="number">1 </span>&lt;&lt; i) } <span class="kw">else </span>{ cum });
+            .fold(<span class="number">0</span>, |cum, (i, x)| cum | (((x == <span class="number">0</span>) <span class="kw">as </span>u8) &lt;&lt; i));
         DoveSet { hash }
     }
 
@@ -166,7 +166,7 @@
             </span>.positions
             .into_iter()
             .enumerate()
-            .fold(<span class="number">0</span>, |cum, (i, x)| <span class="kw">if </span>x != <span class="number">0 </span>{ cum | (<span class="number">1 </span>&lt;&lt; i) } <span class="kw">else </span>{ cum });
+            .fold(<span class="number">0</span>, |cum, (i, x)| cum | (((x != <span class="number">0</span>) <span class="kw">as </span>u8) &lt;&lt; i));
         DoveSet { hash }
     }
 }

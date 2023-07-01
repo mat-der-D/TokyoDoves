@@ -194,17 +194,10 @@
 <a href="#194" id="194">194</a>
 <a href="#195" id="195">195</a>
 <a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Container structs of some objects
 
-</span><span class="kw">use </span><span class="kw">crate</span>::prelude::{Action, Dove};
+</span><span class="kw">use </span><span class="kw">crate</span>::prelude::pieces::{dove_to_index, try_index_to_dove};
+<span class="kw">use </span><span class="kw">crate</span>::prelude::{Action, Dove};
 
 <span class="comment">// *******************************************************************
 //  Action Container
@@ -346,15 +339,7 @@
 
     <span class="doccomment">/// Returns `true` if it contains the specified [`Dove`].
     </span><span class="kw">pub fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, dove: Dove) -&gt; bool {
-        <span class="kw">use </span>Dove::<span class="kw-2">*</span>;
-        <span class="kw">let </span>bit = <span class="kw">match </span>dove {
-            B =&gt; <span class="number">0b1</span>,
-            A =&gt; <span class="number">0b10</span>,
-            Y =&gt; <span class="number">0b100</span>,
-            M =&gt; <span class="number">0b1000</span>,
-            T =&gt; <span class="number">0b10000</span>,
-            H =&gt; <span class="number">0b100000</span>,
-        };
+        <span class="kw">let </span>bit = <span class="number">1 </span>&lt;&lt; dove_to_index(dove);
         <span class="self">self</span>.hash &amp; bit != <span class="number">0
     </span>}
 }
@@ -385,25 +370,24 @@
 <span class="kw">impl </span>Iterator <span class="kw">for </span>DoveSetIntoIter {
     <span class="kw">type </span>Item = Dove;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">if </span><span class="self">self</span>.cursor &gt; (<span class="number">1 </span>&lt;&lt; <span class="number">5</span>) {
+        <span class="kw">if </span><span class="self">self</span>.cursor.trailing_zeros() &gt;= <span class="number">6 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
-        <span class="kw">use </span>Dove::<span class="kw-2">*</span>;
-        <span class="kw">let </span>dove = <span class="kw">match </span><span class="self">self</span>.dove_set.hash &amp; <span class="self">self</span>.cursor {
-            <span class="number">0b0 </span>=&gt; {
+        <span class="kw">match </span>(<span class="self">self</span>.dove_set.hash &amp; <span class="self">self</span>.cursor).trailing_zeros() {
+            idx @ <span class="number">0</span>..=<span class="number">5 </span>=&gt; {
+                <span class="kw">let </span>ret = try_index_to_dove(idx <span class="kw">as </span>usize);
+                <span class="self">self</span>.cursor &lt;&lt;= <span class="number">1</span>;
+                <span class="kw">if </span>ret.is_none() {
+                    <span class="macro">unreachable!</span>();
+                }
+                ret
+            }
+            <span class="number">8 </span>=&gt; {
                 <span class="self">self</span>.cursor &lt;&lt;= <span class="number">1</span>;
                 <span class="kw">return </span><span class="self">self</span>.next();
             }
-            <span class="number">0b1 </span>=&gt; B,
-            <span class="number">0b10 </span>=&gt; A,
-            <span class="number">0b100 </span>=&gt; Y,
-            <span class="number">0b1000 </span>=&gt; M,
-            <span class="number">0b10000 </span>=&gt; T,
-            <span class="number">0b100000 </span>=&gt; H,
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
-        };
-        <span class="self">self</span>.cursor &lt;&lt;= <span class="number">1</span>;
-        <span class="prelude-val">Some</span>(dove)
+        }
     }
 }
 </code></pre></div></section></main></body></html>
