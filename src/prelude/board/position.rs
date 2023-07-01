@@ -41,7 +41,7 @@ impl DovePositions {
             .positions
             .into_iter()
             .enumerate()
-            .fold(0, |cum, (i, x)| if x == 0 { cum | (1 << i) } else { cum });
+            .fold(0, |cum, (i, x)| cum | (((x == 0) as u8) << i));
         DoveSet { hash }
     }
 
@@ -50,7 +50,7 @@ impl DovePositions {
             .positions
             .into_iter()
             .enumerate()
-            .fold(0, |cum, (i, x)| if x != 0 { cum | (1 << i) } else { cum });
+            .fold(0, |cum, (i, x)| cum | (((x != 0) as u8) << i));
         DoveSet { hash }
     }
 }

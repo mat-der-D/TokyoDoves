@@ -1,5 +1,6 @@
 //! Container structs of some objects
 
+use crate::prelude::pieces::{dove_to_index, try_index_to_dove};
 use crate::prelude::{Action, Dove};
 
 // *******************************************************************
@@ -142,15 +143,7 @@ impl DoveSet {
 
     /// Returns `true` if it contains the specified [`Dove`].
     pub fn contains(&self, dove: Dove) -> bool {
-        use Dove::*;
-        let bit = match dove {
-            B => 0b1,
-            A => 0b10,
-            Y => 0b100,
-            M => 0b1000,
-            T => 0b10000,
-            H => 0b100000,
-        };
+        let bit = 1 << dove_to_index(dove);
         self.hash & bit != 0
     }
 }
@@ -181,24 +174,23 @@ impl DoveSetIntoIter {
 impl Iterator for DoveSetIntoIter {
     type Item = Dove;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.cursor > (1 << 5) {
+        if self.cursor.trailing_zeros() >= 6 {
             return None;
         }
-        use Dove::*;
-        let dove = match self.dove_set.hash & self.cursor {
-            0b0 => {
+        match (self.dove_set.hash & self.cursor).trailing_zeros() {
+            idx @ 0..=5 => {
+                let ret = try_index_to_dove(idx as usize);
+                self.cursor <<= 1;
+                if ret.is_none() {
+                    unreachable!();
+                }
+                ret
+            }
+            8 => {
                 self.cursor <<= 1;
                 return self.next();
             }
-            0b1 => B,
-            0b10 => A,
-            0b100 => Y,
-            0b1000 => M,
-            0b10000 => T,
-            0b100000 => H,
             _ => unreachable!(),
-        };
-        self.cursor <<= 1;
-        Some(dove)
+        }
     }
 }
