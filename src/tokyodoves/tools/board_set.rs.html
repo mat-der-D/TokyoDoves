@@ -554,6 +554,26 @@
 <a href="#554" id="554">554</a>
 <a href="#555" id="555">555</a>
 <a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, BoardBuilder};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};
 
@@ -561,24 +581,19 @@
     BoardBuilder::from(hash).build_unchecked()
 }
 
-<span class="attr">#[derive(Debug, Clone, Default)]
+<span class="comment">// ********************************************************************
+//  BoardSet
+// ********************************************************************
+</span><span class="attr">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub struct </span>BoardSet {
-    top2bottoms: HashMap&lt;u32, HashSet&lt;u32&gt;&gt;,
-}
-
-<span class="kw">impl </span>FromIterator&lt;u64&gt; <span class="kw">for </span>BoardSet {
-    <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = u64&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>set = <span class="self">Self</span>::new();
-        <span class="kw">for </span>item <span class="kw">in </span>iter {
-            set.insert_u64(item);
-        }
-        set
-    }
+    raw: RawBoardSet,
 }
 
 <span class="kw">impl </span>FromIterator&lt;Board&gt; <span class="kw">for </span>BoardSet {
     <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = Board&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>::from_iter(iter.into_iter().map(|b| b.to_u64()))
+        <span class="self">Self </span>{
+            raw: iter.into_iter().map(|b| b.to_u64()).collect(),
+        }
     }
 }
 
@@ -586,12 +601,193 @@
     <span class="kw">type </span>Item = Board;
     <span class="kw">type </span>IntoIter = IntoIter;
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
-        <span class="self">Self</span>::IntoIter::new(<span class="self">self</span>)
+        IntoIter(RawIntoIter::new(<span class="self">self</span>.raw))
     }
 }
 
 <span class="kw">impl </span>BoardSet {
-    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::default()
+    }
+
+    <span class="kw">pub fn </span>raw(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>RawBoardSet {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.raw
+    }
+
+    <span class="kw">pub fn </span>raw_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>RawBoardSet {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.raw
+    }
+
+    <span class="kw">pub fn </span>into_raw(<span class="self">self</span>) -&gt; RawBoardSet {
+        <span class="self">self</span>.raw
+    }
+
+    <span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter {
+        Iter(RawIter::new(<span class="kw-2">&amp;</span><span class="self">self</span>.raw))
+    }
+
+    <span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.raw.len()
+    }
+
+    <span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.raw.is_empty()
+    }
+
+    <span class="kw">pub fn </span>drain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Drain {
+        Drain(RawDrain::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.raw))
+    }
+
+    <span class="kw">pub fn </span>retain&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
+    <span class="kw">where
+        </span>F: FnMut(<span class="kw-2">&amp;</span>Board) -&gt; bool,
+    {
+        <span class="self">self</span>.raw.retain(|<span class="kw-2">&amp;</span>h| f(<span class="kw-2">&amp;</span>u64_to_board(h)))
+    }
+
+    <span class="kw">pub fn </span>clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.raw.clear()
+    }
+
+    <span class="kw">pub fn </span>difference&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; Difference&lt;<span class="lifetime">&#39;a</span>&gt; {
+        Difference(RawDifference::new(<span class="kw-2">&amp;</span><span class="self">self</span>.raw, <span class="kw-2">&amp;</span>other.raw))
+    }
+
+    <span class="kw">pub fn </span>symmetric_difference&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; SymmetricDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
+        SymmetricDifference(RawSymmetricDifference::new(<span class="kw-2">&amp;</span><span class="self">self</span>.raw, <span class="kw-2">&amp;</span>other.raw))
+    }
+
+    <span class="kw">pub fn </span>intersection&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; Intersection&lt;<span class="lifetime">&#39;a</span>&gt; {
+        Intersection(RawIntersection::new(<span class="kw-2">&amp;</span><span class="self">self</span>.raw, <span class="kw-2">&amp;</span>other.raw))
+    }
+
+    <span class="kw">pub fn </span>union&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; Union&lt;<span class="lifetime">&#39;a</span>&gt; {
+        Union(RawUnion::new(<span class="kw-2">&amp;</span><span class="self">self</span>.raw, <span class="kw-2">&amp;</span>other.raw))
+    }
+
+    <span class="kw">pub fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, board: <span class="kw-2">&amp;</span>Board) -&gt; bool {
+        <span class="self">self</span>.raw.contains(<span class="kw-2">&amp;</span>board.to_u64())
+    }
+
+    <span class="kw">pub fn </span>is_disjoint(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>BoardSet) -&gt; bool {
+        <span class="self">self</span>.raw.is_disjoint(<span class="kw-2">&amp;</span>other.raw)
+    }
+
+    <span class="kw">pub fn </span>is_subset(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>BoardSet) -&gt; bool {
+        <span class="self">self</span>.raw.is_subset(<span class="kw-2">&amp;</span>other.raw)
+    }
+
+    <span class="kw">pub fn </span>is_superset(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>BoardSet) -&gt; bool {
+        <span class="self">self</span>.raw.is_superset(<span class="kw-2">&amp;</span>other.raw)
+    }
+
+    <span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, board: Board) {
+        <span class="self">self</span>.raw.insert(board.to_u64())
+    }
+
+    <span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, board: <span class="kw-2">&amp;</span>Board) -&gt; bool {
+        <span class="self">self</span>.raw.remove(<span class="kw-2">&amp;</span>board.to_u64())
+    }
+
+    <span class="kw">pub fn </span>take(<span class="kw-2">&amp;mut </span><span class="self">self</span>, board: <span class="kw-2">&amp;</span>Board) -&gt; <span class="prelude-ty">Option</span>&lt;Board&gt; {
+        <span class="self">self</span>.raw.take(<span class="kw-2">&amp;</span>board.to_u64()).map(u64_to_board)
+    }
+}
+
+<span class="kw">impl </span>std::ops::BitAnd&lt;<span class="kw-2">&amp;</span>BoardSet&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>BoardSet {
+    <span class="kw">type </span>Output = BoardSet;
+    <span class="kw">fn </span>bitand(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>BoardSet) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">Self</span>::Output {
+            raw: <span class="self">self</span>.raw.bitand(<span class="kw-2">&amp;</span>rhs.raw),
+        }
+    }
+}
+
+<span class="kw">impl </span>std::ops::BitOr&lt;<span class="kw-2">&amp;</span>BoardSet&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>BoardSet {
+    <span class="kw">type </span>Output = BoardSet;
+    <span class="kw">fn </span>bitor(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>BoardSet) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">Self</span>::Output {
+            raw: <span class="self">self</span>.raw.bitor(<span class="kw-2">&amp;</span>rhs.raw),
+        }
+    }
+}
+
+<span class="kw">impl </span>std::ops::BitXor&lt;<span class="kw-2">&amp;</span>BoardSet&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>BoardSet {
+    <span class="kw">type </span>Output = BoardSet;
+    <span class="kw">fn </span>bitxor(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>BoardSet) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">Self</span>::Output {
+            raw: <span class="self">self</span>.raw.bitxor(<span class="kw-2">&amp;</span>rhs.raw),
+        }
+    }
+}
+
+<span class="macro">macro_rules! </span>impl_iterators {
+    ({<span class="macro-nonterminal">$iter</span>:ident =&gt; <span class="macro-nonterminal">$raw</span>:ident}) =&gt; {
+        <span class="kw">pub struct </span><span class="macro-nonterminal">$iter</span>(<span class="macro-nonterminal">$raw</span>);
+
+        <span class="kw">impl </span>Iterator <span class="kw">for </span><span class="macro-nonterminal">$iter </span>{
+            <span class="kw">type </span>Item = Board;
+            <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+                <span class="self">self</span>.<span class="number">0</span>.next().map(u64_to_board)
+            }
+        }
+    };
+
+    (&lt;<span class="macro-nonterminal">$iter</span>:ident =&gt; <span class="macro-nonterminal">$raw</span>:ident&gt;) =&gt; {
+        <span class="kw">pub struct </span><span class="macro-nonterminal">$iter</span>&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="macro-nonterminal">$raw</span>&lt;<span class="lifetime">&#39;a</span>&gt;);
+
+        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span><span class="macro-nonterminal">$iter</span>&lt;<span class="lifetime">&#39;a</span>&gt; {
+            <span class="kw">type </span>Item = Board;
+            <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+                <span class="self">self</span>.<span class="number">0</span>.next().map(u64_to_board)
+            }
+        }
+    };
+
+    ($({<span class="macro-nonterminal">$iters1</span>:ident =&gt; <span class="macro-nonterminal">$raws1</span>:ident})* $(&lt;<span class="macro-nonterminal">$iters2</span>:ident =&gt; <span class="macro-nonterminal">$raws2</span>:ident&gt;)<span class="kw-2">*</span>) =&gt; {
+        $(<span class="macro">impl_iterators!</span>({<span class="macro-nonterminal">$iters1 </span>=&gt; <span class="macro-nonterminal">$raws1</span>});)*
+        $(<span class="macro">impl_iterators!</span>(&lt;<span class="macro-nonterminal">$iters2 </span>=&gt; <span class="macro-nonterminal">$raws2</span>&gt;);)*
+    };
+}
+
+<span class="macro">impl_iterators!</span>(
+    { IntoIter =&gt; RawIntoIter }
+    { Drain =&gt; RawDrain }
+    &lt; Iter =&gt; RawIter &gt;
+    &lt; Difference =&gt; RawDifference &gt;
+    &lt; SymmetricDifference =&gt; RawSymmetricDifference &gt;
+    &lt; Intersection =&gt; RawIntersection &gt;
+    &lt; Union =&gt; RawUnion &gt;
+);
+
+<span class="comment">// ********************************************************************
+//  BoardSet
+// ********************************************************************
+</span><span class="attr">#[derive(Debug, Clone, Default)]
+</span><span class="kw">pub struct </span>RawBoardSet {
+    top2bottoms: HashMap&lt;u32, HashSet&lt;u32&gt;&gt;,
+}
+
+<span class="kw">impl </span>FromIterator&lt;u64&gt; <span class="kw">for </span>RawBoardSet {
+    <span class="kw">fn </span>from_iter&lt;T: IntoIterator&lt;Item = u64&gt;&gt;(iter: T) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>set = <span class="self">Self</span>::new();
+        <span class="kw">for </span>item <span class="kw">in </span>iter {
+            set.insert(item);
+        }
+        set
+    }
+}
+
+<span class="kw">impl </span>IntoIterator <span class="kw">for </span>RawBoardSet {
+    <span class="kw">type </span>Item = u64;
+    <span class="kw">type </span>IntoIter = RawIntoIter;
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
+        <span class="self">Self</span>::IntoIter::new(<span class="self">self</span>)
+    }
+}
+
+<span class="kw">impl </span>RawBoardSet {
+    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::default()
     }
 
@@ -599,16 +795,8 @@
         <span class="self">self</span>.top2bottoms.retain(|<span class="kw">_</span>, v| !v.is_empty());
     }
 
-    <span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter {
-        Iter::new(<span class="self">self</span>)
-    }
-
-    <span class="kw">pub fn </span>iter_u64(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; IterU64 {
-        IterU64::new(<span class="self">self</span>)
-    }
-
-    <span class="kw">pub fn </span>into_iter_u64(<span class="self">self</span>) -&gt; IntoIterU64 {
-        IntoIterU64::new(<span class="self">self</span>)
+    <span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawIter {
+        RawIter::new(<span class="self">self</span>)
     }
 
     <span class="kw">fn </span>u64_to_u32_u32(n: u64) -&gt; (u32, u32) {
@@ -627,28 +815,17 @@
         <span class="self">self</span>.top2bottoms.values().all(|s| s.is_empty())
     }
 
-    <span class="kw">pub fn </span>drain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Drain {
-        Drain::new(<span class="self">self</span>)
-    }
-
-    <span class="kw">pub fn </span>drain_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; DrainU64 {
-        DrainU64::new(<span class="self">self</span>)
+    <span class="kw">pub fn </span>drain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; RawDrain {
+        RawDrain::new(<span class="self">self</span>)
     }
 
     <span class="kw">pub fn </span>retain&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
-    <span class="kw">where
-        </span>F: FnMut(<span class="kw-2">&amp;</span>Board) -&gt; bool,
-    {
-        <span class="self">self</span>.retain_u64(|<span class="kw-2">&amp;</span>h| f(<span class="kw-2">&amp;</span>u64_to_board(h)))
-    }
-
-    <span class="kw">pub fn </span>retain_u64&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
     <span class="kw">where
         </span>F: FnMut(<span class="kw-2">&amp;</span>u64) -&gt; bool,
     {
         <span class="kw">for </span>(<span class="kw-2">&amp;</span>top, bottoms) <span class="kw">in </span><span class="self">self</span>.top2bottoms.iter_mut() {
             bottoms.retain(|<span class="kw-2">&amp;</span>b| {
-                <span class="kw">let </span>hash = BoardSet::u32_u32_to_u64(top, b);
+                <span class="kw">let </span>hash = RawBoardSet::u32_u32_to_u64(top, b);
                 f(<span class="kw-2">&amp;</span>hash)
             });
         }
@@ -659,75 +836,51 @@
         <span class="self">self</span>.top2bottoms.clear()
     }
 
-    <span class="kw">pub fn </span>difference&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; Difference&lt;<span class="lifetime">&#39;a</span>&gt; {
-        Difference::new(<span class="self">self</span>, other)
+    <span class="kw">pub fn </span>difference&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet) -&gt; RawDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
+        RawDifference::new(<span class="self">self</span>, other)
     }
 
-    <span class="kw">pub fn </span>difference_u64&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; DifferenceU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-        DifferenceU64::new(<span class="self">self</span>, other)
-    }
-
-    <span class="kw">pub fn </span>symmetric_difference&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; SymmetricDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
-        SymmetricDifference::new(<span class="self">self</span>, other)
-    }
-
-    <span class="kw">pub fn </span>symmetric_difference_u64&lt;<span class="lifetime">&#39;a</span>&gt;(
+    <span class="kw">pub fn </span>symmetric_difference&lt;<span class="lifetime">&#39;a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
-        other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet,
-    ) -&gt; SymmetricDifferenceU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-        SymmetricDifferenceU64::new(<span class="self">self</span>, other)
+        other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet,
+    ) -&gt; RawSymmetricDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
+        RawSymmetricDifference::new(<span class="self">self</span>, other)
     }
 
-    <span class="kw">pub fn </span>intersection&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; Intersection&lt;<span class="lifetime">&#39;a</span>&gt; {
-        Intersection::new(<span class="self">self</span>, other)
+    <span class="kw">pub fn </span>intersection&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet) -&gt; RawIntersection&lt;<span class="lifetime">&#39;a</span>&gt; {
+        RawIntersection::new(<span class="self">self</span>, other)
     }
 
-    <span class="kw">pub fn </span>intersection_u64&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; IntersectionU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-        IntersectionU64::new(<span class="self">self</span>, other)
+    <span class="kw">pub fn </span>union&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet) -&gt; RawUnion&lt;<span class="lifetime">&#39;a</span>&gt; {
+        RawUnion::new(<span class="self">self</span>, other)
     }
 
-    <span class="kw">pub fn </span>union&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; Union&lt;<span class="lifetime">&#39;a</span>&gt; {
-        Union::new(<span class="self">self</span>, other)
-    }
-
-    <span class="kw">pub fn </span>union_u64&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; UnionU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-        UnionU64::new(<span class="self">self</span>, other)
-    }
-
-    <span class="kw">pub fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, board: <span class="kw-2">&amp;</span>Board) -&gt; bool {
-        <span class="self">self</span>.contains_u64(<span class="kw-2">&amp;</span>board.to_u64())
-    }
-
-    <span class="kw">pub fn </span>contains_u64(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: <span class="kw-2">&amp;</span>u64) -&gt; bool {
+    <span class="kw">pub fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: <span class="kw-2">&amp;</span>u64) -&gt; bool {
         <span class="kw">let </span>(k, v) = <span class="self">Self</span>::u64_to_u32_u32(<span class="kw-2">*</span>hash);
         <span class="self">self</span>.top2bottoms.get(<span class="kw-2">&amp;</span>k).map_or(<span class="bool-val">false</span>, |x| x.contains(<span class="kw-2">&amp;</span>v))
     }
 
-    <span class="kw">pub fn </span>is_disjoint(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>BoardSet) -&gt; bool {
+    <span class="kw">pub fn </span>is_disjoint(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>RawBoardSet) -&gt; bool {
         <span class="kw">if </span><span class="self">self</span>.len() &lt;= other.len() {
-            <span class="self">self</span>.iter_u64().all(|v| !other.contains_u64(<span class="kw-2">&amp;</span>v))
+            <span class="self">self</span>.iter().all(|v| !other.contains(<span class="kw-2">&amp;</span>v))
         } <span class="kw">else </span>{
-            other.iter_u64().all(|v| !<span class="self">self</span>.contains_u64(<span class="kw-2">&amp;</span>v))
+            other.iter().all(|v| !<span class="self">self</span>.contains(<span class="kw-2">&amp;</span>v))
         }
     }
 
-    <span class="kw">pub fn </span>is_subset(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>BoardSet) -&gt; bool {
+    <span class="kw">pub fn </span>is_subset(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>RawBoardSet) -&gt; bool {
         <span class="kw">if </span><span class="self">self</span>.len() &lt;= other.len() {
-            <span class="self">self</span>.iter_u64().all(|v| other.contains_u64(<span class="kw-2">&amp;</span>v))
+            <span class="self">self</span>.iter().all(|v| other.contains(<span class="kw-2">&amp;</span>v))
         } <span class="kw">else </span>{
             <span class="bool-val">false
         </span>}
     }
 
-    <span class="kw">pub fn </span>is_superset(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>BoardSet) -&gt; bool {
+    <span class="kw">pub fn </span>is_superset(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>RawBoardSet) -&gt; bool {
         other.is_subset(<span class="self">self</span>)
     }
 
-    <span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, board: Board) {
-        <span class="self">self</span>.insert_u64(board.to_u64())
-    }
-
-    <span class="kw">pub fn </span>insert_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hash: u64) {
+    <span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hash: u64) {
         <span class="kw">let </span>(k, v) = <span class="self">Self</span>::u64_to_u32_u32(hash);
         <span class="self">self</span>.top2bottoms
             .entry(k)
@@ -735,11 +888,7 @@
             .insert(v);
     }
 
-    <span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, board: <span class="kw-2">&amp;</span>Board) -&gt; bool {
-        <span class="self">self</span>.remove_u64(<span class="kw-2">&amp;</span>board.to_u64())
-    }
-
-    <span class="kw">pub fn </span>remove_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hash: <span class="kw-2">&amp;</span>u64) -&gt; bool {
+    <span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hash: <span class="kw-2">&amp;</span>u64) -&gt; bool {
         <span class="kw">let </span>(k, v) = <span class="self">Self</span>::u64_to_u32_u32(<span class="kw-2">*</span>hash);
         <span class="kw">let </span><span class="prelude-val">Some</span>(set) = <span class="self">self</span>.top2bottoms.get_mut(<span class="kw-2">&amp;</span>k) <span class="kw">else </span>{
             <span class="kw">return </span><span class="bool-val">false</span>;
@@ -751,11 +900,7 @@
         removed
     }
 
-    <span class="kw">pub fn </span>take(<span class="kw-2">&amp;mut </span><span class="self">self</span>, board: <span class="kw-2">&amp;</span>Board) -&gt; <span class="prelude-ty">Option</span>&lt;Board&gt; {
-        <span class="self">self</span>.take_u64(<span class="kw-2">&amp;</span>board.to_u64()).map(u64_to_board)
-    }
-
-    <span class="kw">pub fn </span>take_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hash: <span class="kw-2">&amp;</span>u64) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
+    <span class="kw">pub fn </span>take(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hash: <span class="kw-2">&amp;</span>u64) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
         <span class="kw">let </span>(k, v) = <span class="self">Self</span>::u64_to_u32_u32(<span class="kw-2">*</span>hash);
         <span class="kw">let </span>set = <span class="self">self</span>.top2bottoms.get_mut(<span class="kw-2">&amp;</span>k)<span class="question-mark">?</span>;
         <span class="kw">let </span>taken = set.take(<span class="kw-2">&amp;</span>v).map(|bottom| <span class="self">Self</span>::u32_u32_to_u64(k, bottom));
@@ -766,24 +911,24 @@
     }
 }
 
-<span class="kw">impl </span>std::ops::BitAnd&lt;<span class="kw-2">&amp;</span>BoardSet&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>BoardSet {
-    <span class="kw">type </span>Output = BoardSet;
-    <span class="kw">fn </span>bitand(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>BoardSet) -&gt; <span class="self">Self</span>::Output {
-        <span class="self">self</span>.intersection_u64(rhs).collect()
+<span class="kw">impl </span>std::ops::BitAnd&lt;<span class="kw-2">&amp;</span>RawBoardSet&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>RawBoardSet {
+    <span class="kw">type </span>Output = RawBoardSet;
+    <span class="kw">fn </span>bitand(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>RawBoardSet) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">self</span>.intersection(rhs).collect()
     }
 }
 
-<span class="kw">impl </span>std::ops::BitOr&lt;<span class="kw-2">&amp;</span>BoardSet&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>BoardSet {
-    <span class="kw">type </span>Output = BoardSet;
-    <span class="kw">fn </span>bitor(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>BoardSet) -&gt; <span class="self">Self</span>::Output {
-        <span class="self">self</span>.union_u64(rhs).collect()
+<span class="kw">impl </span>std::ops::BitOr&lt;<span class="kw-2">&amp;</span>RawBoardSet&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>RawBoardSet {
+    <span class="kw">type </span>Output = RawBoardSet;
+    <span class="kw">fn </span>bitor(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>RawBoardSet) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">self</span>.union(rhs).collect()
     }
 }
 
-<span class="kw">impl </span>std::ops::BitXor&lt;<span class="kw-2">&amp;</span>BoardSet&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>BoardSet {
-    <span class="kw">type </span>Output = BoardSet;
-    <span class="kw">fn </span>bitxor(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>BoardSet) -&gt; <span class="self">Self</span>::Output {
-        <span class="self">self</span>.symmetric_difference_u64(rhs).collect()
+<span class="kw">impl </span>std::ops::BitXor&lt;<span class="kw-2">&amp;</span>RawBoardSet&gt; <span class="kw">for </span><span class="kw-2">&amp;</span>RawBoardSet {
+    <span class="kw">type </span>Output = RawBoardSet;
+    <span class="kw">fn </span>bitxor(<span class="self">self</span>, rhs: <span class="kw-2">&amp;</span>RawBoardSet) -&gt; <span class="self">Self</span>::Output {
+        <span class="self">self</span>.symmetric_difference(rhs).collect()
     }
 }
 
@@ -793,8 +938,8 @@
 </span><span class="kw">type </span>MapIter&lt;<span class="lifetime">&#39;a</span>&gt; = std::collections::hash_map::Iter&lt;<span class="lifetime">&#39;a</span>, u32, HashSet&lt;u32&gt;&gt;;
 <span class="kw">type </span>SetIter&lt;<span class="lifetime">&#39;a</span>&gt; = std::collections::hash_set::Iter&lt;<span class="lifetime">&#39;a</span>, u32&gt;;
 
-<span class="kw">pub struct </span>IterU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-    set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet,
+<span class="kw">pub struct </span>RawIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet,
     state: <span class="prelude-ty">Option</span>&lt;(
         MapIter&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="comment">// iterator of top2bottoms
         </span>u32,         <span class="comment">// key of top2bottoms
@@ -802,13 +947,13 @@
     </span>)&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IterU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RawIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>new(set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ set, state: <span class="prelude-val">None </span>}
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>IterU64&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawIter&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">let </span><span class="prelude-val">Some</span>((map_iter, top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
@@ -824,30 +969,15 @@
             <span class="kw-2">*</span>set_iter = next_set.iter();
             <span class="kw">return </span><span class="self">self</span>.next();
         };
-        <span class="prelude-val">Some</span>(BoardSet::u32_u32_to_u64(<span class="kw-2">*</span>top, <span class="kw-2">*</span>bottom))
-    }
-}
-
-<span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>&gt;(IterU64&lt;<span class="lifetime">&#39;a</span>&gt;);
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(IterU64::new(set))
-    }
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Board;
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.next().map(u64_to_board)
+        <span class="prelude-val">Some</span>(RawBoardSet::u32_u32_to_u64(<span class="kw-2">*</span>top, <span class="kw-2">*</span>bottom))
     }
 }
 
 <span class="kw">type </span>MapIntoIter = std::collections::hash_map::IntoIter&lt;u32, HashSet&lt;u32&gt;&gt;;
 <span class="kw">type </span>SetIntoIter = std::collections::hash_set::IntoIter&lt;u32&gt;;
 
-<span class="kw">pub struct </span>IntoIterU64 {
-    set: <span class="prelude-ty">Option</span>&lt;BoardSet&gt;,
+<span class="kw">pub struct </span>RawIntoIter {
+    set: <span class="prelude-ty">Option</span>&lt;RawBoardSet&gt;,
     state: <span class="prelude-ty">Option</span>&lt;(
         MapIntoIter, <span class="comment">// iterator of set.top2bottoms
         </span>u32,         <span class="comment">// key of set.top2bottoms
@@ -855,8 +985,8 @@
     </span>)&gt;,
 }
 
-<span class="kw">impl </span>IntoIterU64 {
-    <span class="kw">fn </span>new(set: BoardSet) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>RawIntoIter {
+    <span class="kw">fn </span>new(set: RawBoardSet) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             set: <span class="prelude-val">Some</span>(set),
             state: <span class="prelude-val">None</span>,
@@ -864,7 +994,7 @@
     }
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>IntoIterU64 {
+<span class="kw">impl </span>Iterator <span class="kw">for </span>RawIntoIter {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">let </span><span class="prelude-val">Some</span>((map_iter, top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
@@ -881,75 +1011,45 @@
             <span class="kw-2">*</span>set_iter = next_set.into_iter();
             <span class="kw">return </span><span class="self">self</span>.next();
         };
-        <span class="prelude-val">Some</span>(BoardSet::u32_u32_to_u64(<span class="kw-2">*</span>top, bottom))
+        <span class="prelude-val">Some</span>(RawBoardSet::u32_u32_to_u64(<span class="kw-2">*</span>top, bottom))
     }
 }
 
-<span class="kw">pub struct </span>IntoIter(IntoIterU64);
+<span class="kw">pub struct </span>RawDrain(RawIntoIter);
 
-<span class="kw">impl </span>IntoIter {
-    <span class="kw">fn </span>new(set: BoardSet) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(IntoIterU64::new(set))
+<span class="kw">impl </span>RawDrain {
+    <span class="kw">fn </span>new(set: <span class="kw-2">&amp;mut </span>RawBoardSet) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>original = std::mem::replace(set, RawBoardSet::new());
+        <span class="self">Self</span>(original.into_iter())
     }
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>IntoIter {
-    <span class="kw">type </span>Item = Board;
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.next().map(u64_to_board)
-    }
-}
-
-<span class="kw">pub struct </span>DrainU64(IntoIterU64);
-
-<span class="kw">impl </span>DrainU64 {
-    <span class="kw">fn </span>new(set: <span class="kw-2">&amp;mut </span>BoardSet) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>original = std::mem::replace(set, BoardSet::new());
-        <span class="self">Self</span>(original.into_iter_u64())
-    }
-}
-
-<span class="kw">impl </span>Iterator <span class="kw">for </span>DrainU64 {
+<span class="kw">impl </span>Iterator <span class="kw">for </span>RawDrain {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.<span class="number">0</span>.next()
     }
 }
 
-<span class="kw">pub struct </span>Drain(DrainU64);
-
-<span class="kw">impl </span>Drain {
-    <span class="kw">fn </span>new(set: <span class="kw-2">&amp;mut </span>BoardSet) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(DrainU64::new(set))
-    }
+<span class="kw">pub struct </span>RawDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
+    left: RawIter&lt;<span class="lifetime">&#39;a</span>&gt;,
+    right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet,
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>Drain {
-    <span class="kw">type </span>Item = Board;
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.next().map(u64_to_board)
-    }
-}
-
-<span class="kw">pub struct </span>DifferenceU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-    left: IterU64&lt;<span class="lifetime">&#39;a</span>&gt;,
-    right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet,
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; DifferenceU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RawDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            left: left.iter_u64(),
+            left: left.iter(),
             right,
         }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>DifferenceU64&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">let </span>item = <span class="self">self</span>.left.next()<span class="question-mark">?</span>;
-        <span class="kw">if </span><span class="self">self</span>.right.contains_u64(<span class="kw-2">&amp;</span>item) {
+        <span class="kw">if </span><span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item) {
             <span class="self">self</span>.next()
         } <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(item)
@@ -957,51 +1057,36 @@
     }
 }
 
-<span class="kw">pub struct </span>Difference&lt;<span class="lifetime">&#39;a</span>&gt;(DifferenceU64&lt;<span class="lifetime">&#39;a</span>&gt;);
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Difference&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(DifferenceU64::new(left, right))
-    }
+<span class="kw">pub struct </span>RawSymmetricDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
+    left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet,
+    left_iter: RawIter&lt;<span class="lifetime">&#39;a</span>&gt;,
+    right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet,
+    right_iter: RawIter&lt;<span class="lifetime">&#39;a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Difference&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Board;
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.next().map(u64_to_board)
-    }
-}
-
-<span class="kw">pub struct </span>SymmetricDifferenceU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-    left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet,
-    left_iter: IterU64&lt;<span class="lifetime">&#39;a</span>&gt;,
-    right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet,
-    right_iter: IterU64&lt;<span class="lifetime">&#39;a</span>&gt;,
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SymmetricDifferenceU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RawSymmetricDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             left,
-            left_iter: left.iter_u64(),
+            left_iter: left.iter(),
             right,
-            right_iter: right.iter_u64(),
+            right_iter: right.iter(),
         }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>SymmetricDifferenceU64&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawSymmetricDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(item_left) = <span class="self">self</span>.left_iter.next() {
-            <span class="kw">if </span><span class="self">self</span>.right.contains_u64(<span class="kw-2">&amp;</span>item_left) {
+            <span class="kw">if </span><span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item_left) {
                 <span class="self">self</span>.next()
             } <span class="kw">else </span>{
                 <span class="prelude-val">Some</span>(item_left)
             }
         } <span class="kw">else </span>{
             <span class="kw">let </span>item_right = <span class="self">self</span>.right_iter.next()<span class="question-mark">?</span>;
-            <span class="kw">if </span><span class="self">self</span>.left.contains_u64(<span class="kw-2">&amp;</span>item_right) {
+            <span class="kw">if </span><span class="self">self</span>.left.contains(<span class="kw-2">&amp;</span>item_right) {
                 <span class="self">self</span>.next()
             } <span class="kw">else </span>{
                 <span class="prelude-val">Some</span>(item_right)
@@ -1010,40 +1095,25 @@
     }
 }
 
-<span class="kw">pub struct </span>SymmetricDifference&lt;<span class="lifetime">&#39;a</span>&gt;(SymmetricDifferenceU64&lt;<span class="lifetime">&#39;a</span>&gt;);
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SymmetricDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(SymmetricDifferenceU64::new(left, right))
-    }
+<span class="kw">pub struct </span>RawIntersection&lt;<span class="lifetime">&#39;a</span>&gt; {
+    left_iter: RawIter&lt;<span class="lifetime">&#39;a</span>&gt;,
+    right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>SymmetricDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Board;
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.next().map(u64_to_board)
-    }
-}
-
-<span class="kw">pub struct </span>IntersectionU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-    left_iter: IterU64&lt;<span class="lifetime">&#39;a</span>&gt;,
-    right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet,
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntersectionU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RawIntersection&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            left_iter: left.iter_u64(),
+            left_iter: left.iter(),
             right,
         }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>IntersectionU64&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawIntersection&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">let </span>item = <span class="self">self</span>.left_iter.next()<span class="question-mark">?</span>;
-        <span class="kw">if </span><span class="self">self</span>.right.contains_u64(<span class="kw-2">&amp;</span>item) {
+        <span class="kw">if </span><span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item) {
             <span class="prelude-val">Some</span>(item)
         } <span class="kw">else </span>{
             <span class="self">self</span>.next()
@@ -1051,63 +1121,33 @@
     }
 }
 
-<span class="kw">pub struct </span>Intersection&lt;<span class="lifetime">&#39;a</span>&gt;(IntersectionU64&lt;<span class="lifetime">&#39;a</span>&gt;);
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Intersection&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(IntersectionU64::new(left, right))
-    }
+<span class="kw">pub struct </span>RawUnion&lt;<span class="lifetime">&#39;a</span>&gt; {
+    left_iter: RawIter&lt;<span class="lifetime">&#39;a</span>&gt;,
+    right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet,
+    right_iter: RawIter&lt;<span class="lifetime">&#39;a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Intersection&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Board;
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.next().map(u64_to_board)
-    }
-}
-
-<span class="kw">pub struct </span>UnionU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-    left_iter: IterU64&lt;<span class="lifetime">&#39;a</span>&gt;,
-    right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet,
-    right_iter: IterU64&lt;<span class="lifetime">&#39;a</span>&gt;,
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; UnionU64&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RawUnion&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            left_iter: left.iter_u64(),
+            left_iter: left.iter(),
             right,
-            right_iter: right.iter_u64(),
+            right_iter: right.iter(),
         }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>UnionU64&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawUnion&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">let </span><span class="prelude-val">Some</span>(item) = <span class="self">self</span>.left_iter.next() <span class="kw">else </span>{
             <span class="kw">return </span><span class="self">self</span>.right_iter.next();
         };
-        <span class="kw">if </span><span class="self">self</span>.right.contains_u64(<span class="kw-2">&amp;</span>item) {
+        <span class="kw">if </span><span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item) {
             <span class="self">self</span>.next()
         } <span class="kw">else </span>{
             <span class="prelude-val">Some</span>(item)
         }
-    }
-}
-
-<span class="kw">pub struct </span>Union&lt;<span class="lifetime">&#39;a</span>&gt;(UnionU64&lt;<span class="lifetime">&#39;a</span>&gt;);
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Union&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(left: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet, right: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardSet) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(UnionU64::new(left, right))
-    }
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Union&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = Board;
-    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.next().map(u64_to_board)
     }
 }
 </code></pre></div></section></main></body></html>
