@@ -1074,7 +1074,7 @@ impl Board {
             let line_str: String = line
                 .into_iter()
                 .map(|x| match x {
-                    Some((c, d)) => format!("| {:?} ", color_dove_to_char(c, d)),
+                    Some((c, d)) => format!("| {} ", color_dove_to_char(c, d)),
                     None => "|   ".to_string(),
                 })
                 .collect();

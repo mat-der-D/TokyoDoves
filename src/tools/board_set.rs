@@ -28,13 +28,8 @@ impl BoardSet {
         Self::default()
     }
 
-    pub fn trim(&mut self) {
-        let keys: HashSet<u32> = self.top2bottoms.keys().cloned().collect();
-        for key in keys.iter() {
-            if self.top2bottoms[key].is_empty() {
-                self.top2bottoms.remove(key);
-            }
-        }
+    fn trim(&mut self) {
+        self.top2bottoms.retain(|_, v| !v.is_empty());
     }
 
     pub fn iter(&self) -> Iter {
@@ -61,8 +56,17 @@ impl BoardSet {
         Drain::new(self)
     }
 
-    pub fn retain<F>(&mut self, f: F) {
-        todo!()
+    pub fn retain<F>(&mut self, mut f: F)
+    where
+        F: FnMut(&u64) -> bool,
+    {
+        for (&top, bottoms) in self.top2bottoms.iter_mut() {
+            bottoms.retain(|&b| {
+                let hash = BoardSet::u32_u32_to_u64(top, b);
+                f(&hash)
+            });
+        }
+        self.trim();
     }
 
     pub fn clear(&mut self) {
@@ -120,17 +124,51 @@ impl BoardSet {
 
     pub fn remove(&mut self, hash: &u64) -> bool {
         let (k, v) = Self::u64_to_u32_u32(*hash);
-        self.top2bottoms.get_mut(&k).map_or(false, |s| s.remove(&v))
+        let Some(set) = self.top2bottoms.get_mut(&k) else {
+            return false;
+        };
+        let removed = set.remove(&v);
+        if set.is_empty() {
+            self.top2bottoms.remove(&k);
+        }
+        removed
     }
 
     pub fn take(&mut self, hash: &u64) -> Option<u64> {
         let (k, v) = Self::u64_to_u32_u32(*hash);
-        self.top2bottoms.get_mut(&k).map_or(None, |s| {
-            s.take(&v).map(|bottom| Self::u32_u32_to_u64(k, bottom))
-        })
+        let set = self.top2bottoms.get_mut(&k)?;
+        let taken = set.take(&v).map(|bottom| Self::u32_u32_to_u64(k, bottom));
+        if set.is_empty() {
+            self.top2bottoms.remove(&k);
+        }
+        taken
     }
 }
 
+impl std::ops::BitAnd<&BoardSet> for &BoardSet {
+    type Output = BoardSet;
+    fn bitand(self, rhs: &BoardSet) -> Self::Output {
+        self.intersection(rhs).collect()
+    }
+}
+
+impl std::ops::BitOr<&BoardSet> for &BoardSet {
+    type Output = BoardSet;
+    fn bitor(self, rhs: &BoardSet) -> Self::Output {
+        self.union(rhs).collect()
+    }
+}
+
+impl std::ops::BitXor<&BoardSet> for &BoardSet {
+    type Output = BoardSet;
+    fn bitxor(self, rhs: &BoardSet) -> Self::Output {
+        self.symmetric_difference(rhs).collect()
+    }
+}
+
+// **************************************************************
+//  Iterators Returned
+// **************************************************************
 type MapIter<'a> = std::collections::hash_map::Iter<'a, u32, HashSet<u32>>;
 type SetIter<'a> = std::collections::hash_set::Iter<'a, u32>;
 
