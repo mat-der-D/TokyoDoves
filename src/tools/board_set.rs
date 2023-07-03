@@ -14,7 +14,7 @@ impl FromIterator<u64> for BoardSet {
     fn from_iter<T: IntoIterator<Item = u64>>(iter: T) -> Self {
         let mut set = Self::new();
         for item in iter {
-            set.insert(item);
+            set.insert_u64(item);
         }
         set
     }
@@ -43,12 +43,12 @@ impl BoardSet {
         self.top2bottoms.retain(|_, v| !v.is_empty());
     }
 
-    pub fn iter_u64(&self) -> IterU64 {
-        IterU64::new(self)
-    }
-
     pub fn iter(&self) -> Iter {
         Iter::new(self)
+    }
+
+    pub fn iter_u64(&self) -> IterU64 {
+        IterU64::new(self)
     }
 
     pub fn into_iter_u64(self) -> IntoIterU64 {
@@ -71,12 +71,19 @@ impl BoardSet {
         self.top2bottoms.values().all(|s| s.is_empty())
     }
 
+    pub fn drain(&mut self) -> Drain {
+        Drain::new(self)
+    }
+
     pub fn drain_u64(&mut self) -> DrainU64 {
         DrainU64::new(self)
     }
 
-    pub fn drain(&mut self) -> Drain {
-        Drain::new(self)
+    pub fn retain<F>(&mut self, mut f: F)
+    where
+        F: FnMut(&Board) -> bool,
+    {
+        self.retain_u64(|&h| f(&u64_to_board(h)))
     }
 
     pub fn retain_u64<F>(&mut self, mut f: F)
@@ -92,23 +99,20 @@ impl BoardSet {
         self.trim();
     }
 
-    pub fn retain<F>(&mut self, mut f: F)
-    where
-        F: FnMut(&Board) -> bool,
-    {
-        self.retain_u64(|&h| f(&u64_to_board(h)))
-    }
-
     pub fn clear(&mut self) {
         self.top2bottoms.clear()
+    }
+
+    pub fn difference<'a>(&'a self, other: &'a BoardSet) -> Difference<'a> {
+        Difference::new(self, other)
     }
 
     pub fn difference_u64<'a>(&'a self, other: &'a BoardSet) -> DifferenceU64<'a> {
         DifferenceU64::new(self, other)
     }
 
-    pub fn difference<'a>(&'a self, other: &'a BoardSet) -> Difference<'a> {
-        Difference::new(self, other)
+    pub fn symmetric_difference<'a>(&'a self, other: &'a BoardSet) -> SymmetricDifference<'a> {
+        SymmetricDifference::new(self, other)
     }
 
     pub fn symmetric_difference_u64<'a>(
@@ -118,33 +122,29 @@ impl BoardSet {
         SymmetricDifferenceU64::new(self, other)
     }
 
-    pub fn symmetric_difference<'a>(&'a self, other: &'a BoardSet) -> SymmetricDifference<'a> {
-        SymmetricDifference::new(self, other)
+    pub fn intersection<'a>(&'a self, other: &'a BoardSet) -> Intersection<'a> {
+        Intersection::new(self, other)
     }
 
     pub fn intersection_u64<'a>(&'a self, other: &'a BoardSet) -> IntersectionU64<'a> {
         IntersectionU64::new(self, other)
     }
 
-    pub fn intersection<'a>(&'a self, other: &'a BoardSet) -> Intersection<'a> {
-        Intersection::new(self, other)
+    pub fn union<'a>(&'a self, other: &'a BoardSet) -> Union<'a> {
+        Union::new(self, other)
     }
 
     pub fn union_u64<'a>(&'a self, other: &'a BoardSet) -> UnionU64<'a> {
         UnionU64::new(self, other)
     }
 
-    pub fn union<'a>(&'a self, other: &'a BoardSet) -> Union<'a> {
-        Union::new(self, other)
+    pub fn contains(&self, board: &Board) -> bool {
+        self.contains_u64(&board.to_u64())
     }
 
     pub fn contains_u64(&self, hash: &u64) -> bool {
         let (k, v) = Self::u64_to_u32_u32(*hash);
         self.top2bottoms.get(&k).map_or(false, |x| x.contains(&v))
-    }
-
-    pub fn contains(&self, board: &Board) -> bool {
-        self.contains_u64(&board.to_u64())
     }
 
     pub fn is_disjoint(&self, other: &BoardSet) -> bool {
@@ -167,7 +167,11 @@ impl BoardSet {
         other.is_subset(self)
     }
 
-    pub fn insert(&mut self, hash: u64) {
+    pub fn insert(&mut self, board: Board) {
+        self.insert_u64(board.to_u64())
+    }
+
+    pub fn insert_u64(&mut self, hash: u64) {
         let (k, v) = Self::u64_to_u32_u32(hash);
         self.top2bottoms
             .entry(k)
@@ -175,8 +179,8 @@ impl BoardSet {
             .insert(v);
     }
 
-    pub fn insert_board(&mut self, board: Board) {
-        self.insert(board.to_u64())
+    pub fn remove(&mut self, board: &Board) -> bool {
+        self.remove_u64(&board.to_u64())
     }
 
     pub fn remove_u64(&mut self, hash: &u64) -> bool {
@@ -191,8 +195,8 @@ impl BoardSet {
         removed
     }
 
-    pub fn remove(&mut self, board: &Board) -> bool {
-        self.remove_u64(&board.to_u64())
+    pub fn take(&mut self, board: &Board) -> Option<Board> {
+        self.take_u64(&board.to_u64()).map(u64_to_board)
     }
 
     pub fn take_u64(&mut self, hash: &u64) -> Option<u64> {
@@ -203,10 +207,6 @@ impl BoardSet {
             self.top2bottoms.remove(&k);
         }
         taken
-    }
-
-    pub fn take(&mut self, board: &Board) -> Option<Board> {
-        self.take_u64(&board.to_u64()).map(u64_to_board)
     }
 }
 
