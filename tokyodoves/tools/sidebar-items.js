@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["BoardValue","BoardValueErrorType","CompareBoardValueError"],"fn":["compare_board_value"]};
+window.SIDEBAR_ITEMS = {"enum":["BoardValue","BoardValueErrorType","CompareBoardValueError"],"fn":["compare_board_value"],"struct":["BoardSet","Difference","DifferenceU64","Drain","DrainU64","Intersection","IntersectionU64","IntoIter","IntoIterU64","Iter","IterU64","SymmetricDifference","SymmetricDifferenceU64","Union","UnionU64"]};

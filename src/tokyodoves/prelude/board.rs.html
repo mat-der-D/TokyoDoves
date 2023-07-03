@@ -2477,7 +2477,7 @@
             <span class="kw">let </span>line_str: String = line
                 .into_iter()
                 .map(|x| <span class="kw">match </span>x {
-                    <span class="prelude-val">Some</span>((c, d)) =&gt; <span class="macro">format!</span>(<span class="string">&quot;| {:?} &quot;</span>, color_dove_to_char(c, d)),
+                    <span class="prelude-val">Some</span>((c, d)) =&gt; <span class="macro">format!</span>(<span class="string">&quot;| {} &quot;</span>, color_dove_to_char(c, d)),
                     <span class="prelude-val">None </span>=&gt; <span class="string">&quot;|   &quot;</span>.to_string(),
                 })
                 .collect();
