@@ -1,6 +1,10 @@
 use crate::prelude::{Board, BoardBuilder};
 use std::collections::{HashMap, HashSet};
 
+fn u64_to_board(hash: u64) -> Board {
+    BoardBuilder::from(hash).build_unchecked()
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct BoardSet {
     top2bottoms: HashMap<u32, HashSet<u32>>,
@@ -16,8 +20,14 @@ impl FromIterator<u64> for BoardSet {
     }
 }
 
+impl FromIterator<Board> for BoardSet {
+    fn from_iter<T: IntoIterator<Item = Board>>(iter: T) -> Self {
+        Self::from_iter(iter.into_iter().map(|b| b.to_u64()))
+    }
+}
+
 impl IntoIterator for BoardSet {
-    type Item = u64;
+    type Item = Board;
     type IntoIter = IntoIter;
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter::new(self)
@@ -33,16 +43,16 @@ impl BoardSet {
         self.top2bottoms.retain(|_, v| !v.is_empty());
     }
 
+    pub fn iter_u64(&self) -> IterU64 {
+        IterU64::new(self)
+    }
+
     pub fn iter(&self) -> Iter {
         Iter::new(self)
     }
 
-    pub fn board_iter(&self) -> BoardIter {
-        BoardIter::new(self)
-    }
-
-    pub fn board_into_iter(self) -> BoardIntoIter {
-        BoardIntoIter::new(self)
+    pub fn into_iter_u64(self) -> IntoIterU64 {
+        IntoIterU64::new(self)
     }
 
     fn u64_to_u32_u32(n: u64) -> (u32, u32) {
@@ -61,15 +71,15 @@ impl BoardSet {
         self.top2bottoms.values().all(|s| s.is_empty())
     }
 
+    pub fn drain_u64(&mut self) -> DrainU64 {
+        DrainU64::new(self)
+    }
+
     pub fn drain(&mut self) -> Drain {
         Drain::new(self)
     }
 
-    pub fn board_drain(&mut self) -> BoardDrain {
-        BoardDrain::new(self)
-    }
-
-    pub fn retain<F>(&mut self, mut f: F)
+    pub fn retain_u64<F>(&mut self, mut f: F)
     where
         F: FnMut(&u64) -> bool,
     {
@@ -82,61 +92,72 @@ impl BoardSet {
         self.trim();
     }
 
+    pub fn retain<F>(&mut self, mut f: F)
+    where
+        F: FnMut(&Board) -> bool,
+    {
+        self.retain_u64(|&h| f(&u64_to_board(h)))
+    }
+
     pub fn clear(&mut self) {
         self.top2bottoms.clear()
+    }
+
+    pub fn difference_u64<'a>(&'a self, other: &'a BoardSet) -> DifferenceU64<'a> {
+        DifferenceU64::new(self, other)
     }
 
     pub fn difference<'a>(&'a self, other: &'a BoardSet) -> Difference<'a> {
         Difference::new(self, other)
     }
 
-    pub fn board_difference<'a>(&'a self, other: &'a BoardSet) -> BoardDifference<'a> {
-        BoardDifference::new(self, other)
+    pub fn symmetric_difference_u64<'a>(
+        &'a self,
+        other: &'a BoardSet,
+    ) -> SymmetricDifferenceU64<'a> {
+        SymmetricDifferenceU64::new(self, other)
     }
 
     pub fn symmetric_difference<'a>(&'a self, other: &'a BoardSet) -> SymmetricDifference<'a> {
         SymmetricDifference::new(self, other)
     }
 
-    pub fn board_symmetric_difference<'a>(
-        &'a self,
-        other: &'a BoardSet,
-    ) -> BoardSymmetricDifference<'a> {
-        BoardSymmetricDifference::new(self, other)
+    pub fn intersection_u64<'a>(&'a self, other: &'a BoardSet) -> IntersectionU64<'a> {
+        IntersectionU64::new(self, other)
     }
 
     pub fn intersection<'a>(&'a self, other: &'a BoardSet) -> Intersection<'a> {
         Intersection::new(self, other)
     }
 
-    pub fn board_intersection<'a>(&'a self, other: &'a BoardSet) -> BoardIntersection<'a> {
-        BoardIntersection::new(self, other)
+    pub fn union_u64<'a>(&'a self, other: &'a BoardSet) -> UnionU64<'a> {
+        UnionU64::new(self, other)
     }
 
     pub fn union<'a>(&'a self, other: &'a BoardSet) -> Union<'a> {
         Union::new(self, other)
     }
 
-    pub fn board_union<'a>(&'a self, other: &'a BoardSet) -> BoardUnion<'a> {
-        BoardUnion::new(self, other)
-    }
-
-    pub fn contains(&self, hash: &u64) -> bool {
+    pub fn contains_u64(&self, hash: &u64) -> bool {
         let (k, v) = Self::u64_to_u32_u32(*hash);
         self.top2bottoms.get(&k).map_or(false, |x| x.contains(&v))
     }
 
+    pub fn contains(&self, board: &Board) -> bool {
+        self.contains_u64(&board.to_u64())
+    }
+
     pub fn is_disjoint(&self, other: &BoardSet) -> bool {
         if self.len() <= other.len() {
-            self.iter().all(|v| !other.contains(&v))
+            self.iter_u64().all(|v| !other.contains_u64(&v))
         } else {
-            other.iter().all(|v| !self.contains(&v))
+            other.iter_u64().all(|v| !self.contains_u64(&v))
         }
     }
 
     pub fn is_subset(&self, other: &BoardSet) -> bool {
         if self.len() <= other.len() {
-            self.iter().all(|v| other.contains(&v))
+            self.iter_u64().all(|v| other.contains_u64(&v))
         } else {
             false
         }
@@ -158,7 +179,7 @@ impl BoardSet {
         self.insert(board.to_u64())
     }
 
-    pub fn remove(&mut self, hash: &u64) -> bool {
+    pub fn remove_u64(&mut self, hash: &u64) -> bool {
         let (k, v) = Self::u64_to_u32_u32(*hash);
         let Some(set) = self.top2bottoms.get_mut(&k) else {
             return false;
@@ -170,11 +191,11 @@ impl BoardSet {
         removed
     }
 
-    pub fn remove_board(&mut self, board: &Board) -> bool {
-        self.remove(&board.to_u64())
+    pub fn remove(&mut self, board: &Board) -> bool {
+        self.remove_u64(&board.to_u64())
     }
 
-    pub fn take(&mut self, hash: &u64) -> Option<u64> {
+    pub fn take_u64(&mut self, hash: &u64) -> Option<u64> {
         let (k, v) = Self::u64_to_u32_u32(*hash);
         let set = self.top2bottoms.get_mut(&k)?;
         let taken = set.take(&v).map(|bottom| Self::u32_u32_to_u64(k, bottom));
@@ -184,43 +205,39 @@ impl BoardSet {
         taken
     }
 
-    pub fn take_board(&mut self, board: &Board) -> Option<Board> {
-        self.take(&board.to_u64()).map(u64_to_board)
+    pub fn take(&mut self, board: &Board) -> Option<Board> {
+        self.take_u64(&board.to_u64()).map(u64_to_board)
     }
 }
 
 impl std::ops::BitAnd<&BoardSet> for &BoardSet {
     type Output = BoardSet;
     fn bitand(self, rhs: &BoardSet) -> Self::Output {
-        self.intersection(rhs).collect()
+        self.intersection_u64(rhs).collect()
     }
 }
 
 impl std::ops::BitOr<&BoardSet> for &BoardSet {
     type Output = BoardSet;
     fn bitor(self, rhs: &BoardSet) -> Self::Output {
-        self.union(rhs).collect()
+        self.union_u64(rhs).collect()
     }
 }
 
 impl std::ops::BitXor<&BoardSet> for &BoardSet {
     type Output = BoardSet;
     fn bitxor(self, rhs: &BoardSet) -> Self::Output {
-        self.symmetric_difference(rhs).collect()
+        self.symmetric_difference_u64(rhs).collect()
     }
 }
 
 // **************************************************************
 //  Iterators Returned
 // **************************************************************
-fn u64_to_board(hash: u64) -> Board {
-    BoardBuilder::from(hash).build_unchecked()
-}
-
 type MapIter<'a> = std::collections::hash_map::Iter<'a, u32, HashSet<u32>>;
 type SetIter<'a> = std::collections::hash_set::Iter<'a, u32>;
 
-pub struct Iter<'a> {
+pub struct IterU64<'a> {
     set: &'a BoardSet,
     state: Option<(
         MapIter<'a>, // iterator of top2bottoms
@@ -229,13 +246,13 @@ pub struct Iter<'a> {
     )>,
 }
 
-impl<'a> Iter<'a> {
+impl<'a> IterU64<'a> {
     fn new(set: &'a BoardSet) -> Self {
         Self { set, state: None }
     }
 }
 
-impl<'a> Iterator for Iter<'a> {
+impl<'a> Iterator for IterU64<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         let Some((map_iter, top, set_iter)) = self.state.as_mut() else {
@@ -255,15 +272,15 @@ impl<'a> Iterator for Iter<'a> {
     }
 }
 
-pub struct BoardIter<'a>(Iter<'a>);
+pub struct Iter<'a>(IterU64<'a>);
 
-impl<'a> BoardIter<'a> {
+impl<'a> Iter<'a> {
     fn new(set: &'a BoardSet) -> Self {
-        Self(Iter::new(set))
+        Self(IterU64::new(set))
     }
 }
 
-impl<'a> Iterator for BoardIter<'a> {
+impl<'a> Iterator for Iter<'a> {
     type Item = Board;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(u64_to_board)
@@ -273,7 +290,7 @@ impl<'a> Iterator for BoardIter<'a> {
 type MapIntoIter = std::collections::hash_map::IntoIter<u32, HashSet<u32>>;
 type SetIntoIter = std::collections::hash_set::IntoIter<u32>;
 
-pub struct IntoIter {
+pub struct IntoIterU64 {
     set: Option<BoardSet>,
     state: Option<(
         MapIntoIter, // iterator of set.top2bottoms
@@ -282,7 +299,7 @@ pub struct IntoIter {
     )>,
 }
 
-impl IntoIter {
+impl IntoIterU64 {
     fn new(set: BoardSet) -> Self {
         Self {
             set: Some(set),
@@ -291,7 +308,7 @@ impl IntoIter {
     }
 }
 
-impl Iterator for IntoIter {
+impl Iterator for IntoIterU64 {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         let Some((map_iter, top, set_iter)) = self.state.as_mut() else {
@@ -312,71 +329,71 @@ impl Iterator for IntoIter {
     }
 }
 
-pub struct BoardIntoIter(IntoIter);
+pub struct IntoIter(IntoIterU64);
 
-impl BoardIntoIter {
+impl IntoIter {
     fn new(set: BoardSet) -> Self {
-        Self(IntoIter::new(set))
+        Self(IntoIterU64::new(set))
     }
 }
 
-impl Iterator for BoardIntoIter {
+impl Iterator for IntoIter {
     type Item = Board;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(u64_to_board)
     }
 }
 
-pub struct Drain(IntoIter);
+pub struct DrainU64(IntoIterU64);
 
-impl Drain {
+impl DrainU64 {
     fn new(set: &mut BoardSet) -> Self {
         let original = std::mem::replace(set, BoardSet::new());
-        Self(original.into_iter())
+        Self(original.into_iter_u64())
     }
 }
 
-impl Iterator for Drain {
+impl Iterator for DrainU64 {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next()
     }
 }
 
-pub struct BoardDrain(Drain);
+pub struct Drain(DrainU64);
 
-impl BoardDrain {
+impl Drain {
     fn new(set: &mut BoardSet) -> Self {
-        Self(Drain::new(set))
+        Self(DrainU64::new(set))
     }
 }
 
-impl Iterator for BoardDrain {
+impl Iterator for Drain {
     type Item = Board;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(u64_to_board)
     }
 }
 
-pub struct Difference<'a> {
-    left: Iter<'a>,
+pub struct DifferenceU64<'a> {
+    left: IterU64<'a>,
     right: &'a BoardSet,
 }
 
-impl<'a> Difference<'a> {
+impl<'a> DifferenceU64<'a> {
     fn new(left: &'a BoardSet, right: &'a BoardSet) -> Self {
         Self {
-            left: left.iter(),
+            left: left.iter_u64(),
             right,
         }
     }
 }
 
-impl<'a> Iterator for Difference<'a> {
+impl<'a> Iterator for DifferenceU64<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         let item = self.left.next()?;
-        if self.right.contains(&item) {
+        if self.right.contains_u64(&item) {
             self.next()
         } else {
             Some(item)
@@ -384,51 +401,51 @@ impl<'a> Iterator for Difference<'a> {
     }
 }
 
-pub struct BoardDifference<'a>(Difference<'a>);
+pub struct Difference<'a>(DifferenceU64<'a>);
 
-impl<'a> BoardDifference<'a> {
+impl<'a> Difference<'a> {
     fn new(left: &'a BoardSet, right: &'a BoardSet) -> Self {
-        Self(Difference::new(left, right))
+        Self(DifferenceU64::new(left, right))
     }
 }
 
-impl<'a> Iterator for BoardDifference<'a> {
+impl<'a> Iterator for Difference<'a> {
     type Item = Board;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(u64_to_board)
     }
 }
 
-pub struct SymmetricDifference<'a> {
+pub struct SymmetricDifferenceU64<'a> {
     left: &'a BoardSet,
-    left_iter: Iter<'a>,
+    left_iter: IterU64<'a>,
     right: &'a BoardSet,
-    right_iter: Iter<'a>,
+    right_iter: IterU64<'a>,
 }
 
-impl<'a> SymmetricDifference<'a> {
+impl<'a> SymmetricDifferenceU64<'a> {
     fn new(left: &'a BoardSet, right: &'a BoardSet) -> Self {
         Self {
             left,
-            left_iter: left.iter(),
+            left_iter: left.iter_u64(),
             right,
-            right_iter: right.iter(),
+            right_iter: right.iter_u64(),
         }
     }
 }
 
-impl<'a> Iterator for SymmetricDifference<'a> {
+impl<'a> Iterator for SymmetricDifferenceU64<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(item_left) = self.left_iter.next() {
-            if self.right.contains(&item_left) {
+            if self.right.contains_u64(&item_left) {
                 self.next()
             } else {
                 Some(item_left)
             }
         } else {
             let item_right = self.right_iter.next()?;
-            if self.left.contains(&item_right) {
+            if self.left.contains_u64(&item_right) {
                 self.next()
             } else {
                 Some(item_right)
@@ -437,40 +454,40 @@ impl<'a> Iterator for SymmetricDifference<'a> {
     }
 }
 
-pub struct BoardSymmetricDifference<'a>(SymmetricDifference<'a>);
+pub struct SymmetricDifference<'a>(SymmetricDifferenceU64<'a>);
 
-impl<'a> BoardSymmetricDifference<'a> {
+impl<'a> SymmetricDifference<'a> {
     fn new(left: &'a BoardSet, right: &'a BoardSet) -> Self {
-        Self(SymmetricDifference::new(left, right))
+        Self(SymmetricDifferenceU64::new(left, right))
     }
 }
 
-impl<'a> Iterator for BoardSymmetricDifference<'a> {
+impl<'a> Iterator for SymmetricDifference<'a> {
     type Item = Board;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(u64_to_board)
     }
 }
 
-pub struct Intersection<'a> {
-    left_iter: Iter<'a>,
+pub struct IntersectionU64<'a> {
+    left_iter: IterU64<'a>,
     right: &'a BoardSet,
 }
 
-impl<'a> Intersection<'a> {
+impl<'a> IntersectionU64<'a> {
     fn new(left: &'a BoardSet, right: &'a BoardSet) -> Self {
         Self {
-            left_iter: left.iter(),
+            left_iter: left.iter_u64(),
             right,
         }
     }
 }
 
-impl<'a> Iterator for Intersection<'a> {
+impl<'a> Iterator for IntersectionU64<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         let item = self.left_iter.next()?;
-        if self.right.contains(&item) {
+        if self.right.contains_u64(&item) {
             Some(item)
         } else {
             self.next()
@@ -478,44 +495,44 @@ impl<'a> Iterator for Intersection<'a> {
     }
 }
 
-pub struct BoardIntersection<'a>(Intersection<'a>);
+pub struct Intersection<'a>(IntersectionU64<'a>);
 
-impl<'a> BoardIntersection<'a> {
+impl<'a> Intersection<'a> {
     fn new(left: &'a BoardSet, right: &'a BoardSet) -> Self {
-        Self(Intersection::new(left, right))
+        Self(IntersectionU64::new(left, right))
     }
 }
 
-impl<'a> Iterator for BoardIntersection<'a> {
+impl<'a> Iterator for Intersection<'a> {
     type Item = Board;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(u64_to_board)
     }
 }
 
-pub struct Union<'a> {
-    left_iter: Iter<'a>,
+pub struct UnionU64<'a> {
+    left_iter: IterU64<'a>,
     right: &'a BoardSet,
-    right_iter: Iter<'a>,
+    right_iter: IterU64<'a>,
 }
 
-impl<'a> Union<'a> {
+impl<'a> UnionU64<'a> {
     fn new(left: &'a BoardSet, right: &'a BoardSet) -> Self {
         Self {
-            left_iter: left.iter(),
+            left_iter: left.iter_u64(),
             right,
-            right_iter: right.iter(),
+            right_iter: right.iter_u64(),
         }
     }
 }
 
-impl<'a> Iterator for Union<'a> {
+impl<'a> Iterator for UnionU64<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         let Some(item) = self.left_iter.next() else {
             return self.right_iter.next();
         };
-        if self.right.contains(&item) {
+        if self.right.contains_u64(&item) {
             self.next()
         } else {
             Some(item)
@@ -523,15 +540,15 @@ impl<'a> Iterator for Union<'a> {
     }
 }
 
-pub struct BoardUnion<'a>(Union<'a>);
+pub struct Union<'a>(UnionU64<'a>);
 
-impl<'a> BoardUnion<'a> {
+impl<'a> Union<'a> {
     fn new(left: &'a BoardSet, right: &'a BoardSet) -> Self {
-        Self(Union::new(left, right))
+        Self(UnionU64::new(left, right))
     }
 }
 
-impl<'a> Iterator for BoardUnion<'a> {
+impl<'a> Iterator for Union<'a> {
     type Item = Board;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().map(u64_to_board)
