@@ -69,6 +69,12 @@ pub struct BoardBuilder {
     positions: [[u64; 6]; 2],
 }
 
+impl Default for BoardBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BoardBuilder {
     pub fn new() -> Self {
         Self::from_u64_bits([[1 << 8, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]])
@@ -145,8 +151,7 @@ impl BoardBuilder {
             DovePositions::new(self.positions[0]),
             DovePositions::new(self.positions[1]),
         ]);
-        let board = Board::new(viewer, positions);
-        board
+        Board::new(viewer, positions)
     }
 
     pub fn build(&self) -> Result<Board, error::BoardError> {

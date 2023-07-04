@@ -199,7 +199,7 @@ impl Iterator for DoveSetIntoIter {
             }
             8 => {
                 self.cursor <<= 1;
-                return self.next();
+                self.next()
             }
             _ => unreachable!(),
         }
