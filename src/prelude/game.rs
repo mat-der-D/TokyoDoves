@@ -214,8 +214,10 @@ pub struct Game {
 impl Game {
     /// Constructs [`Game`]
     pub fn new(allow_remove: bool) -> Game {
-        let mut rule = GameRule::default();
-        rule.allow_remove = allow_remove;
+        let rule = GameRule {
+            allow_remove,
+            ..Default::default()
+        };
         Self::from_rule(rule)
     }
 
