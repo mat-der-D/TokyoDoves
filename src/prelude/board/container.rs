@@ -37,7 +37,6 @@ impl<const N: usize> IntoIterator for FiniteActionContainer<N> {
     fn into_iter(self) -> Self::IntoIter {
         FiniteActionContainerIntoIter {
             iter: self.container.into_iter(),
-            item_count: 0,
         }
     }
 }
@@ -54,7 +53,6 @@ impl<'a, const N: usize> FiniteActionContainer<N> {
     pub fn iter(&'a self) -> FiniteActionContainerIter<'a> {
         FiniteActionContainerIter {
             iter: self.container.iter(),
-            item_count: 0,
         }
     }
 }
@@ -111,40 +109,26 @@ impl<const N: usize> ActionContainer for FiniteActionContainer<N> {
 /// An [`Iterator`] returned by [`FiniteActionContainer::iter`]
 pub struct FiniteActionContainerIter<'a> {
     iter: std::slice::Iter<'a, Option<Action>>,
-    item_count: usize,
 }
 
 impl<'a> Iterator for FiniteActionContainerIter<'a> {
     type Item = &'a Action;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.item_count >= self.iter.len() {
-            return None;
-        }
-
-        let item = self.iter.next()?.as_ref()?;
-        self.item_count += 1;
-        Some(item)
+        self.iter.next()?.as_ref()
     }
 }
 
 /// An [`Iterator`] returned by [`FiniteActionContainer::into_iter`]
 pub struct FiniteActionContainerIntoIter<const N: usize> {
     iter: std::array::IntoIter<Option<Action>, N>,
-    item_count: usize,
 }
 
 impl<const N: usize> Iterator for FiniteActionContainerIntoIter<N> {
     type Item = Action;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.item_count >= N {
-            return None;
-        }
-
-        let item = self.iter.next()??;
-        self.item_count += 1;
-        Some(item)
+        self.iter.next()?
     }
 }
 
