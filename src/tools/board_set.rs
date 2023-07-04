@@ -1,5 +1,9 @@
+use super::io::{Fragment, FragmentIter};
 use crate::prelude::{Board, BoardBuilder};
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    io::{BufWriter, Read, Write},
+};
 
 fn u64_to_board(hash: u64) -> Board {
     BoardBuilder::from(hash).build_unchecked()
@@ -29,6 +33,12 @@ impl IntoIterator for BoardSet {
     }
 }
 
+impl From<RawBoardSet> for BoardSet {
+    fn from(raw: RawBoardSet) -> Self {
+        Self { raw }
+    }
+}
+
 impl BoardSet {
     pub fn new() -> Self {
         Self::default()
@@ -44,6 +54,23 @@ impl BoardSet {
 
     pub fn into_raw(self) -> RawBoardSet {
         self.raw
+    }
+
+    pub fn required_capacity<R>(raw_reader: R) -> HashMap<u32, usize>
+    where
+        R: Read,
+    {
+        RawBoardSet::required_capacity(raw_reader)
+    }
+
+    pub fn with_capacity(capacity: HashMap<u32, usize>) -> Self {
+        Self {
+            raw: RawBoardSet::with_capacity(capacity),
+        }
+    }
+
+    pub fn capacity(&self) -> HashMap<u32, usize> {
+        self.raw.capacity()
     }
 
     pub fn iter(&self) -> Iter {
@@ -71,6 +98,10 @@ impl BoardSet {
 
     pub fn clear(&mut self) {
         self.raw.clear()
+    }
+
+    pub fn reserve(&mut self, additional: HashMap<u32, usize>) {
+        self.raw.reserve(additional)
     }
 
     pub fn difference<'a>(&'a self, other: &'a BoardSet) -> Difference<'a> {
@@ -115,6 +146,20 @@ impl BoardSet {
 
     pub fn take(&mut self, board: &Board) -> Option<Board> {
         self.raw.take(&board.to_u64()).map(u64_to_board)
+    }
+
+    pub fn load<R>(&mut self, reader: R) -> std::io::Result<()>
+    where
+        R: Read,
+    {
+        self.raw.load(reader)
+    }
+
+    pub fn save<W>(&self, writer: W) -> std::io::Result<()>
+    where
+        W: Write,
+    {
+        self.raw.save(writer)
     }
 }
 
@@ -215,6 +260,39 @@ impl RawBoardSet {
         Self::default()
     }
 
+    pub fn required_capacity<R>(raw_reader: R) -> HashMap<u32, usize>
+    where
+        R: Read,
+    {
+        let mut count = HashMap::new();
+        let mut head = 0;
+        for fragment in FragmentIter::new(raw_reader) {
+            use Fragment::*;
+            match fragment {
+                Delimiter => continue,
+                Head(h) => head = h,
+                Tail(_) => *count.entry(head).or_default() += 1,
+            }
+        }
+        count
+    }
+
+    pub fn with_capacity(capacity: HashMap<u32, usize>) -> Self {
+        let mut top2bottoms = HashMap::with_capacity(capacity.len());
+        for (top, num_bottoms) in capacity.into_iter() {
+            top2bottoms.insert(top, HashSet::with_capacity(num_bottoms));
+        }
+        Self { top2bottoms }
+    }
+
+    pub fn capacity(&self) -> HashMap<u32, usize> {
+        let mut capacity = HashMap::with_capacity(self.top2bottoms.len());
+        for (k, v) in self.top2bottoms.iter() {
+            capacity.insert(*k, v.capacity());
+        }
+        capacity
+    }
+
     fn trim(&mut self) {
         self.top2bottoms.retain(|_, v| !v.is_empty());
     }
@@ -258,6 +336,20 @@ impl RawBoardSet {
 
     pub fn clear(&mut self) {
         self.top2bottoms.clear()
+    }
+
+    pub fn reserve(&mut self, additional: HashMap<u32, usize>) {
+        for (top, additional_len) in additional.into_iter() {
+            match self.top2bottoms.get_mut(&top) {
+                Some(bottoms) => {
+                    bottoms.reserve(additional_len);
+                }
+                None => {
+                    self.top2bottoms
+                        .insert(top, HashSet::with_capacity(additional_len));
+                }
+            };
+        }
     }
 
     pub fn difference<'a>(&'a self, other: &'a RawBoardSet) -> RawDifference<'a> {
@@ -333,6 +425,45 @@ impl RawBoardSet {
         }
         taken
     }
+
+    pub fn load<R>(&mut self, reader: R) -> std::io::Result<()>
+    where
+        R: Read,
+    {
+        let mut iter = FragmentIter::new(reader);
+        let mut dummy = HashSet::new();
+        let mut set = &mut dummy;
+        loop {
+            let Some(next) = iter.try_next()? else {
+                return Ok(());
+            };
+
+            use Fragment::*;
+            match next {
+                Delimiter => continue,
+                Head(n) => set = self.top2bottoms.entry(n).or_insert_with(HashSet::new),
+                Tail(n) => {
+                    set.insert(n);
+                }
+            }
+        }
+    }
+
+    pub fn save<W>(&self, writer: W) -> std::io::Result<()>
+    where
+        W: Write,
+    {
+        let mut writer = BufWriter::new(writer);
+        for (top, bottoms) in self.top2bottoms.iter() {
+            writer.write_all(&top.to_be_bytes())?;
+            for bottom in bottoms.iter() {
+                writer.write_all(&bottom.to_be_bytes())?;
+            }
+            writer.write_all(&u32::MAX.to_be_bytes())?;
+        }
+        writer.flush()?;
+        Ok(())
+    }
 }
 
 impl std::ops::BitAnd<&RawBoardSet> for &RawBoardSet {
@@ -356,9 +487,6 @@ impl std::ops::BitXor<&RawBoardSet> for &RawBoardSet {
     }
 }
 
-// **************************************************************
-//  Iterators Returned
-// **************************************************************
 type MapIter<'a> = std::collections::hash_map::Iter<'a, u32, HashSet<u32>>;
 type SetIter<'a> = std::collections::hash_set::Iter<'a, u32>;
 
