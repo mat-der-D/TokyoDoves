@@ -24,9 +24,16 @@ use route::*;
 // *******************************************************************
 /// Inherited implementation for capsuling
 macro_rules! impl_mutable_action_container {
-    ( $($target: ident { $internal: ty, $iter: ident })* ) => {
+    ( $($target: ident { $internal: ty, $iter: ident, $into_iter: ident })* ) => {
         $(
-            impl Iterator for $iter {
+            impl<'a> Iterator for $iter<'a> {
+                type Item = &'a Action;
+                fn next(&mut self) -> Option<Self::Item> {
+                    self.0.next()
+                }
+            }
+
+            impl Iterator for $into_iter {
                 type Item = Action;
                 fn next(&mut self) -> Option<Self::Item> {
                     self.0.next()
@@ -35,9 +42,9 @@ macro_rules! impl_mutable_action_container {
 
             impl IntoIterator for $target {
                 type Item = Action;
-                type IntoIter = $iter;
+                type IntoIter = $into_iter;
                 fn into_iter(self) -> Self::IntoIter {
-                    $iter(self.0.into_iter())
+                    $into_iter(self.0.into_iter())
                 }
             }
 
@@ -62,6 +69,12 @@ macro_rules! impl_mutable_action_container {
                 }
             }
 
+            impl<'a> $target {
+                pub fn iter(&'a self) -> $iter<'a> {
+                    $iter(self.0.iter())
+                }
+            }
+
             impl MutableActionContainer for $target {
                 fn new() -> Self {
                     Self(<$internal as MutableActionContainer>::new())
@@ -71,6 +84,7 @@ macro_rules! impl_mutable_action_container {
                     self.0.push(cmd)
                 }
             }
+
         )*
     };
 }
@@ -78,18 +92,26 @@ macro_rules! impl_mutable_action_container {
 /// An [`ActionContainer`] returned by [`Board::legal_actions`]
 #[derive(Debug, Clone)]
 pub struct ActionsFwd(FiniteActionContainer<64>);
+
+/// An [`Iterator`] returned by [`ActionsFwd::iter`]
+pub struct ActionsFwdIter<'a>(FiniteActionContainerIter<'a>);
+
 /// An [`Iterator`] returned by [`ActionsFwd::into_iter`]
 pub struct ActionsFwdIntoIter(FiniteActionContainerIntoIter<64>);
 
 /// An [`ActionContainer`] returned by [`Board::legal_actions_bwd`]
 #[derive(Debug, Clone)]
 pub struct ActionsBwd(FiniteActionContainer<100>);
+
+/// An [`Iterator`] returned by [`ActionsBwd::iter`]
+pub struct ActionsBwdIter<'a>(FiniteActionContainerIter<'a>);
+
 /// An [`Iterator`] returned by [`ActionsBwd::into_iter`]
 pub struct ActionsBwdIntoIter(FiniteActionContainerIntoIter<100>);
 
 impl_mutable_action_container! {
-    ActionsFwd { FiniteActionContainer<64>, ActionsFwdIntoIter }
-    ActionsBwd { FiniteActionContainer<100>, ActionsBwdIntoIter }
+    ActionsFwd { FiniteActionContainer<64>, ActionsFwdIter, ActionsFwdIntoIter }
+    ActionsBwd { FiniteActionContainer<100>, ActionsBwdIter, ActionsBwdIntoIter }
 }
 
 /// An enum returned by [`Board::surrounded_status`]
@@ -1202,6 +1224,20 @@ mod tests {
             }
         }
         actions
+    }
+
+    #[test]
+    fn test_actions_iter_consistency() {
+        let num_turns = 10_000;
+        for (board, _, player) in RandomPlayIter::new().take(num_turns) {
+            let actions = board.legal_actions(player, true, true, true);
+            let actions_cloned = actions.clone();
+            for (a_into_iter, &a_iter) in actions.into_iter().zip(actions_cloned.iter()) {
+                let b_into_iter = board.perform_copied(a_into_iter).unwrap();
+                let b_iter = board.perform_copied(a_iter).unwrap();
+                assert_eq!(b_into_iter, b_iter);
+            }
+        }
     }
 
     #[test]
