@@ -36,8 +36,8 @@ impl<const N: usize> IntoIterator for FiniteActionContainer<N> {
 
     fn into_iter(self) -> Self::IntoIter {
         FiniteActionContainerIntoIter {
-            container: self.container,
-            cursor: 0,
+            iter: self.container.into_iter(),
+            item_count: 0,
         }
     }
 }
@@ -132,23 +132,21 @@ impl<'a> Iterator for FiniteActionContainerIter<'a> {
 
 /// An [`Iterator`] returned by [`FiniteActionContainer::into_iter`]
 pub struct FiniteActionContainerIntoIter<const N: usize> {
-    container: [Option<Action>; N],
-    cursor: usize,
+    iter: std::array::IntoIter<Option<Action>, N>,
+    item_count: usize,
 }
 
 impl<const N: usize> Iterator for FiniteActionContainerIntoIter<N> {
     type Item = Action;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.cursor >= N {
+        if self.item_count >= N {
             return None;
         }
 
-        let item = self.container[self.cursor];
-        if item.is_some() {
-            self.cursor += 1;
-        }
-        item
+        let item = self.iter.next()??;
+        self.item_count += 1;
+        Some(item)
     }
 }
 
