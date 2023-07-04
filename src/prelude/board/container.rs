@@ -50,6 +50,15 @@ impl<const N: usize> std::ops::Index<usize> for FiniteActionContainer<N> {
     }
 }
 
+impl<'a, const N: usize> FiniteActionContainer<N> {
+    pub fn iter(&'a self) -> FiniteActionContainerIter<'a> {
+        FiniteActionContainerIter {
+            container: &self.container,
+            cursor: 0,
+        }
+    }
+}
+
 /// Hacking trait for [`ActionContainer`].
 ///
 /// The [`ActionContainer`] that implements trait [`MutableActionContainer`]
@@ -96,6 +105,28 @@ impl<const N: usize> ActionContainer for FiniteActionContainer<N> {
             }
         }
         false
+    }
+}
+
+/// An [`Iterator`] returned by [`FiniteActionContainer::iter`]
+pub struct FiniteActionContainerIter<'a> {
+    container: &'a [Option<Action>],
+    cursor: usize,
+}
+
+impl<'a> Iterator for FiniteActionContainerIter<'a> {
+    type Item = &'a Action;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.cursor >= self.container.len() {
+            return None;
+        }
+
+        let item = self.container[self.cursor].as_ref();
+        if item.is_some() {
+            self.cursor += 1;
+        }
+        item
     }
 }
 
