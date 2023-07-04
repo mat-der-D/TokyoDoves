@@ -12,6 +12,6 @@ codegen-units = 1
 
 [dependencies]
 array-macro = "2.1.5"
-strum = "0.24"
-strum_macros = "0.24"
+strum = "0.25"
+strum_macros = "0.25"
 thiserror = "1.0"
