@@ -293,6 +293,11 @@
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
 <a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::str::FromStr;
 
 <span class="kw">use </span>strum::IntoEnumIterator;
@@ -362,6 +367,12 @@
 </span><span class="attr">#[derive(Debug, Clone, Copy)]
 </span><span class="kw">pub struct </span>BoardBuilder {
     positions: [[u64; <span class="number">6</span>]; <span class="number">2</span>],
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>BoardBuilder {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new()
+    }
 }
 
 <span class="kw">impl </span>BoardBuilder {
@@ -440,8 +451,7 @@
             DovePositions::new(<span class="self">self</span>.positions[<span class="number">0</span>]),
             DovePositions::new(<span class="self">self</span>.positions[<span class="number">1</span>]),
         ]);
-        <span class="kw">let </span>board = Board::new(viewer, positions);
-        board
+        Board::new(viewer, positions)
     }
 
     <span class="kw">pub fn </span>build(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Board, error::BoardError&gt; {
