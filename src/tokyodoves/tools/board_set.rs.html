@@ -825,6 +825,22 @@
 <a href="#825" id="825">825</a>
 <a href="#826" id="826">826</a>
 <a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::io::{Fragment, FragmentIter};
 <span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, BoardBuilder};
 <span class="kw">use </span>std::{
@@ -1023,6 +1039,10 @@
 
     <span class="kw">pub fn </span>take(<span class="kw-2">&amp;mut </span><span class="self">self</span>, board: <span class="kw-2">&amp;</span>Board) -&gt; <span class="prelude-ty">Option</span>&lt;Board&gt; {
         <span class="self">self</span>.raw.take(<span class="kw-2">&amp;</span>board.to_u64()).map(u64_to_board)
+    }
+
+    <span class="kw">pub fn </span>absorb(<span class="kw-2">&amp;mut </span><span class="self">self</span>, set: BoardSet) {
+        <span class="self">self</span>.raw.absorb(set.raw);
     }
 
     <span class="kw">pub fn </span>load&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, reader: R) -&gt; std::io::Result&lt;()&gt;
@@ -1338,6 +1358,18 @@
             <span class="self">self</span>.top2bottoms.remove(<span class="kw-2">&amp;</span>k);
         }
         taken
+    }
+
+    <span class="kw">pub fn </span>absorb(<span class="kw-2">&amp;mut </span><span class="self">self</span>, set: RawBoardSet) {
+        <span class="kw">for </span>(top, bottoms) <span class="kw">in </span>set.top2bottoms.into_iter() {
+            <span class="kw">if </span>bottoms.is_empty() {
+                <span class="kw">continue</span>;
+            }
+            <span class="self">self</span>.top2bottoms
+                .entry(top)
+                .or_insert_with(HashSet::new)
+                .extend(bottoms.into_iter());
+        }
     }
 
     <span class="kw">pub fn </span>load&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, reader: R) -&gt; std::io::Result&lt;()&gt;
