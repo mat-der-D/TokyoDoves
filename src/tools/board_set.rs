@@ -99,12 +99,12 @@ impl BoardSet {
         RawBoardSet::required_capacity(reader)
     }
 
-    pub fn required_capacity_filter<R, F>(raw_reader: R, f: F) -> Capacity
+    pub fn required_capacity_filter<R, F>(reader: R, f: F) -> Capacity
     where
         R: Read,
         F: FnMut(&u64) -> bool,
     {
-        RawBoardSet::required_capacity_filter(raw_reader, f)
+        RawBoardSet::required_capacity_filter(reader, f)
     }
 
     pub fn with_capacity(capacity: Capacity) -> Self {
