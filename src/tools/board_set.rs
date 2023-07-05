@@ -61,6 +61,12 @@ impl FromIterator<Board> for BoardSet {
     }
 }
 
+impl Extend<Board> for BoardSet {
+    fn extend<T: IntoIterator<Item = Board>>(&mut self, iter: T) {
+        iter.into_iter().for_each(|b| self.insert(b));
+    }
+}
+
 impl IntoIterator for BoardSet {
     type Item = Board;
     type IntoIter = IntoIter;
@@ -296,6 +302,12 @@ impl FromIterator<u64> for RawBoardSet {
             set.insert(item);
         }
         set
+    }
+}
+
+impl Extend<u64> for RawBoardSet {
+    fn extend<T: IntoIterator<Item = u64>>(&mut self, iter: T) {
+        iter.into_iter().for_each(|h| self.insert(h));
     }
 }
 
