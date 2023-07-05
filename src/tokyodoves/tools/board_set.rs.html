@@ -813,6 +813,18 @@
 <a href="#813" id="813">813</a>
 <a href="#814" id="814">814</a>
 <a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
+<a href="#819" id="819">819</a>
+<a href="#820" id="820">820</a>
+<a href="#821" id="821">821</a>
+<a href="#822" id="822">822</a>
+<a href="#823" id="823">823</a>
+<a href="#824" id="824">824</a>
+<a href="#825" id="825">825</a>
+<a href="#826" id="826">826</a>
+<a href="#827" id="827">827</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::io::{Fragment, FragmentIter};
 <span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, BoardBuilder};
 <span class="kw">use </span>std::{
@@ -873,6 +885,12 @@
         <span class="self">Self </span>{
             raw: iter.into_iter().map(|b| b.to_u64()).collect(),
         }
+    }
+}
+
+<span class="kw">impl </span>Extend&lt;Board&gt; <span class="kw">for </span>BoardSet {
+    <span class="kw">fn </span>extend&lt;T: IntoIterator&lt;Item = Board&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, iter: T) {
+        iter.into_iter().for_each(|b| <span class="self">self</span>.insert(b));
     }
 }
 
@@ -1111,6 +1129,12 @@
             set.insert(item);
         }
         set
+    }
+}
+
+<span class="kw">impl </span>Extend&lt;u64&gt; <span class="kw">for </span>RawBoardSet {
+    <span class="kw">fn </span>extend&lt;T: IntoIterator&lt;Item = u64&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, iter: T) {
+        iter.into_iter().for_each(|h| <span class="self">self</span>.insert(h));
     }
 }
 
