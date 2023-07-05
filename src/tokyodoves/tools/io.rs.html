@@ -174,8 +174,8 @@
 
 <span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 </span><span class="kw">pub enum </span>Fragment {
-    Head(u32),
-    Tail(u32),
+    Top(u32),
+    Bottom(u32),
     Delimiter,
 }
 
@@ -185,17 +185,17 @@
     </span>R: Read,
 {
     reader: BufReader&lt;R&gt;,
-    next_is_head: bool,
+    next_is_top: bool,
 }
 
 <span class="kw">impl</span>&lt;R&gt; FragmentIter&lt;R&gt;
 <span class="kw">where
     </span>R: Read,
 {
-    <span class="kw">pub fn </span>new(raw_reader: R) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(reader: R) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            reader: BufReader::new(raw_reader),
-            next_is_head: <span class="bool-val">true</span>,
+            reader: BufReader::new(reader),
+            next_is_top: <span class="bool-val">true</span>,
         }
     }
 
@@ -208,16 +208,16 @@
 
         <span class="kw">let </span>n = u32::from_be_bytes(buf);
         <span class="kw">if </span>n == u32::MAX {
-            <span class="self">self</span>.next_is_head = <span class="bool-val">true</span>;
+            <span class="self">self</span>.next_is_top = <span class="bool-val">true</span>;
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Fragment::Delimiter));
         }
 
-        <span class="kw">let </span>ret = <span class="kw">if </span><span class="self">self</span>.next_is_head {
-            Fragment::Head(n)
+        <span class="kw">let </span>ret = <span class="kw">if </span><span class="self">self</span>.next_is_top {
+            Fragment::Top(n)
         } <span class="kw">else </span>{
-            Fragment::Tail(n)
+            Fragment::Bottom(n)
         };
-        <span class="self">self</span>.next_is_head = <span class="bool-val">false</span>;
+        <span class="self">self</span>.next_is_top = <span class="bool-val">false</span>;
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(ret))
     }
 }
@@ -256,9 +256,9 @@
 <span class="kw">where
     </span>R: Read,
 {
-    <span class="kw">pub fn </span>new(raw_reader: R) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(reader: R) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            raw: LazyRawBoardLoader::new(raw_reader),
+            raw: LazyRawBoardLoader::new(reader),
         }
     }
 
@@ -300,17 +300,17 @@
     </span>R: Read,
 {
     fragment_iter: FragmentIter&lt;R&gt;,
-    head: u64,
+    top: u64,
 }
 
 <span class="kw">impl</span>&lt;R&gt; LazyRawBoardLoader&lt;R&gt;
 <span class="kw">where
     </span>R: Read,
 {
-    <span class="kw">pub fn </span>new(raw_reader: R) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(reader: R) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            fragment_iter: FragmentIter::new(raw_reader),
-            head: <span class="number">0</span>,
+            fragment_iter: FragmentIter::new(reader),
+            top: <span class="number">0</span>,
         }
     }
 
@@ -322,11 +322,11 @@
         <span class="kw">use </span>Fragment::<span class="kw-2">*</span>;
         <span class="kw">match </span>next {
             Delimiter =&gt; <span class="self">self</span>.try_next(),
-            Head(head) =&gt; {
-                <span class="self">self</span>.head = (head <span class="kw">as </span>u64) &lt;&lt; <span class="number">32</span>;
+            Top(top) =&gt; {
+                <span class="self">self</span>.top = (top <span class="kw">as </span>u64) &lt;&lt; <span class="number">32</span>;
                 <span class="self">self</span>.try_next()
             }
-            Tail(tail) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="self">self</span>.head | (tail <span class="kw">as </span>u64))),
+            Bottom(bottom) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="self">self</span>.top | (bottom <span class="kw">as </span>u64))),
         }
     }
 }

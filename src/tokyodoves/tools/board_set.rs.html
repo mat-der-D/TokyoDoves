@@ -1060,13 +1060,13 @@
         </span>R: Read,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>count = HashMap::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>head = <span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>top = <span class="number">0</span>;
         <span class="kw">for </span>fragment <span class="kw">in </span>FragmentIter::new(raw_reader) {
             <span class="kw">use </span>Fragment::<span class="kw-2">*</span>;
             <span class="kw">match </span>fragment {
                 Delimiter =&gt; <span class="kw">continue</span>,
-                Head(h) =&gt; head = h,
-                Tail(<span class="kw">_</span>) =&gt; <span class="kw-2">*</span>count.entry(head).or_default() += <span class="number">1</span>,
+                Top(top_) =&gt; top = top_,
+                Bottom(<span class="kw">_</span>) =&gt; <span class="kw-2">*</span>count.entry(top).or_default() += <span class="number">1</span>,
             }
         }
         count
@@ -1078,16 +1078,16 @@
         F: FnMut(<span class="kw-2">&amp;</span>u64) -&gt; bool,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>count = HashMap::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>head = <span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>top = <span class="number">0</span>;
         <span class="kw">for </span>fragment <span class="kw">in </span>FragmentIter::new(raw_reader) {
             <span class="kw">use </span>Fragment::<span class="kw-2">*</span>;
             <span class="kw">match </span>fragment {
                 Delimiter =&gt; <span class="kw">continue</span>,
-                Head(h) =&gt; head = h,
-                Tail(t) =&gt; {
-                    <span class="kw">let </span>hash = <span class="self">Self</span>::u32_u32_to_u64(head, t);
+                Top(top_) =&gt; top = top_,
+                Bottom(bottom) =&gt; {
+                    <span class="kw">let </span>hash = <span class="self">Self</span>::u32_u32_to_u64(top, bottom);
                     <span class="kw">if </span>f(<span class="kw-2">&amp;</span>hash) {
-                        <span class="kw-2">*</span>count.entry(head).or_default() += <span class="number">1</span>;
+                        <span class="kw-2">*</span>count.entry(top).or_default() += <span class="number">1</span>;
                     }
                 }
             }
@@ -1259,8 +1259,8 @@
             <span class="kw">use </span>Fragment::<span class="kw-2">*</span>;
             <span class="kw">match </span>next {
                 Delimiter =&gt; <span class="kw">continue</span>,
-                Head(n) =&gt; set = <span class="self">self</span>.top2bottoms.entry(n).or_insert_with(HashSet::new),
-                Tail(n) =&gt; {
+                Top(n) =&gt; set = <span class="self">self</span>.top2bottoms.entry(n).or_insert_with(HashSet::new),
+                Bottom(n) =&gt; {
                     set.insert(n);
                 }
             }
@@ -1275,7 +1275,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>iter = FragmentIter::new(reader);
         <span class="kw">let </span><span class="kw-2">mut </span>dummy = HashSet::new();
         <span class="kw">let </span><span class="kw-2">mut </span>set = <span class="kw-2">&amp;mut </span>dummy;
-        <span class="kw">let </span><span class="kw-2">mut </span>head_tmp = <span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>top = <span class="number">0</span>;
         <span class="kw">loop </span>{
             <span class="kw">let </span><span class="prelude-val">Some</span>(next) = iter.try_next()<span class="question-mark">? </span><span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(());
@@ -1286,17 +1286,17 @@
                 Delimiter =&gt; {
                     <span class="kw">if </span>set.is_empty() {
                         set = <span class="kw-2">&amp;mut </span>dummy;
-                        <span class="self">self</span>.top2bottoms.remove(<span class="kw-2">&amp;</span>head_tmp);
+                        <span class="self">self</span>.top2bottoms.remove(<span class="kw-2">&amp;</span>top);
                     }
                 }
-                Head(head) =&gt; {
-                    set = <span class="self">self</span>.top2bottoms.entry(head).or_insert_with(HashSet::new);
-                    head_tmp = head;
+                Top(top_) =&gt; {
+                    set = <span class="self">self</span>.top2bottoms.entry(top_).or_insert_with(HashSet::new);
+                    top = top_;
                 }
-                Tail(tail) =&gt; {
-                    <span class="kw">let </span>hash = <span class="self">Self</span>::u32_u32_to_u64(head_tmp, tail);
+                Bottom(bottom) =&gt; {
+                    <span class="kw">let </span>hash = <span class="self">Self</span>::u32_u32_to_u64(top, bottom);
                     <span class="kw">if </span>f(<span class="kw-2">&amp;</span>hash) {
-                        set.insert(tail);
+                        set.insert(bottom);
                     }
                 }
             }
