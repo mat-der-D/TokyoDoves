@@ -3,8 +3,8 @@ use std::io::{BufReader, Read};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Fragment {
-    Head(u32),
-    Tail(u32),
+    Top(u32),
+    Bottom(u32),
     Delimiter,
 }
 
@@ -14,17 +14,17 @@ where
     R: Read,
 {
     reader: BufReader<R>,
-    next_is_head: bool,
+    next_is_top: bool,
 }
 
 impl<R> FragmentIter<R>
 where
     R: Read,
 {
-    pub fn new(raw_reader: R) -> Self {
+    pub fn new(reader: R) -> Self {
         Self {
-            reader: BufReader::new(raw_reader),
-            next_is_head: true,
+            reader: BufReader::new(reader),
+            next_is_top: true,
         }
     }
 
@@ -37,16 +37,16 @@ where
 
         let n = u32::from_be_bytes(buf);
         if n == u32::MAX {
-            self.next_is_head = true;
+            self.next_is_top = true;
             return Ok(Some(Fragment::Delimiter));
         }
 
-        let ret = if self.next_is_head {
-            Fragment::Head(n)
+        let ret = if self.next_is_top {
+            Fragment::Top(n)
         } else {
-            Fragment::Tail(n)
+            Fragment::Bottom(n)
         };
-        self.next_is_head = false;
+        self.next_is_top = false;
         Ok(Some(ret))
     }
 }
@@ -85,9 +85,9 @@ impl<R> LazyBoardLoader<R>
 where
     R: Read,
 {
-    pub fn new(raw_reader: R) -> Self {
+    pub fn new(reader: R) -> Self {
         Self {
-            raw: LazyRawBoardLoader::new(raw_reader),
+            raw: LazyRawBoardLoader::new(reader),
         }
     }
 
@@ -129,17 +129,17 @@ where
     R: Read,
 {
     fragment_iter: FragmentIter<R>,
-    head: u64,
+    top: u64,
 }
 
 impl<R> LazyRawBoardLoader<R>
 where
     R: Read,
 {
-    pub fn new(raw_reader: R) -> Self {
+    pub fn new(reader: R) -> Self {
         Self {
-            fragment_iter: FragmentIter::new(raw_reader),
-            head: 0,
+            fragment_iter: FragmentIter::new(reader),
+            top: 0,
         }
     }
 
@@ -151,11 +151,11 @@ where
         use Fragment::*;
         match next {
             Delimiter => self.try_next(),
-            Head(head) => {
-                self.head = (head as u64) << 32;
+            Top(top) => {
+                self.top = (top as u64) << 32;
                 self.try_next()
             }
-            Tail(tail) => Ok(Some(self.head | (tail as u64))),
+            Bottom(bottom) => Ok(Some(self.top | (bottom as u64))),
         }
     }
 }
