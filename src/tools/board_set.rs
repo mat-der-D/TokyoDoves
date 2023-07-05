@@ -281,13 +281,13 @@ impl RawBoardSet {
         R: Read,
     {
         let mut count = HashMap::new();
-        let mut head = 0;
+        let mut top = 0;
         for fragment in FragmentIter::new(raw_reader) {
             use Fragment::*;
             match fragment {
                 Delimiter => continue,
-                Head(h) => head = h,
-                Tail(_) => *count.entry(head).or_default() += 1,
+                Top(top_) => top = top_,
+                Bottom(_) => *count.entry(top).or_default() += 1,
             }
         }
         count
@@ -299,16 +299,16 @@ impl RawBoardSet {
         F: FnMut(&u64) -> bool,
     {
         let mut count = HashMap::new();
-        let mut head = 0;
+        let mut top = 0;
         for fragment in FragmentIter::new(raw_reader) {
             use Fragment::*;
             match fragment {
                 Delimiter => continue,
-                Head(h) => head = h,
-                Tail(t) => {
-                    let hash = Self::u32_u32_to_u64(head, t);
+                Top(top_) => top = top_,
+                Bottom(bottom) => {
+                    let hash = Self::u32_u32_to_u64(top, bottom);
                     if f(&hash) {
-                        *count.entry(head).or_default() += 1;
+                        *count.entry(top).or_default() += 1;
                     }
                 }
             }
@@ -480,8 +480,8 @@ impl RawBoardSet {
             use Fragment::*;
             match next {
                 Delimiter => continue,
-                Head(n) => set = self.top2bottoms.entry(n).or_insert_with(HashSet::new),
-                Tail(n) => {
+                Top(n) => set = self.top2bottoms.entry(n).or_insert_with(HashSet::new),
+                Bottom(n) => {
                     set.insert(n);
                 }
             }
@@ -496,7 +496,7 @@ impl RawBoardSet {
         let mut iter = FragmentIter::new(reader);
         let mut dummy = HashSet::new();
         let mut set = &mut dummy;
-        let mut head_tmp = 0;
+        let mut top = 0;
         loop {
             let Some(next) = iter.try_next()? else {
                 return Ok(());
@@ -507,17 +507,17 @@ impl RawBoardSet {
                 Delimiter => {
                     if set.is_empty() {
                         set = &mut dummy;
-                        self.top2bottoms.remove(&head_tmp);
+                        self.top2bottoms.remove(&top);
                     }
                 }
-                Head(head) => {
-                    set = self.top2bottoms.entry(head).or_insert_with(HashSet::new);
-                    head_tmp = head;
+                Top(top_) => {
+                    set = self.top2bottoms.entry(top_).or_insert_with(HashSet::new);
+                    top = top_;
                 }
-                Tail(tail) => {
-                    let hash = Self::u32_u32_to_u64(head_tmp, tail);
+                Bottom(bottom) => {
+                    let hash = Self::u32_u32_to_u64(top, bottom);
                     if f(&hash) {
-                        set.insert(tail);
+                        set.insert(bottom);
                     }
                 }
             }
