@@ -63,6 +63,14 @@ impl BoardSet {
         RawBoardSet::required_capacity(raw_reader)
     }
 
+    pub fn required_capacity_filter<R, F>(raw_reader: R, f: F) -> HashMap<u32, usize>
+    where
+        R: Read,
+        F: FnMut(&u64) -> bool,
+    {
+        RawBoardSet::required_capacity_filter(raw_reader, f)
+    }
+
     pub fn with_capacity(capacity: HashMap<u32, usize>) -> Self {
         Self {
             raw: RawBoardSet::with_capacity(capacity),
@@ -153,6 +161,14 @@ impl BoardSet {
         R: Read,
     {
         self.raw.load(reader)
+    }
+
+    pub fn load_filter<R, F>(&mut self, reader: R, f: F) -> std::io::Result<()>
+    where
+        R: Read,
+        F: FnMut(&u64) -> bool,
+    {
+        self.raw.load_filter(reader, f)
     }
 
     pub fn save<W>(&self, writer: W) -> std::io::Result<()>
@@ -272,6 +288,29 @@ impl RawBoardSet {
                 Delimiter => continue,
                 Head(h) => head = h,
                 Tail(_) => *count.entry(head).or_default() += 1,
+            }
+        }
+        count
+    }
+
+    pub fn required_capacity_filter<R, F>(raw_reader: R, mut f: F) -> HashMap<u32, usize>
+    where
+        R: Read,
+        F: FnMut(&u64) -> bool,
+    {
+        let mut count = HashMap::new();
+        let mut head = 0;
+        for fragment in FragmentIter::new(raw_reader) {
+            use Fragment::*;
+            match fragment {
+                Delimiter => continue,
+                Head(h) => head = h,
+                Tail(t) => {
+                    let hash = Self::u32_u32_to_u64(head, t);
+                    if f(&hash) {
+                        *count.entry(head).or_default() += 1;
+                    }
+                }
             }
         }
         count
@@ -444,6 +483,42 @@ impl RawBoardSet {
                 Head(n) => set = self.top2bottoms.entry(n).or_insert_with(HashSet::new),
                 Tail(n) => {
                     set.insert(n);
+                }
+            }
+        }
+    }
+
+    pub fn load_filter<R, F>(&mut self, reader: R, mut f: F) -> std::io::Result<()>
+    where
+        R: Read,
+        F: FnMut(&u64) -> bool,
+    {
+        let mut iter = FragmentIter::new(reader);
+        let mut dummy = HashSet::new();
+        let mut set = &mut dummy;
+        let mut head_tmp = 0;
+        loop {
+            let Some(next) = iter.try_next()? else {
+                return Ok(());
+            };
+
+            use Fragment::*;
+            match next {
+                Delimiter => {
+                    if set.is_empty() {
+                        set = &mut dummy;
+                        self.top2bottoms.remove(&head_tmp);
+                    }
+                }
+                Head(head) => {
+                    set = self.top2bottoms.entry(head).or_insert_with(HashSet::new);
+                    head_tmp = head;
+                }
+                Tail(tail) => {
+                    let hash = Self::u32_u32_to_u64(head_tmp, tail);
+                    if f(&hash) {
+                        set.insert(tail);
+                    }
                 }
             }
         }
