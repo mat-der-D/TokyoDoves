@@ -10,6 +10,42 @@ fn u64_to_board(hash: u64) -> Board {
 }
 
 // ********************************************************************
+//  Capacity
+// ********************************************************************
+#[derive(Debug, Clone, Default)]
+pub struct Capacity(HashMap<u32, usize>);
+
+impl Capacity {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.values().sum()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.values().all(|&n| n == 0)
+    }
+}
+
+impl std::ops::Add for Capacity {
+    type Output = Capacity;
+    fn add(mut self, rhs: Self) -> Self::Output {
+        self += rhs;
+        self
+    }
+}
+
+impl std::ops::AddAssign for Capacity {
+    fn add_assign(&mut self, rhs: Self) {
+        for (top, num_bottoms) in rhs.0.into_iter() {
+            *self.0.entry(top).or_default() += num_bottoms;
+        }
+    }
+}
+
+// ********************************************************************
 //  BoardSet
 // ********************************************************************
 #[derive(Debug, Clone, Default)]
@@ -56,28 +92,28 @@ impl BoardSet {
         self.raw
     }
 
-    pub fn required_capacity<R>(raw_reader: R) -> HashMap<u32, usize>
+    pub fn required_capacity<R>(reader: R) -> Capacity
     where
         R: Read,
     {
-        RawBoardSet::required_capacity(raw_reader)
+        RawBoardSet::required_capacity(reader)
     }
 
-    pub fn required_capacity_filter<R, F>(raw_reader: R, f: F) -> HashMap<u32, usize>
+    pub fn required_capacity_filter<R, F>(reader: R, f: F) -> Capacity
     where
         R: Read,
         F: FnMut(&u64) -> bool,
     {
-        RawBoardSet::required_capacity_filter(raw_reader, f)
+        RawBoardSet::required_capacity_filter(reader, f)
     }
 
-    pub fn with_capacity(capacity: HashMap<u32, usize>) -> Self {
+    pub fn with_capacity(capacity: Capacity) -> Self {
         Self {
             raw: RawBoardSet::with_capacity(capacity),
         }
     }
 
-    pub fn capacity(&self) -> HashMap<u32, usize> {
+    pub fn capacity(&self) -> Capacity {
         self.raw.capacity()
     }
 
@@ -108,7 +144,7 @@ impl BoardSet {
         self.raw.clear()
     }
 
-    pub fn reserve(&mut self, additional: HashMap<u32, usize>) {
+    pub fn reserve(&mut self, additional: Capacity) {
         self.raw.reserve(additional)
     }
 
@@ -276,13 +312,13 @@ impl RawBoardSet {
         Self::default()
     }
 
-    pub fn required_capacity<R>(raw_reader: R) -> HashMap<u32, usize>
+    pub fn required_capacity<R>(reader: R) -> Capacity
     where
         R: Read,
     {
         let mut count = HashMap::new();
         let mut top = 0;
-        for fragment in FragmentIter::new(raw_reader) {
+        for fragment in FragmentIter::new(reader) {
             use Fragment::*;
             match fragment {
                 Delimiter => continue,
@@ -290,17 +326,17 @@ impl RawBoardSet {
                 Bottom(_) => *count.entry(top).or_default() += 1,
             }
         }
-        count
+        Capacity(count)
     }
 
-    pub fn required_capacity_filter<R, F>(raw_reader: R, mut f: F) -> HashMap<u32, usize>
+    pub fn required_capacity_filter<R, F>(reader: R, mut f: F) -> Capacity
     where
         R: Read,
         F: FnMut(&u64) -> bool,
     {
         let mut count = HashMap::new();
         let mut top = 0;
-        for fragment in FragmentIter::new(raw_reader) {
+        for fragment in FragmentIter::new(reader) {
             use Fragment::*;
             match fragment {
                 Delimiter => continue,
@@ -313,23 +349,23 @@ impl RawBoardSet {
                 }
             }
         }
-        count
+        Capacity(count)
     }
 
-    pub fn with_capacity(capacity: HashMap<u32, usize>) -> Self {
-        let mut top2bottoms = HashMap::with_capacity(capacity.len());
-        for (top, num_bottoms) in capacity.into_iter() {
+    pub fn with_capacity(capacity: Capacity) -> Self {
+        let mut top2bottoms = HashMap::with_capacity(capacity.0.len());
+        for (top, num_bottoms) in capacity.0.into_iter() {
             top2bottoms.insert(top, HashSet::with_capacity(num_bottoms));
         }
         Self { top2bottoms }
     }
 
-    pub fn capacity(&self) -> HashMap<u32, usize> {
-        let mut capacity = HashMap::with_capacity(self.top2bottoms.len());
+    pub fn capacity(&self) -> Capacity {
+        let mut count = HashMap::with_capacity(self.top2bottoms.len());
         for (k, v) in self.top2bottoms.iter() {
-            capacity.insert(*k, v.capacity());
+            count.insert(*k, v.capacity());
         }
-        capacity
+        Capacity(count)
     }
 
     fn trim(&mut self) {
@@ -377,8 +413,8 @@ impl RawBoardSet {
         self.top2bottoms.clear()
     }
 
-    pub fn reserve(&mut self, additional: HashMap<u32, usize>) {
-        for (top, additional_len) in additional.into_iter() {
+    pub fn reserve(&mut self, additional: Capacity) {
+        for (top, additional_len) in additional.0.into_iter() {
             match self.top2bottoms.get_mut(&top) {
                 Some(bottoms) => {
                     bottoms.reserve(additional_len);
