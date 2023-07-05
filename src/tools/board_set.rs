@@ -198,6 +198,10 @@ impl BoardSet {
         self.raw.take(&board.to_u64()).map(u64_to_board)
     }
 
+    pub fn absorb(&mut self, set: BoardSet) {
+        self.raw.absorb(set.raw);
+    }
+
     pub fn load<R>(&mut self, reader: R) -> std::io::Result<()>
     where
         R: Read,
@@ -511,6 +515,18 @@ impl RawBoardSet {
             self.top2bottoms.remove(&k);
         }
         taken
+    }
+
+    pub fn absorb(&mut self, set: RawBoardSet) {
+        for (top, bottoms) in set.top2bottoms.into_iter() {
+            if bottoms.is_empty() {
+                continue;
+            }
+            self.top2bottoms
+                .entry(top)
+                .or_insert_with(HashSet::new)
+                .extend(bottoms.into_iter());
+        }
     }
 
     pub fn load<R>(&mut self, reader: R) -> std::io::Result<()>
