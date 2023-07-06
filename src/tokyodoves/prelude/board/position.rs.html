@@ -122,11 +122,13 @@
 <a href="#122" id="122">122</a>
 <a href="#123" id="123">123</a>
 <a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Position holders
 
-</span><span class="kw">use </span><span class="kw">super</span>::bitutil::calc_adjacents;
-<span class="kw">use </span><span class="kw">super</span>::container::DoveSet;
-<span class="kw">use </span><span class="kw">crate</span>::prelude::pieces::{color_to_index, dove_to_index, Color, Dove};
+</span><span class="kw">use </span><span class="kw">crate</span>::prelude::{
+    board::{bitutil::calc_adjacents, container::DoveSet},
+    pieces::{color_to_index, dove_to_index, Color, Dove},
+};
 
 <span class="doccomment">/// [`Dove`] -&gt; position
 </span><span class="attr">#[derive(Debug, Clone, Copy, Default)]

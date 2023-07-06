@@ -173,14 +173,14 @@
 <span class="kw">use </span>std::io::{BufReader, Read};
 
 <span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-</span><span class="kw">pub enum </span>Fragment {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>Fragment {
     Top(u32),
     Bottom(u32),
     Delimiter,
 }
 
 <span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>FragmentIter&lt;R&gt;
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FragmentIter&lt;R&gt;
 <span class="kw">where
     </span>R: Read,
 {

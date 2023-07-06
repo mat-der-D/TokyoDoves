@@ -335,7 +335,7 @@
 }
 
 <span class="attr">#[inline]
-</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>color_to_index(color: Color) -&gt; usize {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>color_to_index(color: Color) -&gt; usize {
     <span class="kw">use </span>Color::<span class="kw-2">*</span>;
     <span class="kw">match </span>color {
         Red =&gt; <span class="number">0</span>,
@@ -344,7 +344,7 @@
 }
 
 <span class="attr">#[inline]
-</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>dove_to_index(dove: Dove) -&gt; usize {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>dove_to_index(dove: Dove) -&gt; usize {
     <span class="kw">use </span>Dove::<span class="kw-2">*</span>;
     <span class="kw">match </span>dove {
         B =&gt; <span class="number">0</span>,
@@ -357,7 +357,7 @@
 }
 
 <span class="attr">#[inline]
-</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>try_index_to_dove(index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Dove&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>try_index_to_dove(index: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Dove&gt; {
     <span class="kw">use </span>Dove::<span class="kw-2">*</span>;
     <span class="kw">let </span>dove = <span class="kw">match </span>index {
         <span class="number">0 </span>=&gt; B,

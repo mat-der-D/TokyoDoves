@@ -317,14 +317,24 @@
 <a href="#317" id="317">317</a>
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::str::FromStr;
 
 <span class="kw">use </span>strum::IntoEnumIterator;
 
-<span class="kw">use </span><span class="kw">super</span>::board::{mask::<span class="kw-2">*</span>, position::<span class="kw-2">*</span>, Board};
-<span class="kw">use </span><span class="kw">super</span>::error;
-<span class="kw">use </span><span class="kw">crate</span>::prelude::pieces::{color_to_index, dove_to_index, Color, Dove};
-<span class="kw">use </span><span class="kw">crate</span>::try_char_to_color_dove;
+<span class="kw">use </span><span class="kw">crate</span>::prelude::{
+    board::{
+        main::Board,
+        mask::MaskViewer,
+        position::{ColorDovePositions, DovePositions},
+    },
+    error,
+    pieces::{color_to_index, dove_to_index, try_char_to_color_dove, Color, Dove},
+};
 
 <span class="doccomment">/// A builder of [`Board`]
 ///

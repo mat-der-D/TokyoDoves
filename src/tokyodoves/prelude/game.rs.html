@@ -338,11 +338,15 @@
 <a href="#338" id="338">338</a>
 <a href="#339" id="339">339</a>
 <a href="#340" id="340">340</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::board::{ActionsFwd, Board};
-<span class="kw">use </span><span class="kw">super</span>::builder::BoardBuilder;
-<span class="kw">use </span><span class="kw">super</span>::error;
-<span class="kw">use </span><span class="kw">crate</span>::prelude::{Action, Color};
-<span class="kw">use </span><span class="kw">crate</span>::SurroundedStatus;
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::{
+    actions::Action,
+    board::main::{ActionsFwd, Board, SurroundedStatus},
+    builder::BoardBuilder,
+    error,
+    pieces::Color,
+};
 
 <span class="comment">// ************************************************************
 //  Building Blocks
@@ -616,7 +620,7 @@
         }
     }
 
-    <span class="doccomment">/// Returns an [`ActionContainer`](`super::container::ActionContainer`) of legal [`Action`]s.
+    <span class="doccomment">/// Returns an [`ActionContainer`](`super::board::container::ActionContainer`) of legal [`Action`]s.
     </span><span class="kw">pub fn </span>legal_actions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ActionsFwd {
         <span class="self">self</span>.board
             .legal_actions(<span class="self">self</span>.player, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="self">self</span>.rule.allow_remove)

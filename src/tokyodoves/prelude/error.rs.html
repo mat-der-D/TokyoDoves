@@ -160,7 +160,7 @@
     </span>InitialBoardError,
 }
 
-<span class="doccomment">/// Errors associated to [`Board`](`super::board::Board`)
+<span class="doccomment">/// Errors associated to [`Board`](`super::board::main::Board`)
 </span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
 </span><span class="kw">pub enum </span>BoardError {
     <span class="attr">#[error(<span class="string">&quot;[BoardCreateError]&quot;</span>)]
@@ -176,7 +176,7 @@
     </span>MaskShiftError,
 }
 
-<span class="doccomment">/// Types of errors on creating [`Board`](`super::board::Board`)
+<span class="doccomment">/// Types of errors on creating [`Board`](`super::board::main::Board`)
 </span><span class="attr">#[derive(Debug, Clone, Copy)]
 </span><span class="kw">pub enum </span>BoardCreateErrorType {
     BossNotFound,

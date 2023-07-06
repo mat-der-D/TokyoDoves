@@ -723,7 +723,6 @@
 <a href="#723" id="723">723</a>
 <a href="#724" id="724">724</a>
 <a href="#725" id="725">725</a>
-<a href="#726" id="726">726</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Bit-mask utility [`BitMask`] and viewer to it [`MaskViewer`].
 //!
 //! This module consists of [`BitMask`] and [`MaskViewer`].
@@ -731,8 +730,7 @@
 </span><span class="kw">use </span>array_macro::array;
 <span class="kw">use </span>strum_macros::EnumIter;
 
-<span class="kw">use </span><span class="kw">crate</span>::prelude::error;
-<span class="kw">use </span><span class="kw">crate</span>::prelude::macros;
+<span class="kw">use </span><span class="kw">crate</span>::prelude::{error, macros};
 
 <span class="kw">const </span>MASKS: [BitMask; <span class="number">64</span>] = {
     <span class="kw">let </span>mask0 = BitMask::new();
@@ -1353,7 +1351,7 @@
 }
 
 <span class="attr">#[derive(Debug, Clone, Copy, EnumIter)]
-</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">enum </span>Direction {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>Direction {
     <span class="doccomment">/// South-East
     </span>SE,
     <span class="doccomment">/// South
@@ -1407,7 +1405,7 @@
         </span><span class="kw">unsafe </span>{ MASKS.get_unchecked(<span class="self">self</span>.status) }
     }
 
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>view_next_mask(<span class="kw-2">&amp;</span><span class="self">self</span>, d: Direction) -&gt; <span class="kw-2">&amp;</span>BitMask {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>view_next_mask(<span class="kw-2">&amp;</span><span class="self">self</span>, d: Direction) -&gt; <span class="kw-2">&amp;</span>BitMask {
         <span class="comment">// safety is guaranteed because the turned value of Self::shift_status ranges from 0 to 63
         </span><span class="kw">let </span>next_status = <span class="self">Self</span>::shift_status(<span class="self">self</span>.status, d);
         <span class="kw">unsafe </span>{ MASKS.get_unchecked(next_status) }
@@ -1415,7 +1413,7 @@
 
     <span class="doccomment">/// Get a (reference to) [`BitMask`] that contains `bit`
     /// without changing internal index (differently from [`shift_toward`](`Self::shift_toward`)).
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>view_mask_at(<span class="kw-2">&amp;</span><span class="self">self</span>, bit: u64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>BitMask, error::DirectionError&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>view_mask_at(<span class="kw-2">&amp;</span><span class="self">self</span>, bit: u64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>BitMask, error::DirectionError&gt; {
         <span class="kw">match </span><span class="self">self</span>.view_mask().target_bit_to_direction(bit)<span class="question-mark">? </span>{
             <span class="prelude-val">Some</span>(d) =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.view_next_mask(d)),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.view_mask()),
@@ -1424,7 +1422,7 @@
 
     <span class="doccomment">/// Changes the reference to constant [`BitMask`] so that
     /// the `core` of new [`BitMask`] contains the specified `bit`.
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>shift_toward(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bit: u64) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::DirectionError&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>shift_toward(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bit: u64) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::DirectionError&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(d) = <span class="self">self</span>.view_mask().target_bit_to_direction(bit)<span class="question-mark">? </span>{
             <span class="self">self</span>.do_shift(d);
         }

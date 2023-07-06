@@ -15,8 +15,8 @@
 </pre></div><pre class="rust"><code><span class="doccomment">//! Convenient tools to analyze the game
 
 </span><span class="kw">pub mod </span>board_set;
-<span class="kw">mod </span>board_value;
-<span class="kw">mod </span>io;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>board_value;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>io;
 
 <span class="comment">// By-pass export
 </span><span class="kw">pub use </span><span class="kw">crate</span>::prelude::board::canonicalizer::PositionMapper;
@@ -25,5 +25,5 @@
     BoardSet, Capacity, Difference, Drain, Intersection, IntoIter, Iter, SymmetricDifference, Union,
 };
 <span class="kw">pub use </span>board_value::<span class="kw-2">*</span>;
-<span class="kw">pub use </span>io::{LazyBoardLoader, LazyRawBoardLoader};
+<span class="kw">pub use </span>io::<span class="kw-2">*</span>;
 </code></pre></div></section></main></body></html>
