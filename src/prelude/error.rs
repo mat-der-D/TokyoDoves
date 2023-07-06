@@ -38,7 +38,7 @@ pub enum GameRuleError {
     InitialBoardError,
 }
 
-/// Errors associated to [`Board`](`super::board::Board`)
+/// Errors associated to [`Board`](`super::board::main::Board`)
 #[derive(Debug, Clone, Copy, thiserror::Error)]
 pub enum BoardError {
     #[error("[BoardCreateError]")]
@@ -54,7 +54,7 @@ pub enum BoardError {
     MaskShiftError,
 }
 
-/// Types of errors on creating [`Board`](`super::board::Board`)
+/// Types of errors on creating [`Board`](`super::board::main::Board`)
 #[derive(Debug, Clone, Copy)]
 pub enum BoardCreateErrorType {
     BossNotFound,

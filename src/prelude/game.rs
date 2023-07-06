@@ -1,8 +1,10 @@
-use super::board::{ActionsFwd, Board};
-use super::builder::BoardBuilder;
-use super::error;
-use crate::prelude::{Action, Color};
-use crate::SurroundedStatus;
+use crate::prelude::{
+    actions::Action,
+    board::main::{ActionsFwd, Board, SurroundedStatus},
+    builder::BoardBuilder,
+    error,
+    pieces::Color,
+};
 
 // ************************************************************
 //  Building Blocks
@@ -276,7 +278,7 @@ impl Game {
         }
     }
 
-    /// Returns an [`ActionContainer`](`super::container::ActionContainer`) of legal [`Action`]s.
+    /// Returns an [`ActionContainer`](`super::board::container::ActionContainer`) of legal [`Action`]s.
     pub fn legal_actions(&self) -> ActionsFwd {
         self.board
             .legal_actions(self.player, true, true, self.rule.allow_remove)

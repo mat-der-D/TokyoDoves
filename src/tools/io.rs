@@ -2,14 +2,14 @@ use crate::prelude::{Board, BoardBuilder};
 use std::io::{BufReader, Read};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Fragment {
+pub(crate) enum Fragment {
     Top(u32),
     Bottom(u32),
     Delimiter,
 }
 
 #[derive(Debug)]
-pub struct FragmentIter<R>
+pub(crate) struct FragmentIter<R>
 where
     R: Read,
 {

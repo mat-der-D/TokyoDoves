@@ -1,7 +1,9 @@
 //! Container structs of some objects
 
-use crate::prelude::pieces::{dove_to_index, try_index_to_dove};
-use crate::prelude::{Action, Dove};
+use crate::prelude::{
+    actions::Action,
+    pieces::{dove_to_index, try_index_to_dove, Dove},
+};
 
 // *******************************************************************
 //  Action Container
@@ -138,7 +140,7 @@ impl<const N: usize> Iterator for FiniteActionContainerIntoIter<N> {
 /// Read-only [`Sized`] container of [`Dove`]s without duplication.
 #[derive(Debug, Clone, Copy)]
 pub struct DoveSet {
-    pub(super) hash: u8,
+    pub(crate) hash: u8,
 }
 
 impl DoveSet {

@@ -2,10 +2,15 @@ use std::str::FromStr;
 
 use strum::IntoEnumIterator;
 
-use super::board::{mask::*, position::*, Board};
-use super::error;
-use crate::prelude::pieces::{color_to_index, dove_to_index, Color, Dove};
-use crate::try_char_to_color_dove;
+use crate::prelude::{
+    board::{
+        main::Board,
+        mask::MaskViewer,
+        position::{ColorDovePositions, DovePositions},
+    },
+    error,
+    pieces::{color_to_index, dove_to_index, try_char_to_color_dove, Color, Dove},
+};
 
 /// A builder of [`Board`]
 ///
