@@ -647,20 +647,22 @@ impl<'a> RawIter<'a> {
 impl<'a> Iterator for RawIter<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
-        let Some((map_iter, top, set_iter)) = self.state.as_mut() else {
-            let mut map_iter_raw = self.set.top2bottoms.iter();
-            let (top, set) = map_iter_raw.next()?;
-            self.state = Some((map_iter_raw, *top, set.iter()));
-            return self.next();
-        };
+        loop {
+            let Some((map_iter, top, set_iter)) = self.state.as_mut() else {
+                let mut map_iter_raw = self.set.top2bottoms.iter();
+                let (top, set) = map_iter_raw.next()?;
+                self.state = Some((map_iter_raw, *top, set.iter()));
+                continue;
+            };
 
-        let Some(bottom) = set_iter.next() else {
-            let (next_top, next_set) = map_iter.next()?;
-            *top = *next_top;
-            *set_iter = next_set.iter();
-            return self.next();
-        };
-        Some(RawBoardSet::u32_u32_to_u64(*top, *bottom))
+            let Some(bottom) = set_iter.next() else {
+                let (next_top, next_set) = map_iter.next()?;
+                *top = *next_top;
+                *set_iter = next_set.iter();
+                continue;
+            };
+            return Some(RawBoardSet::u32_u32_to_u64(*top, *bottom));
+        }
     }
 }
 
@@ -688,21 +690,23 @@ impl RawIntoIter {
 impl Iterator for RawIntoIter {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
-        let Some((map_iter, top, set_iter)) = self.state.as_mut() else {
-            let set = std::mem::replace(&mut self.set, None)?;
-            let mut map_iter_raw = set.top2bottoms.into_iter();
-            let (top, set) = map_iter_raw.next()?;
-            self.state = Some((map_iter_raw, top, set.into_iter()));
-            return self.next();
-        };
+        loop {
+            let Some((map_iter, top, set_iter)) = self.state.as_mut() else {
+                let set = std::mem::replace(&mut self.set, None)?;
+                let mut map_iter_raw = set.top2bottoms.into_iter();
+                let (top, set) = map_iter_raw.next()?;
+                self.state = Some((map_iter_raw, top, set.into_iter()));
+                continue;
+            };
 
-        let Some(bottom) = set_iter.next() else {
-            let (next_top, next_set) = map_iter.next()?;
-            *top = next_top;
-            *set_iter = next_set.into_iter();
-            return self.next();
-        };
-        Some(RawBoardSet::u32_u32_to_u64(*top, bottom))
+            let Some(bottom) = set_iter.next() else {
+                let (next_top, next_set) = map_iter.next()?;
+                *top = next_top;
+                *set_iter = next_set.into_iter();
+                continue;
+            };
+            return Some(RawBoardSet::u32_u32_to_u64(*top, bottom));
+        }
     }
 }
 
@@ -739,11 +743,11 @@ impl<'a> RawDifference<'a> {
 impl<'a> Iterator for RawDifference<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
-        let item = self.left.next()?;
-        if self.right.contains(&item) {
-            self.next()
-        } else {
-            Some(item)
+        loop {
+            let item = self.left.next()?;
+            if !self.right.contains(&item) {
+                return Some(item);
+            }
         }
     }
 }
@@ -769,18 +773,16 @@ impl<'a> RawSymmetricDifference<'a> {
 impl<'a> Iterator for RawSymmetricDifference<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(item_left) = self.left_iter.next() {
-            if self.right.contains(&item_left) {
-                self.next()
+        loop {
+            if let Some(item_left) = self.left_iter.next() {
+                if !self.right.contains(&item_left) {
+                    return Some(item_left);
+                }
             } else {
-                Some(item_left)
-            }
-        } else {
-            let item_right = self.right_iter.next()?;
-            if self.left.contains(&item_right) {
-                self.next()
-            } else {
-                Some(item_right)
+                let item_right = self.right_iter.next()?;
+                if !self.left.contains(&item_right) {
+                    return Some(item_right);
+                }
             }
         }
     }
@@ -803,11 +805,11 @@ impl<'a> RawIntersection<'a> {
 impl<'a> Iterator for RawIntersection<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
-        let item = self.left_iter.next()?;
-        if self.right.contains(&item) {
-            Some(item)
-        } else {
-            self.next()
+        loop {
+            let item = self.left_iter.next()?;
+            if self.right.contains(&item) {
+                return Some(item);
+            }
         }
     }
 }
@@ -831,13 +833,15 @@ impl<'a> RawUnion<'a> {
 impl<'a> Iterator for RawUnion<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
-        let Some(item) = self.left_iter.next() else {
-            return self.right_iter.next();
-        };
-        if self.right.contains(&item) {
-            self.next()
-        } else {
-            Some(item)
+        loop {
+            match self.left_iter.next() {
+                Some(item) => {
+                    if !self.right.contains(&item) {
+                        return Some(item);
+                    }
+                }
+                None => return self.right_iter.next(),
+            }
         }
     }
 }
