@@ -4,6 +4,9 @@ pub mod board_set;
 mod board_value;
 mod io;
 
+// By-pass export
+pub use crate::prelude::board::canonicalizer::PositionMapper;
+
 pub use board_set::{
     BoardSet, Capacity, Difference, Drain, Intersection, IntoIter, Iter, SymmetricDifference, Union,
 };

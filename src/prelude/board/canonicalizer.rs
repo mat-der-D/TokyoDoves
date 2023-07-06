@@ -1,6 +1,6 @@
 use crate::prelude::macros;
 
-pub const CONGRUENT_MAPS: [[[usize; 16]; 8]; 16] = {
+const CONGRUENT_MAPS: [[[usize; 16]; 8]; 16] = {
     // (hsize - 1) + 4 * (vsize - 1)
     let rotate_maps = [
         [0, 4, 8, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // vsize == 1
@@ -46,4 +46,28 @@ const fn compose(a: [usize; 16], b: [usize; 16]) -> [usize; 16] {
         a_after_b[i] = a[b[i]];
     });
     a_after_b
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct PositionMapper {
+    maps: &'static [[usize; 16]; 8],
+}
+
+impl PositionMapper {
+    pub fn try_create(vsize: usize, hsize: usize) -> Option<Self> {
+        if vsize == 0 || vsize >= 5 || hsize == 0 || hsize >= 5 {
+            None
+        } else {
+            let maps = unsafe { CONGRUENT_MAPS.get_unchecked((hsize - 1) + 4 * (vsize - 1)) };
+            Some(Self { maps })
+        }
+    }
+
+    pub fn map(&self, index: usize, pos: usize) -> usize {
+        if index >= 8 || pos >= 16 {
+            0
+        } else {
+            unsafe { *self.maps.get_unchecked(index).get_unchecked(pos) }
+        }
+    }
 }

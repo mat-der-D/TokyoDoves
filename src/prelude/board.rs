@@ -1,7 +1,7 @@
 use strum::IntoEnumIterator;
 
 pub(super) mod bitutil;
-pub(super) mod canonicalizer;
+pub(crate) mod canonicalizer;
 pub(super) mod container;
 pub(super) mod mask;
 pub(super) mod position;
@@ -11,7 +11,7 @@ use crate::prelude::pieces::{color_dove_to_char, color_to_index, dove_to_index, 
 use crate::prelude::{error, Action, Shift};
 
 use bitutil::*;
-use canonicalizer::*;
+use canonicalizer::PositionMapper;
 use container::*;
 pub use container::{ActionContainer, DoveSet, DoveSetIntoIter};
 pub use mask::Rectangle;
@@ -1001,7 +1001,7 @@ impl Board {
         } = board.minimum_rectangle();
         let (hsize, vsize) = (hmax - hmin + 1, vmax - vmin + 1);
 
-        let cons = CONGRUENT_MAPS[(hsize - 1) + 4 * (vsize - 1)];
+        let mapper = PositionMapper::try_create(vsize, hsize).unwrap();
         let idx_shift = hmin + 4 * vmin;
         for d in Dove::iter() {
             let id = dove_to_index(d);
@@ -1015,7 +1015,7 @@ impl Board {
                 let Some(ipos_raw) = board.viewer.view_mask().field_idx(*pos) else { continue; };
                 let ipos = ipos_raw - idx_shift;
                 for (i, hash) in hashes.iter_mut().enumerate() {
-                    let new_pos = cons[i][ipos] as u64;
+                    let new_pos = mapper.map(i, ipos) as u64;
                     *hash |= new_pos << (4 * ishift);
                     *hash |= 1_u64 << (48 + ishift);
                 }
