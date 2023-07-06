@@ -298,6 +298,25 @@
 <a href="#298" id="298">298</a>
 <a href="#299" id="299">299</a>
 <a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::str::FromStr;
 
 <span class="kw">use </span>strum::IntoEnumIterator;
@@ -415,7 +434,8 @@
     <span class="kw">fn </span>position(<span class="kw-2">&amp;</span><span class="self">self</span>, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;</span>u64 {
         <span class="kw">let </span>icolor = color_to_index(color);
         <span class="kw">let </span>idove = dove_to_index(dove);
-        <span class="kw-2">&amp;</span><span class="self">self</span>.positions[icolor][idove]
+        <span class="comment">// safety is guaranteed because icolor is in 0..2 and idove is in 0..6
+        </span><span class="kw">unsafe </span>{ <span class="self">self</span>.positions.get_unchecked(icolor).get_unchecked(idove) }
     }
 
     <span class="kw">pub fn </span>put_dove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos_v: usize, pos_h: usize, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
@@ -423,7 +443,13 @@
             <span class="kw">let </span>pos = <span class="number">1 </span>&lt;&lt; (pos_h + <span class="number">8 </span>* pos_v);
             <span class="kw">let </span>icolor = color_to_index(color);
             <span class="kw">let </span>idove = dove_to_index(dove);
-            <span class="self">self</span>.positions[icolor][idove] = pos;
+            <span class="comment">// safety is guaranteed because icolor is in 0..2 and idove is in 0..6
+            </span><span class="kw">unsafe </span>{
+                <span class="kw-2">*</span><span class="self">self
+                    </span>.positions
+                    .get_unchecked_mut(icolor)
+                    .get_unchecked_mut(idove) = pos;
+            }
         }
         <span class="self">self
     </span>}
@@ -431,7 +457,13 @@
     <span class="kw">pub fn </span>remove_dove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">let </span>icolor = color_to_index(color);
         <span class="kw">let </span>idove = dove_to_index(dove);
-        <span class="self">self</span>.positions[icolor][idove] = <span class="number">0</span>;
+        <span class="comment">// safety is guaranteed because icolor is in 0..2 and idove is in 0..6
+        </span><span class="kw">unsafe </span>{
+            <span class="kw-2">*</span><span class="self">self
+                </span>.positions
+                .get_unchecked_mut(icolor)
+                .get_unchecked_mut(idove) = <span class="number">0</span>;
+        }
         <span class="self">self
     </span>}
 
@@ -439,7 +471,13 @@
         <span class="kw">let </span>core = <span class="number">0x0f0f0f0f</span>;
         <span class="kw">for </span>icolor <span class="kw">in </span><span class="number">0</span>..<span class="number">2 </span>{
             <span class="kw">for </span>idove <span class="kw">in </span><span class="number">0</span>..<span class="number">6 </span>{
-                <span class="self">self</span>.positions[icolor][idove] &amp;= core;
+                <span class="comment">// safety is guaranteed because icolor is in 0..2 and idove is in 0..6
+                </span><span class="kw">unsafe </span>{
+                    <span class="kw-2">*</span><span class="self">self
+                        </span>.positions
+                        .get_unchecked_mut(icolor)
+                        .get_unchecked_mut(idove) &amp;= core;
+                }
             }
         }
         <span class="self">self
