@@ -2424,7 +2424,7 @@
     /// &quot;Universality&quot; means that this method returns the same value for boards that
     /// - coinside with each other under reflection, rotation, translation, and any compositions of them.
     /// - coinside with each other after alternating next player and swapping colors of doves simultaneously.
-    </span><span class="kw">pub fn </span>to_canonical_u64(<span class="kw-2">&amp;</span><span class="self">self</span>, next_player: Color) -&gt; u64 {
+    </span><span class="kw">pub fn </span>to_invariant_u64(<span class="kw-2">&amp;</span><span class="self">self</span>, next_player: Color) -&gt; u64 {
         <span class="kw">use </span>Color::<span class="kw-2">*</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>board = <span class="kw-2">*</span><span class="self">self</span>;
         <span class="kw">if </span><span class="macro">matches!</span>(next_player, Green) {
@@ -2862,15 +2862,15 @@
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_swap_color_canonical_u64() {
+    </span><span class="kw">fn </span>test_swap_color_invariant_u64() {
         <span class="kw">let </span>num_turns = <span class="number">10_000</span>;
         <span class="kw">for </span>(board, <span class="kw">_</span>, <span class="kw">_</span>) <span class="kw">in </span>RandomPlayIter::new().take(num_turns) {
             <span class="kw">let </span><span class="kw-2">mut </span>board_swap = board;
             board_swap.swap_color();
             <span class="kw">for </span>player <span class="kw">in </span>Color::iter() {
                 <span class="macro">assert_eq!</span>(
-                    board.to_canonical_u64(player),
-                    board_swap.to_canonical_u64(!player),
+                    board.to_invariant_u64(player),
+                    board_swap.to_invariant_u64(!player),
                 );
             }
         }
