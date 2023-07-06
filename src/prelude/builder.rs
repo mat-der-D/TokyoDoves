@@ -115,7 +115,8 @@ impl BoardBuilder {
     fn position(&self, color: Color, dove: Dove) -> &u64 {
         let icolor = color_to_index(color);
         let idove = dove_to_index(dove);
-        &self.positions[icolor][idove]
+        // safety is guaranteed because icolor is in 0..2 and idove is in 0..6
+        unsafe { self.positions.get_unchecked(icolor).get_unchecked(idove) }
     }
 
     pub fn put_dove(&mut self, pos_v: usize, pos_h: usize, color: Color, dove: Dove) -> &mut Self {
@@ -123,7 +124,13 @@ impl BoardBuilder {
             let pos = 1 << (pos_h + 8 * pos_v);
             let icolor = color_to_index(color);
             let idove = dove_to_index(dove);
-            self.positions[icolor][idove] = pos;
+            // safety is guaranteed because icolor is in 0..2 and idove is in 0..6
+            unsafe {
+                *self
+                    .positions
+                    .get_unchecked_mut(icolor)
+                    .get_unchecked_mut(idove) = pos;
+            }
         }
         self
     }
@@ -131,7 +138,13 @@ impl BoardBuilder {
     pub fn remove_dove(&mut self, color: Color, dove: Dove) -> &mut Self {
         let icolor = color_to_index(color);
         let idove = dove_to_index(dove);
-        self.positions[icolor][idove] = 0;
+        // safety is guaranteed because icolor is in 0..2 and idove is in 0..6
+        unsafe {
+            *self
+                .positions
+                .get_unchecked_mut(icolor)
+                .get_unchecked_mut(idove) = 0;
+        }
         self
     }
 
@@ -139,7 +152,13 @@ impl BoardBuilder {
         let core = 0x0f0f0f0f;
         for icolor in 0..2 {
             for idove in 0..6 {
-                self.positions[icolor][idove] &= core;
+                // safety is guaranteed because icolor is in 0..2 and idove is in 0..6
+                unsafe {
+                    *self
+                        .positions
+                        .get_unchecked_mut(icolor)
+                        .get_unchecked_mut(idove) &= core;
+                }
             }
         }
         self
