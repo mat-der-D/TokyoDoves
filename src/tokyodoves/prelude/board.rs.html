@@ -1437,6 +1437,10 @@
 <a href="#1437" id="1437">1437</a>
 <a href="#1438" id="1438">1438</a>
 <a href="#1439" id="1439">1439</a>
+<a href="#1440" id="1440">1440</a>
+<a href="#1441" id="1441">1441</a>
+<a href="#1442" id="1442">1442</a>
+<a href="#1443" id="1443">1443</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>bitutil;
@@ -2495,9 +2499,13 @@
                         <span class="kw">continue</span>;
                     };
 
-                    <span class="kw">let </span>ih = idx % <span class="number">4</span>;
+                    <span class="comment">// safety is guaranteed because ih and iv ranges from 0 to 3
+                    // iv &lt; 16 holds because field_idx above returns Some(0 ~ 15)
+                    </span><span class="kw">let </span>ih = idx % <span class="number">4</span>;
                     <span class="kw">let </span>iv = idx / <span class="number">4</span>;
-                    matrix[iv][ih] = <span class="prelude-val">Some</span>((c, d));
+                    <span class="kw">unsafe </span>{
+                        <span class="kw-2">*</span>matrix.get_unchecked_mut(iv).get_unchecked_mut(ih) = <span class="prelude-val">Some</span>((c, d));
+                    }
                 }
             }
         }

@@ -114,6 +114,14 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Position holders
 
 </span><span class="kw">use </span><span class="kw">super</span>::bitutil::calc_adjacents;
@@ -132,13 +140,17 @@
     }
 
     <span class="kw">fn </span>set_position(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dove: Dove, bit: u64) {
-        <span class="kw">let </span>i = dove_to_index(dove);
-        <span class="self">self</span>.positions[i] = bit;
+        <span class="comment">// safety is guaranteed because dove_to_index returns 0~5
+        </span><span class="kw">let </span>i = dove_to_index(dove);
+        <span class="kw">unsafe </span>{
+            <span class="kw-2">*</span><span class="self">self</span>.positions.get_unchecked_mut(i) = bit;
+        }
     }
 
     <span class="kw">fn </span>position_of(<span class="kw-2">&amp;</span><span class="self">self</span>, dove: Dove) -&gt; <span class="kw-2">&amp;</span>u64 {
-        <span class="kw">let </span>i = dove_to_index(dove);
-        <span class="kw-2">&amp;</span><span class="self">self</span>.positions[i]
+        <span class="comment">// safety is guaranteed because dove_to_index returns 0~5
+        </span><span class="kw">let </span>i = dove_to_index(dove);
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.positions.get_unchecked(i) }
     }
 
     <span class="kw">fn </span>union(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
@@ -147,9 +159,11 @@
 
     <span class="kw">fn </span>union_except(<span class="kw-2">&amp;</span><span class="self">self</span>, dove: Dove) -&gt; u64 {
         <span class="kw">let </span>index = dove_to_index(dove);
-        (<span class="number">0</span>..<span class="number">6</span>)
-            .filter(|i| <span class="kw-2">*</span>i != index)
-            .fold(<span class="number">0</span>, |union, i| union | <span class="self">self</span>.positions[i])
+        <span class="self">self</span>.positions
+            .iter()
+            .enumerate()
+            .filter(|(i, <span class="kw">_</span>)| <span class="kw-2">*</span>i != index)
+            .fold(<span class="number">0</span>, |union, (<span class="kw">_</span>, pos)| union | <span class="kw-2">*</span>pos)
     }
 
     <span class="kw">fn </span>doves_in_hand(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; DoveSet {
@@ -184,13 +198,15 @@
     }
 
     <span class="kw">pub fn </span>dove_positions(<span class="kw-2">&amp;</span><span class="self">self</span>, color: Color) -&gt; <span class="kw-2">&amp;</span>DovePositions {
-        <span class="kw">let </span>i = color_to_index(color);
-        <span class="kw-2">&amp;</span><span class="self">self</span>.positions[i]
+        <span class="comment">// safety is guaranteed because color_to_index return 0 or 1
+        </span><span class="kw">let </span>i = color_to_index(color);
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.positions.get_unchecked(i) }
     }
 
     <span class="kw">pub fn </span>dove_positions_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color) -&gt; <span class="kw-2">&amp;mut </span>DovePositions {
-        <span class="kw">let </span>i = color_to_index(color);
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.positions[i]
+        <span class="comment">// safety is guaranteed because color_to_index return 0 or 1
+        </span><span class="kw">let </span>i = color_to_index(color);
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.positions.get_unchecked_mut(i) }
     }
 
     <span class="kw">pub fn </span>set_position(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color, dove: Dove, bit: u64) {
