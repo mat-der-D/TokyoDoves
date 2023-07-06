@@ -677,12 +677,14 @@ impl MaskViewer {
     }
 
     pub fn view_mask(&self) -> &BitMask {
-        &MASKS[self.status]
+        // safety is guaranteed because self.status can be changed only via do_shift
+        unsafe { MASKS.get_unchecked(self.status) }
     }
 
     pub(super) fn view_next_mask(&self, d: Direction) -> &BitMask {
+        // safety is guaranteed because the turned value of Self::shift_status ranges from 0 to 63
         let next_status = Self::shift_status(self.status, d);
-        &MASKS[next_status]
+        unsafe { MASKS.get_unchecked(next_status) }
     }
 
     /// Get a (reference to) [`BitMask`] that contains `bit`

@@ -16,13 +16,17 @@ impl DovePositions {
     }
 
     fn set_position(&mut self, dove: Dove, bit: u64) {
+        // safety is guaranteed because dove_to_index returns 0~5
         let i = dove_to_index(dove);
-        self.positions[i] = bit;
+        unsafe {
+            *self.positions.get_unchecked_mut(i) = bit;
+        }
     }
 
     fn position_of(&self, dove: Dove) -> &u64 {
+        // safety is guaranteed because dove_to_index returns 0~5
         let i = dove_to_index(dove);
-        &self.positions[i]
+        unsafe { self.positions.get_unchecked(i) }
     }
 
     fn union(&self) -> u64 {
@@ -31,9 +35,11 @@ impl DovePositions {
 
     fn union_except(&self, dove: Dove) -> u64 {
         let index = dove_to_index(dove);
-        (0..6)
-            .filter(|i| *i != index)
-            .fold(0, |union, i| union | self.positions[i])
+        self.positions
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| *i != index)
+            .fold(0, |union, (_, pos)| union | *pos)
     }
 
     fn doves_in_hand(&self) -> DoveSet {
@@ -68,13 +74,15 @@ impl ColorDovePositions {
     }
 
     pub fn dove_positions(&self, color: Color) -> &DovePositions {
+        // safety is guaranteed because color_to_index return 0 or 1
         let i = color_to_index(color);
-        &self.positions[i]
+        unsafe { self.positions.get_unchecked(i) }
     }
 
     pub fn dove_positions_mut(&mut self, color: Color) -> &mut DovePositions {
+        // safety is guaranteed because color_to_index return 0 or 1
         let i = color_to_index(color);
-        &mut self.positions[i]
+        unsafe { self.positions.get_unchecked_mut(i) }
     }
 
     pub fn set_position(&mut self, color: Color, dove: Dove, bit: u64) {

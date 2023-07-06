@@ -58,6 +58,8 @@ impl PositionMapper {
         if vsize == 0 || vsize >= 5 || hsize == 0 || hsize >= 5 {
             None
         } else {
+            // safety is guaranteed because (hsize - 1) + 4 * (vsize - 1) ranges from 0 to 15
+            // under the validation above
             let maps = unsafe { CONGRUENT_MAPS.get_unchecked((hsize - 1) + 4 * (vsize - 1)) };
             Some(Self { maps })
         }
@@ -67,6 +69,7 @@ impl PositionMapper {
         if index >= 8 || pos >= 16 {
             0
         } else {
+            // safety is guaranteed thanks to the validation above
             unsafe { *self.maps.get_unchecked(index).get_unchecked(pos) }
         }
     }

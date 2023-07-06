@@ -1056,9 +1056,13 @@ impl Board {
                         continue;
                     };
 
+                    // safety is guaranteed because ih and iv ranges from 0 to 3
+                    // iv < 16 holds because field_idx above returns Some(0 ~ 15)
                     let ih = idx % 4;
                     let iv = idx / 4;
-                    matrix[iv][ih] = Some((c, d));
+                    unsafe {
+                        *matrix.get_unchecked_mut(iv).get_unchecked_mut(ih) = Some((c, d));
+                    }
                 }
             }
         }
