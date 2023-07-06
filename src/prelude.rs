@@ -1,5 +1,5 @@
 mod actions;
-mod board;
+pub(crate) mod board;
 mod builder;
 mod game;
 mod macros;
