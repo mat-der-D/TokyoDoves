@@ -841,6 +841,10 @@
 <a href="#841" id="841">841</a>
 <a href="#842" id="842">842</a>
 <a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::io::{Fragment, FragmentIter};
 <span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, BoardBuilder};
 <span class="kw">use </span>std::{
@@ -1490,20 +1494,22 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawIter&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">let </span><span class="prelude-val">Some</span>((map_iter, top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
-            <span class="kw">let </span><span class="kw-2">mut </span>map_iter_raw = <span class="self">self</span>.set.top2bottoms.iter();
-            <span class="kw">let </span>(top, set) = map_iter_raw.next()<span class="question-mark">?</span>;
-            <span class="self">self</span>.state = <span class="prelude-val">Some</span>((map_iter_raw, <span class="kw-2">*</span>top, set.iter()));
-            <span class="kw">return </span><span class="self">self</span>.next();
-        };
+        <span class="kw">loop </span>{
+            <span class="kw">let </span><span class="prelude-val">Some</span>((map_iter, top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
+                <span class="kw">let </span><span class="kw-2">mut </span>map_iter_raw = <span class="self">self</span>.set.top2bottoms.iter();
+                <span class="kw">let </span>(top, set) = map_iter_raw.next()<span class="question-mark">?</span>;
+                <span class="self">self</span>.state = <span class="prelude-val">Some</span>((map_iter_raw, <span class="kw-2">*</span>top, set.iter()));
+                <span class="kw">continue</span>;
+            };
 
-        <span class="kw">let </span><span class="prelude-val">Some</span>(bottom) = set_iter.next() <span class="kw">else </span>{
-            <span class="kw">let </span>(next_top, next_set) = map_iter.next()<span class="question-mark">?</span>;
-            <span class="kw-2">*</span>top = <span class="kw-2">*</span>next_top;
-            <span class="kw-2">*</span>set_iter = next_set.iter();
-            <span class="kw">return </span><span class="self">self</span>.next();
-        };
-        <span class="prelude-val">Some</span>(RawBoardSet::u32_u32_to_u64(<span class="kw-2">*</span>top, <span class="kw-2">*</span>bottom))
+            <span class="kw">let </span><span class="prelude-val">Some</span>(bottom) = set_iter.next() <span class="kw">else </span>{
+                <span class="kw">let </span>(next_top, next_set) = map_iter.next()<span class="question-mark">?</span>;
+                <span class="kw-2">*</span>top = <span class="kw-2">*</span>next_top;
+                <span class="kw-2">*</span>set_iter = next_set.iter();
+                <span class="kw">continue</span>;
+            };
+            <span class="kw">return </span><span class="prelude-val">Some</span>(RawBoardSet::u32_u32_to_u64(<span class="kw-2">*</span>top, <span class="kw-2">*</span>bottom));
+        }
     }
 }
 
@@ -1531,21 +1537,23 @@
 <span class="kw">impl </span>Iterator <span class="kw">for </span>RawIntoIter {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">let </span><span class="prelude-val">Some</span>((map_iter, top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
-            <span class="kw">let </span>set = std::mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.set, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
-            <span class="kw">let </span><span class="kw-2">mut </span>map_iter_raw = set.top2bottoms.into_iter();
-            <span class="kw">let </span>(top, set) = map_iter_raw.next()<span class="question-mark">?</span>;
-            <span class="self">self</span>.state = <span class="prelude-val">Some</span>((map_iter_raw, top, set.into_iter()));
-            <span class="kw">return </span><span class="self">self</span>.next();
-        };
+        <span class="kw">loop </span>{
+            <span class="kw">let </span><span class="prelude-val">Some</span>((map_iter, top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
+                <span class="kw">let </span>set = std::mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.set, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>map_iter_raw = set.top2bottoms.into_iter();
+                <span class="kw">let </span>(top, set) = map_iter_raw.next()<span class="question-mark">?</span>;
+                <span class="self">self</span>.state = <span class="prelude-val">Some</span>((map_iter_raw, top, set.into_iter()));
+                <span class="kw">continue</span>;
+            };
 
-        <span class="kw">let </span><span class="prelude-val">Some</span>(bottom) = set_iter.next() <span class="kw">else </span>{
-            <span class="kw">let </span>(next_top, next_set) = map_iter.next()<span class="question-mark">?</span>;
-            <span class="kw-2">*</span>top = next_top;
-            <span class="kw-2">*</span>set_iter = next_set.into_iter();
-            <span class="kw">return </span><span class="self">self</span>.next();
-        };
-        <span class="prelude-val">Some</span>(RawBoardSet::u32_u32_to_u64(<span class="kw-2">*</span>top, bottom))
+            <span class="kw">let </span><span class="prelude-val">Some</span>(bottom) = set_iter.next() <span class="kw">else </span>{
+                <span class="kw">let </span>(next_top, next_set) = map_iter.next()<span class="question-mark">?</span>;
+                <span class="kw-2">*</span>top = next_top;
+                <span class="kw-2">*</span>set_iter = next_set.into_iter();
+                <span class="kw">continue</span>;
+            };
+            <span class="kw">return </span><span class="prelude-val">Some</span>(RawBoardSet::u32_u32_to_u64(<span class="kw-2">*</span>top, bottom));
+        }
     }
 }
 
@@ -1582,11 +1590,11 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">let </span>item = <span class="self">self</span>.left.next()<span class="question-mark">?</span>;
-        <span class="kw">if </span><span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item) {
-            <span class="self">self</span>.next()
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(item)
+        <span class="kw">loop </span>{
+            <span class="kw">let </span>item = <span class="self">self</span>.left.next()<span class="question-mark">?</span>;
+            <span class="kw">if </span>!<span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item) {
+                <span class="kw">return </span><span class="prelude-val">Some</span>(item);
+            }
         }
     }
 }
@@ -1612,18 +1620,16 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawSymmetricDifference&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(item_left) = <span class="self">self</span>.left_iter.next() {
-            <span class="kw">if </span><span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item_left) {
-                <span class="self">self</span>.next()
+        <span class="kw">loop </span>{
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(item_left) = <span class="self">self</span>.left_iter.next() {
+                <span class="kw">if </span>!<span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item_left) {
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(item_left);
+                }
             } <span class="kw">else </span>{
-                <span class="prelude-val">Some</span>(item_left)
-            }
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>item_right = <span class="self">self</span>.right_iter.next()<span class="question-mark">?</span>;
-            <span class="kw">if </span><span class="self">self</span>.left.contains(<span class="kw-2">&amp;</span>item_right) {
-                <span class="self">self</span>.next()
-            } <span class="kw">else </span>{
-                <span class="prelude-val">Some</span>(item_right)
+                <span class="kw">let </span>item_right = <span class="self">self</span>.right_iter.next()<span class="question-mark">?</span>;
+                <span class="kw">if </span>!<span class="self">self</span>.left.contains(<span class="kw-2">&amp;</span>item_right) {
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(item_right);
+                }
             }
         }
     }
@@ -1646,11 +1652,11 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawIntersection&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">let </span>item = <span class="self">self</span>.left_iter.next()<span class="question-mark">?</span>;
-        <span class="kw">if </span><span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item) {
-            <span class="prelude-val">Some</span>(item)
-        } <span class="kw">else </span>{
-            <span class="self">self</span>.next()
+        <span class="kw">loop </span>{
+            <span class="kw">let </span>item = <span class="self">self</span>.left_iter.next()<span class="question-mark">?</span>;
+            <span class="kw">if </span><span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item) {
+                <span class="kw">return </span><span class="prelude-val">Some</span>(item);
+            }
         }
     }
 }
@@ -1674,13 +1680,15 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawUnion&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">let </span><span class="prelude-val">Some</span>(item) = <span class="self">self</span>.left_iter.next() <span class="kw">else </span>{
-            <span class="kw">return </span><span class="self">self</span>.right_iter.next();
-        };
-        <span class="kw">if </span><span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item) {
-            <span class="self">self</span>.next()
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(item)
+        <span class="kw">loop </span>{
+            <span class="kw">match </span><span class="self">self</span>.left_iter.next() {
+                <span class="prelude-val">Some</span>(item) =&gt; {
+                    <span class="kw">if </span>!<span class="self">self</span>.right.contains(<span class="kw-2">&amp;</span>item) {
+                        <span class="kw">return </span><span class="prelude-val">Some</span>(item);
+                    }
+                }
+                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="self">self</span>.right_iter.next(),
+            }
         }
     }
 }
