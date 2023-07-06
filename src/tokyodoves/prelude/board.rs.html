@@ -1440,7 +1440,7 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>bitutil;
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>canonicalizer;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>canonicalizer;
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>container;
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>mask;
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>position;
@@ -1450,7 +1450,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::prelude::{error, Action, Shift};
 
 <span class="kw">use </span>bitutil::<span class="kw-2">*</span>;
-<span class="kw">use </span>canonicalizer::<span class="kw-2">*</span>;
+<span class="kw">use </span>canonicalizer::PositionMapper;
 <span class="kw">use </span>container::<span class="kw-2">*</span>;
 <span class="kw">pub use </span>container::{ActionContainer, DoveSet, DoveSetIntoIter};
 <span class="kw">pub use </span>mask::Rectangle;
@@ -2440,7 +2440,7 @@
         } = board.minimum_rectangle();
         <span class="kw">let </span>(hsize, vsize) = (hmax - hmin + <span class="number">1</span>, vmax - vmin + <span class="number">1</span>);
 
-        <span class="kw">let </span>cons = CONGRUENT_MAPS[(hsize - <span class="number">1</span>) + <span class="number">4 </span>* (vsize - <span class="number">1</span>)];
+        <span class="kw">let </span>mapper = PositionMapper::try_create(vsize, hsize).unwrap();
         <span class="kw">let </span>idx_shift = hmin + <span class="number">4 </span>* vmin;
         <span class="kw">for </span>d <span class="kw">in </span>Dove::iter() {
             <span class="kw">let </span>id = dove_to_index(d);
@@ -2454,7 +2454,7 @@
                 <span class="kw">let </span><span class="prelude-val">Some</span>(ipos_raw) = board.viewer.view_mask().field_idx(<span class="kw-2">*</span>pos) <span class="kw">else </span>{ <span class="kw">continue</span>; };
                 <span class="kw">let </span>ipos = ipos_raw - idx_shift;
                 <span class="kw">for </span>(i, hash) <span class="kw">in </span>hashes.iter_mut().enumerate() {
-                    <span class="kw">let </span>new_pos = cons[i][ipos] <span class="kw">as </span>u64;
+                    <span class="kw">let </span>new_pos = mapper.map(i, ipos) <span class="kw">as </span>u64;
                     <span class="kw-2">*</span>hash |= new_pos &lt;&lt; (<span class="number">4 </span>* ishift);
                     <span class="kw-2">*</span>hash |= <span class="number">1_u64 </span>&lt;&lt; (<span class="number">48 </span>+ ishift);
                 }
