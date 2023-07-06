@@ -1,5 +1,5 @@
-use super::{
-    board::Board,
+use crate::prelude::{
+    board::main::Board,
     error,
     pieces::{color_dove_to_char, try_char_to_color_dove, Color, Dove},
     Shift,

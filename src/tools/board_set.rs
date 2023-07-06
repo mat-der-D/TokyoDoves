@@ -1,5 +1,5 @@
-use super::io::{Fragment, FragmentIter};
 use crate::prelude::{Board, BoardBuilder};
+use crate::tools::io::{Fragment, FragmentIter};
 use std::{
     collections::{HashMap, HashSet},
     io::{BufWriter, Read, Write},

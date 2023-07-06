@@ -5,8 +5,7 @@
 use array_macro::array;
 use strum_macros::EnumIter;
 
-use crate::prelude::error;
-use crate::prelude::macros;
+use crate::prelude::{error, macros};
 
 const MASKS: [BitMask; 64] = {
     let mask0 = BitMask::new();
@@ -627,7 +626,7 @@ impl Rectangle {
 }
 
 #[derive(Debug, Clone, Copy, EnumIter)]
-pub(super) enum Direction {
+pub(crate) enum Direction {
     /// South-East
     SE,
     /// South
@@ -681,7 +680,7 @@ impl MaskViewer {
         unsafe { MASKS.get_unchecked(self.status) }
     }
 
-    pub(super) fn view_next_mask(&self, d: Direction) -> &BitMask {
+    pub(crate) fn view_next_mask(&self, d: Direction) -> &BitMask {
         // safety is guaranteed because the turned value of Self::shift_status ranges from 0 to 63
         let next_status = Self::shift_status(self.status, d);
         unsafe { MASKS.get_unchecked(next_status) }
@@ -689,7 +688,7 @@ impl MaskViewer {
 
     /// Get a (reference to) [`BitMask`] that contains `bit`
     /// without changing internal index (differently from [`shift_toward`](`Self::shift_toward`)).
-    pub(super) fn view_mask_at(&self, bit: u64) -> Result<&BitMask, error::DirectionError> {
+    pub(crate) fn view_mask_at(&self, bit: u64) -> Result<&BitMask, error::DirectionError> {
         match self.view_mask().target_bit_to_direction(bit)? {
             Some(d) => Ok(self.view_next_mask(d)),
             None => Ok(self.view_mask()),
@@ -698,7 +697,7 @@ impl MaskViewer {
 
     /// Changes the reference to constant [`BitMask`] so that
     /// the `core` of new [`BitMask`] contains the specified `bit`.
-    pub(super) fn shift_toward(&mut self, bit: u64) -> Result<(), error::DirectionError> {
+    pub(crate) fn shift_toward(&mut self, bit: u64) -> Result<(), error::DirectionError> {
         if let Some(d) = self.view_mask().target_bit_to_direction(bit)? {
             self.do_shift(d);
         }

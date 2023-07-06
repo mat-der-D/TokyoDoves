@@ -1,8 +1,9 @@
 //! Position holders
 
-use super::bitutil::calc_adjacents;
-use super::container::DoveSet;
-use crate::prelude::pieces::{color_to_index, dove_to_index, Color, Dove};
+use crate::prelude::{
+    board::{bitutil::calc_adjacents, container::DoveSet},
+    pieces::{color_to_index, dove_to_index, Color, Dove},
+};
 
 /// [`Dove`] -> position
 #[derive(Debug, Clone, Copy, Default)]

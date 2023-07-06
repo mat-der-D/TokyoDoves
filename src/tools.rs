@@ -1,8 +1,8 @@
 //! Convenient tools to analyze the game
 
 pub mod board_set;
-mod board_value;
-mod io;
+pub(crate) mod board_value;
+pub(crate) mod io;
 
 // By-pass export
 pub use crate::prelude::board::canonicalizer::PositionMapper;
@@ -11,4 +11,4 @@ pub use board_set::{
     BoardSet, Capacity, Difference, Drain, Intersection, IntoIter, Iter, SymmetricDifference, Union,
 };
 pub use board_value::*;
-pub use io::{LazyBoardLoader, LazyRawBoardLoader};
+pub use io::*;

@@ -1,7 +1,7 @@
 //! Utility functions for bit manupulations.
 use array_macro::array;
 
-use crate::prelude::Shift;
+use crate::prelude::shift::Shift;
 
 const BIT_SIDES: [u64; 64] = {
     let sides0 = calc_sides(1);

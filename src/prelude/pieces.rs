@@ -128,7 +128,7 @@ pub enum Dove {
 }
 
 #[inline]
-pub(super) fn color_to_index(color: Color) -> usize {
+pub(crate) fn color_to_index(color: Color) -> usize {
     use Color::*;
     match color {
         Red => 0,
@@ -137,7 +137,7 @@ pub(super) fn color_to_index(color: Color) -> usize {
 }
 
 #[inline]
-pub(super) fn dove_to_index(dove: Dove) -> usize {
+pub(crate) fn dove_to_index(dove: Dove) -> usize {
     use Dove::*;
     match dove {
         B => 0,
@@ -150,7 +150,7 @@ pub(super) fn dove_to_index(dove: Dove) -> usize {
 }
 
 #[inline]
-pub(super) fn try_index_to_dove(index: usize) -> Option<Dove> {
+pub(crate) fn try_index_to_dove(index: usize) -> Option<Dove> {
     use Dove::*;
     let dove = match index {
         0 => B,
