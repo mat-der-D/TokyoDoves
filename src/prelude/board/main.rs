@@ -52,6 +52,8 @@ macro_rules! impl_mutable_action_container {
                 }
             }
 
+            impl private::Sealed for $target {}
+
             impl ActionContainer for $target {
                 fn len(&self) -> usize {
                     self.0.len()

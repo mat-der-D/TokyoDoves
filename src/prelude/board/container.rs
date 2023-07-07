@@ -26,7 +26,7 @@ pub trait ActionContainer:
     fn contains(&self, action: Action) -> bool;
 }
 
-mod private {
+pub mod private {
     pub trait Sealed {}
 }
 
