@@ -30,7 +30,7 @@ pub struct Shift {
 
 impl Shift {
     /// Constructs [`Shift`].
-    pub fn new(dh: i8, dv: i8) -> Self {
+    pub fn new(dv: i8, dh: i8) -> Self {
         Self { dh, dv }
     }
 
