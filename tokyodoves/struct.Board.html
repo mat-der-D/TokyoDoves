@@ -4,7 +4,7 @@
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
 
 <span class="kw">let </span><span class="kw-2">mut </span>board = BoardBuilder::new().build()<span class="question-mark">?</span>;
-<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift { dh: <span class="number">1</span>, dv: <span class="number">0 </span>});
+<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift::new(<span class="number">0</span>, <span class="number">1</span>));
 <span class="kw">let </span>result = board.perform(action);
 <span class="macro">assert!</span>(result.is_ok());</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.perform_copied" class="method"><a class="srclink rightside" href="../src/tokyodoves/prelude/board/main.rs.html#204-208">source</a><h4 class="code-header">pub fn <a href="#method.perform_copied" class="fn">perform_copied</a>(&amp;self, action: <a class="enum" href="enum.Action.html" title="enum tokyodoves::Action">Action</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.70.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, <a class="enum" href="error/enum.BoardError.html" title="enum tokyodoves::error::BoardError">BoardError</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the result of performing the specified action to <code>self</code>.
@@ -13,14 +13,14 @@ It differs from <a href="struct.Board.html#method.perform" title="method tokyodo
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
 
 <span class="kw">let </span>board = BoardBuilder::new().build()<span class="question-mark">?</span>;
-<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift { dh: <span class="number">1</span>, dv: <span class="number">0 </span>});
+<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift::new(<span class="number">0</span>, <span class="number">1</span>));
 <span class="kw">let </span>next_board = board.perform_copied(action)<span class="question-mark">?</span>;</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.perform_bwd" class="method"><a class="srclink rightside" href="../src/tokyodoves/prelude/board/main.rs.html#227-231">source</a><h4 class="code-header">pub fn <a href="#method.perform_bwd" class="fn">perform_bwd</a>(&amp;mut self, action: <a class="enum" href="enum.Action.html" title="enum tokyodoves::Action">Action</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.70.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.70.0/std/primitive.unit.html">()</a>, <a class="enum" href="error/enum.BoardError.html" title="enum tokyodoves::error::BoardError">BoardError</a>&gt;</h4></section></summary><div class="docblock"><p>Performs the specified backward action to <code>self</code>.</p>
 <h5 id="errors-2"><a href="#errors-2">Errors</a></h5><h5 id="examples-2"><a href="#examples-2">Examples</a></h5>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
 
 <span class="kw">let </span><span class="kw-2">mut </span>board = BoardBuilder::new().build()<span class="question-mark">?</span>;
-<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift { dh: <span class="number">1</span>, dv: -<span class="number">1 </span>});
+<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift::new(-<span class="number">1</span>, <span class="number">1</span>));
 <span class="kw">let </span>result = board.perform_bwd(action);
 <span class="macro">assert!</span>(result.is_ok());</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.perform_bwd_copied" class="method"><a class="srclink rightside" href="../src/tokyodoves/prelude/board/main.rs.html#250-254">source</a><h4 class="code-header">pub fn <a href="#method.perform_bwd_copied" class="fn">perform_bwd_copied</a>(&amp;self, action: <a class="enum" href="enum.Action.html" title="enum tokyodoves::Action">Action</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.70.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, <a class="enum" href="error/enum.BoardError.html" title="enum tokyodoves::error::BoardError">BoardError</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the result of performing the specified backward action to <code>self</code>.
@@ -29,7 +29,7 @@ It differs from <a href="struct.Board.html#method.perform_bwd" title="method tok
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
 
 <span class="kw">let </span>board = BoardBuilder::new().build()<span class="question-mark">?</span>;
-<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift { dh: <span class="number">1</span>, dv: <span class="number">0 </span>});
+<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift::new(<span class="number">0</span>, <span class="number">1</span>));
 <span class="kw">let </span>next_board = board.perform_bwd_copied(action)<span class="question-mark">?</span>;</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.perform_unchecked" class="method"><a class="srclink rightside" href="../src/tokyodoves/prelude/board/main.rs.html#286-288">source</a><h4 class="code-header">pub fn <a href="#method.perform_unchecked" class="fn">perform_unchecked</a>(&amp;mut self, action: <a class="enum" href="enum.Action.html" title="enum tokyodoves::Action">Action</a>)</h4></section></summary><div class="docblock"><p>Performs <code>action</code> to <code>self</code> (without distinction between forward and backward).</p>
 <p>It may return <code>Ok(())</code> even if the specified <code>action</code> is illegal.
@@ -51,7 +51,7 @@ When it returns an error, <code>self</code> is not changed.</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
 
 <span class="kw">let </span><span class="kw-2">mut </span>board = BoardBuilder::new().build()<span class="question-mark">?</span>;
-<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift { dh: <span class="number">1</span>, dv: <span class="number">0 </span>});
+<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift::new(<span class="number">0</span>, <span class="number">1</span>));
 board.perform_unchecked(action);</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.perform_unchecked_copied" class="method"><a class="srclink rightside" href="../src/tokyodoves/prelude/board/main.rs.html#334-338">source</a><h4 class="code-header">pub fn <a href="#method.perform_unchecked_copied" class="fn">perform_unchecked_copied</a>(&amp;self, action: <a class="enum" href="enum.Action.html" title="enum tokyodoves::Action">Action</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Returns the result of performing the specified action to <code>self</code>.
 It differs from <a href="struct.Board.html#method.perform_unchecked" title="method tokyodoves::Board::perform_unchecked"><code>perform_unchecked</code></a> in that it does not change <code>self</code>.</p>
@@ -62,21 +62,21 @@ far from the current 4x4 field (, which are clearly illegal).</p>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
 
 <span class="kw">let </span>board = BoardBuilder::new().build()<span class="question-mark">?</span>;
-<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift { dh: <span class="number">1</span>, dv: <span class="number">0 </span>});
+<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift::new(<span class="number">0</span>, <span class="number">1</span>));
 <span class="kw">let </span>next_board = board.perform_unchecked_copied(action);</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.check_action" class="method"><a class="srclink rightside" href="../src/tokyodoves/prelude/board/main.rs.html#359-361">source</a><h4 class="code-header">pub fn <a href="#method.check_action" class="fn">check_action</a>(&amp;self, action: <a class="enum" href="enum.Action.html" title="enum tokyodoves::Action">Action</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.70.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.70.0/std/primitive.unit.html">()</a>, <a class="enum" href="error/enum.BoardError.html" title="enum tokyodoves::error::BoardError">BoardError</a>&gt;</h4></section></summary><div class="docblock"><p>Check if <code>action</code> is legal.</p>
 <h5 id="errors-4"><a href="#errors-4">Errors</a></h5><h5 id="examples-6"><a href="#examples-6">Examples</a></h5>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
 
 <span class="kw">let </span><span class="kw-2">mut </span>board = BoardBuilder::new().build()<span class="question-mark">?</span>;
-<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift { dh: <span class="number">1</span>, dv: <span class="number">0 </span>});
+<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift::new(<span class="number">0</span>, <span class="number">1</span>));
 <span class="macro">assert!</span>(board.check_action(action).is_ok());</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.check_action_bwd" class="method"><a class="srclink rightside" href="../src/tokyodoves/prelude/board/main.rs.html#379-381">source</a><h4 class="code-header">pub fn <a href="#method.check_action_bwd" class="fn">check_action_bwd</a>(&amp;self, action: <a class="enum" href="enum.Action.html" title="enum tokyodoves::Action">Action</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.70.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.70.0/std/primitive.unit.html">()</a>, <a class="enum" href="error/enum.BoardError.html" title="enum tokyodoves::error::BoardError">BoardError</a>&gt;</h4></section></summary><div class="docblock"><p>Check if backward <code>action</code> is legal.</p>
 <h5 id="errors-5"><a href="#errors-5">Errors</a></h5><h5 id="examples-7"><a href="#examples-7">Examples</a></h5>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
 
 <span class="kw">let </span><span class="kw-2">mut </span>board = BoardBuilder::new().build()<span class="question-mark">?</span>;
-<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift { dh: <span class="number">1</span>, dv: -<span class="number">1 </span>});
+<span class="kw">let </span>action = Action::Put(Color::Red, Dove::A, Shift::new(-<span class="number">1</span>, <span class="number">1</span>));
 <span class="macro">assert!</span>(board.check_action_bwd(action).is_ok());</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.legal_actions" class="method"><a class="srclink rightside" href="../src/tokyodoves/prelude/board/main.rs.html#588-602">source</a><h4 class="code-header">pub fn <a href="#method.legal_actions" class="fn">legal_actions</a>(
     &amp;self,

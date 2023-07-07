@@ -2,7 +2,7 @@
 <h2 id="examples"><a href="#examples">Examples</a></h2>
 <div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>tokyodoves::{Color, Board, BoardBuilder};
-<span class="kw">use </span>tokyodoves::game::{GameRule, WinnerJudgement};
+<span class="kw">use </span>tokyodoves::game::{GameRule, Judge};
 
 <span class="comment">// Set whether `Remove` is allowed or not
 </span><span class="kw">let </span>rule = GameRule::new(<span class="bool-val">true</span>);
@@ -17,7 +17,7 @@
 <p>The values of fields are as below:</p>
 <ul>
 <li><code>first_player</code>: <code>Color::Red</code></li>
-<li><code>suicide_atk_judge</code>: <code>WinnerJudgement::NextPlayer</code></li>
+<li><code>suicide_atk_judge</code>: <code>Judge::NextWins</code></li>
 <li><code>initial_board</code>: <code>BoardConverter::new_game().board</code></li>
 </ul>
 </div></details><section id="method.is_remove_accepted" class="method"><a class="srclink rightside" href="../../src/tokyodoves/game.rs.html#83-85">source</a><h4 class="code-header">pub fn <a href="#method.is_remove_accepted" class="fn">is_remove_accepted</a>(&amp;self) -&gt; &amp;<a class="primitive" href="https://doc.rust-lang.org/1.70.0/std/primitive.bool.html">bool</a></h4></section><section id="method.first_player" class="method"><a class="srclink rightside" href="../../src/tokyodoves/game.rs.html#87-89">source</a><h4 class="code-header">pub fn <a href="#method.first_player" class="fn">first_player</a>(&amp;self) -&gt; &amp;<a class="enum" href="../enum.Color.html" title="enum tokyodoves::Color">Color</a></h4></section><section id="method.suicide_atk_judge" class="method"><a class="srclink rightside" href="../../src/tokyodoves/game.rs.html#91-93">source</a><h4 class="code-header">pub fn <a href="#method.suicide_atk_judge" class="fn">suicide_atk_judge</a>(&amp;self) -&gt; &amp;<a class="enum" href="enum.Judge.html" title="enum tokyodoves::game::Judge">Judge</a></h4></section><section id="method.initial_board" class="method"><a class="srclink rightside" href="../../src/tokyodoves/game.rs.html#95-97">source</a><h4 class="code-header">pub fn <a href="#method.initial_board" class="fn">initial_board</a>(&amp;self) -&gt; &amp;<a class="struct" href="../struct.Board.html" title="struct tokyodoves::Board">Board</a></h4></section><details class="toggle method-toggle" open><summary><section id="method.with_is_remove_accepted" class="method"><a class="srclink rightside" href="../../src/tokyodoves/game.rs.html#100-105">source</a><h4 class="code-header">pub fn <a href="#method.with_is_remove_accepted" class="fn">with_is_remove_accepted</a>(self, is_remove_accepted: <a class="primitive" href="https://doc.rust-lang.org/1.70.0/std/primitive.bool.html">bool</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Update whether accept <code>Remove</code> in the game or not</p>

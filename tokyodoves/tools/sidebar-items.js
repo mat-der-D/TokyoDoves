@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["BoardValue","BoardValueErrorType","CompareBoardValueError"],"fn":["compare_board_value"],"mod":["board_set"],"struct":["LazyBoardLoader","LazyRawBoardLoader","PositionMapper"]};
+window.SIDEBAR_ITEMS = {"enum":["BoardValue","BoardValueError","CompareBoardValueError","CreateCheckmateTreeError","EvaluateBoardError"],"fn":["compare_board_value","create_checkmate_tree","evaluate_board"],"mod":["board_set"],"struct":["ActionTree","LazyBoardLoader","LazyRawBoardLoader","PositionMapper"]};

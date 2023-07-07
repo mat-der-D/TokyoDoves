@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"tokyodoves":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.70.0/core/cmp/trait.Ord.html\" title=\"trait core::cmp::Ord\">Ord</a> for <a class=\"enum\" href=\"tokyodoves/tools/enum.BoardValue.html\" title=\"enum tokyodoves::tools::BoardValue\">BoardValue</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

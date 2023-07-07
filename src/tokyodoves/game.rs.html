@@ -398,7 +398,7 @@
 /// ```ignore
 /// use std::str::FromStr;
 /// use tokyodoves::{Color, Board, BoardBuilder};
-/// use tokyodoves::game::{GameRule, WinnerJudgement};
+/// use tokyodoves::game::{GameRule, Judge};
 ///
 /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
 /// // Set whether `Remove` is allowed or not
@@ -430,7 +430,7 @@
     ///
     /// The values of fields are as below:
     /// - `first_player`: `Color::Red`
-    /// - `suicide_atk_judge`: `WinnerJudgement::NextPlayer`
+    /// - `suicide_atk_judge`: `Judge::NextWins`
     /// - `initial_board`: `BoardConverter::new_game().board`
     </span><span class="kw">pub fn </span>new(is_remove_accepted: bool) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>first_player = Color::Red;

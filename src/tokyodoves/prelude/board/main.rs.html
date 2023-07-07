@@ -1614,7 +1614,7 @@
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let result = board.perform(action);
     /// assert!(result.is_ok());
     /// # Ok(())
@@ -1638,7 +1638,7 @@
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let next_board = board.perform_copied(action)?;
     /// # Ok(())
     /// # }
@@ -1660,7 +1660,7 @@
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: -1 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(-1, 1));
     /// let result = board.perform_bwd(action);
     /// assert!(result.is_ok());
     /// # Ok(())
@@ -1684,7 +1684,7 @@
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let next_board = board.perform_bwd_copied(action)?;
     /// # Ok(())
     /// # }
@@ -1720,7 +1720,7 @@
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// board.perform_unchecked(action);
     /// # Ok(())
     /// # }
@@ -1768,7 +1768,7 @@
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let next_board = board.perform_unchecked_copied(action);
     /// # Ok(())
     /// # }
@@ -1793,7 +1793,7 @@
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// assert!(board.check_action(action).is_ok());
     /// # Ok(())
     /// # }
@@ -1813,7 +1813,7 @@
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: -1 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(-1, 1));
     /// assert!(board.check_action_bwd(action).is_ok());
     /// # Ok(())
     /// # }
