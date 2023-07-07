@@ -56,7 +56,7 @@ pub struct GameRule {
     /// The player who moves first
     first_player: Color,
     /// Winner judgement when both bosses are surrounded simultaneously
-    simultaneous_surrounding: WinnerJudgement,
+    suicide_atk_judge: Judge,
     /// Initial board
     initial_board: Board,
 }
@@ -66,16 +66,16 @@ impl GameRule {
     ///
     /// The values of fields are as below:
     /// - `first_player`: `Color::Red`
-    /// - `simultaneous_surrounding`: `WinnerJudgement::NextPlayer`
+    /// - `suicide_atk_judge`: `WinnerJudgement::NextPlayer`
     /// - `initial_board`: `BoardConverter::new_game().board`
     pub fn new(is_remove_accepted: bool) -> Self {
         let first_player = Color::Red;
-        let simultaneous_surrounding = WinnerJudgement::NextPlayer;
+        let suicide_atk_judge = Judge::NextWins;
         let initial_board = BoardBuilder::new().build_unchecked();
         Self {
             is_remove_accepted,
             first_player,
-            simultaneous_surrounding,
+            suicide_atk_judge,
             initial_board,
         }
     }
@@ -88,8 +88,8 @@ impl GameRule {
         &self.first_player
     }
 
-    pub fn simultaneous_surrounding(&self) -> &WinnerJudgement {
-        &self.simultaneous_surrounding
+    pub fn suicide_atk_judge(&self) -> &Judge {
+        &self.suicide_atk_judge
     }
 
     pub fn initial_board(&self) -> &Board {
@@ -113,9 +113,9 @@ impl GameRule {
     }
 
     /// Update judgement rule when both bosses are surrounded simultaneously
-    pub fn with_simultaneous_surrounding(self, simultaneous_surrounding: WinnerJudgement) -> Self {
+    pub fn with_suicide_atk_judge(self, judge: Judge) -> Self {
         Self {
-            simultaneous_surrounding,
+            suicide_atk_judge: judge,
             ..self
         }
     }
@@ -151,11 +151,11 @@ impl Default for GameRule {
 
 /// Judgement of winner on some event
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum WinnerJudgement {
+pub enum Judge {
     /// The player just before the event is treated as the winner
-    LastPlayer,
+    LastWins,
     /// The player just after the event is treated as the winner
-    NextPlayer,
+    NextWins,
     /// It is a draw game
     Draw,
 }
@@ -338,10 +338,10 @@ impl Game {
         use GameStatus::*;
         use SurroundedStatus::*;
         match self.board.surrounded_status() {
-            Both => match self.rule.simultaneous_surrounding {
-                WinnerJudgement::LastPlayer => self.status = Win(self.player),
-                WinnerJudgement::NextPlayer => self.status = Win(!self.player),
-                WinnerJudgement::Draw => self.status = Draw,
+            Both => match self.rule.suicide_atk_judge {
+                Judge::LastWins => self.status = Win(self.player),
+                Judge::NextWins => self.status = Win(!self.player),
+                Judge::Draw => self.status = Draw,
             },
             OneSide(player) => self.status = Win(!player),
             None => self.player = !self.player,
