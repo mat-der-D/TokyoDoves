@@ -225,7 +225,7 @@ impl Action {
                         let Some(pos) = board.position_in_rbcc(color, dove) else {
                             return Err(SSNDecodingError { error_type: DoveNotOnBoard(color, dove) });
                         };
-                        Ok(Action::Put(color, dove, -pos + shift))
+                        Ok(Action::Move(color, dove, -pos + shift))
                     }
                     Remove => Ok(Action::Remove(color, dove)),
                 }

@@ -1,10 +1,9 @@
+use std::collections::{HashMap, HashSet};
+
 use crate::prelude::{
-    actions::Action,
-    board::main::{ActionsFwd, Board, SurroundedStatus},
-    builder::BoardBuilder,
-    error,
-    pieces::Color,
+    error, Action, ActionContainer, ActionsFwd, Board, BoardBuilder, Color, SurroundedStatus,
 };
+use crate::tools::{create_checkmate_tree, evaluate_board, BoardValue};
 
 // ************************************************************
 //  Errors
@@ -172,7 +171,7 @@ pub enum GameStatus {
 }
 
 // ************************************************************
-//  Main Part
+//  Game Struct
 // ************************************************************
 /// A struct that provides methods to play Tokyo Doves games following rules.
 ///
@@ -360,5 +359,182 @@ impl std::fmt::Display for Game {
             String::from("None")
         };
         write!(f, "{}\nNext Player: {}", board_string, next_player_string)
+    }
+}
+
+// ************************************************************
+//  Agent Trait
+// ************************************************************
+pub trait Agent {
+    fn play(&mut self, game: &mut Game);
+}
+
+pub struct RandomAgent {
+    n: usize,
+}
+
+impl RandomAgent {
+    pub fn new() -> Self {
+        Self { n: 0 }
+    }
+
+    fn update_parameter(&mut self) {
+        self.n = (33 * self.n + 33) % 65536
+    }
+}
+
+impl Agent for RandomAgent {
+    fn play(&mut self, game: &mut Game) {
+        self.update_parameter();
+        let actions = game.legal_actions();
+        let action = actions[self.n % actions.len()];
+        game.perform(action).expect("illegal situation");
+    }
+}
+
+pub struct AnalistAgent {
+    depth: usize,
+    declare_near_to_end: bool,
+}
+
+impl AnalistAgent {
+    pub fn new(depth: usize, declare_near_to_end: bool) -> Self {
+        Self {
+            depth,
+            declare_near_to_end,
+        }
+    }
+}
+
+impl Agent for AnalistAgent {
+    fn play(&mut self, game: &mut Game) {
+        use BoardValue::*;
+
+        let player = *game.next_player();
+        let rule = *game.rule();
+
+        let val = evaluate_board(&game.board(), self.depth, player, rule).unwrap();
+
+        if !matches!(val, BoardValue::Unknown) {
+            if self.declare_near_to_end {
+                println!("----> About To End! value={:?}", val);
+            }
+            let tree = create_checkmate_tree(&game.board(), val, player, rule).unwrap();
+            let action = *tree.actions().nth(0).unwrap();
+            game.perform(action).unwrap();
+            return;
+        }
+
+        let mut next_val = Win(1);
+        let mut action_win1 = None;
+        let mut action_best = None;
+        for a in game.legal_actions() {
+            let mut g = game.clone();
+            g.perform(a).unwrap();
+            if matches!(g.winner(), Some(p) if p == player) {
+                *game = g;
+                return;
+            } else if !g.is_ongoing() {
+                continue;
+            }
+            let next_val_tmp =
+                evaluate_board(&g.board(), self.depth, *g.next_player(), *g.rule()).unwrap();
+            if matches!(next_val_tmp, Win(1)) {
+                action_win1 = Some(a);
+            } else if next_val_tmp < next_val {
+                next_val = next_val_tmp;
+                action_best = Some(a);
+            }
+        }
+
+        let action = action_best.unwrap_or_else(|| action_win1.unwrap());
+        game.perform(action).unwrap();
+    }
+}
+
+pub struct ConsoleAgent;
+
+impl ConsoleAgent {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+
+impl Agent for ConsoleAgent {
+    fn play(&mut self, game: &mut Game) {
+        let legal_actions = game.legal_actions();
+
+        let mut buffer = String::new();
+        let action: Action;
+        loop {
+            buffer.clear();
+            println!("Input an action in SSN:");
+            std::io::stdin()
+                .read_line(&mut buffer)
+                .expect("read line error");
+            let ssn = buffer.trim();
+            let Ok(action_tmp) = Action::from_ssn(ssn, game.board()) else {
+                println!("Invalid Input. Try Again.");
+                continue;
+            };
+            println!("---> Infered Action: {:?}", action_tmp);
+            if !legal_actions.contains(action_tmp) {
+                println!("Illegal Action. Try Again.");
+                continue;
+            }
+            action = action_tmp;
+            break;
+        } // ask action
+        game.perform(action).expect("failed to perform");
+    }
+}
+
+pub struct Arena<AR, AG>
+where
+    AR: Agent,
+    AG: Agent,
+{
+    agent_red: AR,
+    agent_green: AG,
+    game: Game,
+}
+
+impl<AR, AG> Arena<AR, AG>
+where
+    AR: Agent,
+    AG: Agent,
+{
+    pub fn new(agent_red: AR, agent_green: AG, game: Game) -> Self {
+        Self {
+            agent_red,
+            agent_green,
+            game,
+        }
+    }
+
+    pub fn auto_play(&mut self, verbose: bool) {
+        let mut num_turns = 0_u128;
+        loop {
+            num_turns += 1;
+            if verbose {
+                println!("{}", self.game);
+            }
+
+            match self.game.next_player() {
+                Color::Red => self.agent_red.play(&mut self.game),
+                Color::Green => self.agent_green.play(&mut self.game),
+            }
+
+            if !self.game.is_ongoing() {
+                break;
+            }
+        }
+
+        println!("Total {} turns", num_turns);
+        println!("{}", self.game);
+        match self.game.winner() {
+            Some(player) => println!("*** {:?} win! ***", player),
+            None => println!("*** Draw! ***"),
+        }
     }
 }
