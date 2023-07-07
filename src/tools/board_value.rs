@@ -74,7 +74,7 @@ pub fn compare_board_value(
     };
 
     use WinnerJudgement::*;
-    let wins_if_both = match rule.suicide_attack_judge() {
+    let wins_if_both = match rule.suicide_atk_judge() {
         LastPlayer => true,
         NextPlayer => false,
         Draw => return Err(DrawNotSupportedError),
