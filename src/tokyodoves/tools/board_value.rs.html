@@ -150,8 +150,7 @@
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::game::{GameRule, WinnerJudgement};
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::game::{GameRule, Judge};
 <span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, Color, SurroundedStatus};
 
 <span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
@@ -226,10 +225,10 @@
         }
     };
 
-    <span class="kw">use </span>WinnerJudgement::<span class="kw-2">*</span>;
-    <span class="kw">let </span>wins_if_both = <span class="kw">match </span>rule.simultaneous_surrounding() {
-        LastPlayer =&gt; <span class="bool-val">true</span>,
-        NextPlayer =&gt; <span class="bool-val">false</span>,
+    <span class="kw">use </span>Judge::<span class="kw-2">*</span>;
+    <span class="kw">let </span>wins_if_both = <span class="kw">match </span>rule.suicide_atk_judge() {
+        LastWins =&gt; <span class="bool-val">true</span>,
+        NextWins =&gt; <span class="bool-val">false</span>,
         Draw =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(DrawNotSupportedError),
     };
     <span class="kw">let </span>allow_remove = rule.is_remove_accepted();
@@ -284,8 +283,7 @@
     </span><span class="kw">fn </span>test_compare_value() {
         <span class="kw">use </span>std::str::FromStr;
         <span class="kw">use </span>tools::BoardValue::<span class="kw-2">*</span>;
-        <span class="kw">let </span>rule = game::GameRule::new(<span class="bool-val">true</span>)
-            .with_simultaneous_surrounding(game::WinnerJudgement::NextPlayer);
+        <span class="kw">let </span>rule = game::GameRule::new(<span class="bool-val">true</span>).with_suicide_atk_judge(game::Judge::NextWins);
         <span class="kw">let </span>board_value = [
             (<span class="string">&quot; B; a;TH y;b mM&quot;</span>, Win(<span class="number">5</span>)),
             (<span class="string">&quot; By;H  a;A m;  Yb&quot;</span>, Win(<span class="number">3</span>)),
