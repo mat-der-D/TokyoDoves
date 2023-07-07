@@ -79,7 +79,7 @@ pub fn compare_board_value(
         NextPlayer => false,
         Draw => return Err(DrawNotSupportedError),
     };
-    let allow_remove = rule.allow_remove();
+    let allow_remove = rule.is_remove_accepted();
     Ok(compare_board_value_core(
         n,
         board,
