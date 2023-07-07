@@ -1,25 +1,4 @@
-/// Difference of coordinates between two squares.
-///
-/// It has two data `dh`, i.e. the **h**orizonal difference,
-/// and `dv`, i.e. the **v**ertical difference.
-/// Positive/negative `dh` means the direction is on right/left.
-/// Positive/negative `dv` means the direction is on downwards/upwards.
-/// These data can be accessed
-/// via [`dh`](`Self::dh`), [`dv`](`Self::dv`),
-/// [`dh_mut`](`Self::dh_mut`) and [`dv_mut`](`Self::dv_mut`).
-///
-/// This struct supports addition, subtraction and negation.
-/// ```ignore
-/// use tokyodoves::Shift;
-///
-/// assert_eq!(-Shift::new(2, 3), Shift::new(-2, -3));
-/// assert_eq!(Shift::new(1, 1) + Shift::new(2, 0), Shift::new(3, 1));
-/// assert_eq!(Shift::new(2, -1) - Shift::new(1, -2), Shift::new(1, 1));
-/// ```
-///
-/// Pedantically speaking, this struct behaves like
-/// an element in two-dimensional Affine space with integral coordinates
-/// without scalar multiplication.
+/// Difference between two squares.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Shift {
     /// Horizontal shift. Positive (or negative) direction is on right (or left).
