@@ -362,13 +362,6 @@
 <a href="#362" id="362">362</a>
 <a href="#363" id="363">363</a>
 <a href="#364" id="364">364</a>
-<a href="#365" id="365">365</a>
-<a href="#366" id="366">366</a>
-<a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::{
     actions::Action,
     board::main::{ActionsFwd, Board, SurroundedStatus},
@@ -380,7 +373,7 @@
 <span class="comment">// ************************************************************
 //  Errors
 // ************************************************************
-</span><span class="doccomment">/// Errors associated to [`Game`]
+</span><span class="doccomment">/// Errors associated to [`Game`](`super::game::Game`)
 </span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
 </span><span class="kw">pub enum </span>GameError {
     <span class="attr">#[error(<span class="string">&quot;[BoardError] {:?}&quot;</span>, .error)]
@@ -394,13 +387,6 @@
 
     <span class="attr">#[error(<span class="string">&quot;[GameFinishedError] Status: {:?}&quot;</span>, .game_status)]
     </span>GameFinishedError { game_status: GameStatus },
-}
-
-<span class="doccomment">/// Errors associated to [`GameRule`](`super::game::GameRule`)
-</span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
-</span><span class="kw">pub enum </span>GameRuleError {
-    <span class="attr">#[error(<span class="string">&quot;[InitialBoardError]&quot;</span>)]
-    </span>InitialBoardError,
 }
 
 <span class="comment">// ************************************************************
@@ -502,11 +488,11 @@
     ///
     /// # Errors
     /// It returns:
-    /// - `Err(GameRuleError::InitialBoardError)`
+    /// - `Err(error::GameRuleError::InitialBoardError)`
     ///     if `initial_board` is that of finished game
-    </span><span class="kw">pub fn </span>with_initial_board(<span class="self">self</span>, initial_board: Board) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, GameRuleError&gt; {
+    </span><span class="kw">pub fn </span>with_initial_board(<span class="self">self</span>, initial_board: Board) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::GameRuleError&gt; {
         <span class="kw">if </span>!<span class="macro">matches!</span>(initial_board.surrounded_status(), SurroundedStatus::None) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(GameRuleError::InitialBoardError);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(error::GameRuleError::InitialBoardError);
         }
         <span class="kw">let </span>rule = <span class="self">Self </span>{
             initial_board,
