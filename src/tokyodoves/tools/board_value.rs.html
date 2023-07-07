@@ -831,7 +831,7 @@
     }
 
     <span class="kw">pub fn </span>child(<span class="kw-2">&amp;</span><span class="self">self</span>, action: <span class="kw-2">&amp;</span>Action) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ActionTree&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.get(<span class="kw-2">&amp;</span>action)
+        <span class="self">self</span>.<span class="number">0</span>.get(action)
     }
 
     <span class="kw">pub fn </span>children(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; hash_map::Values&lt;<span class="lifetime">&#39;_</span>, Action, ActionTree&gt; {
@@ -875,7 +875,7 @@
             <span class="self">self</span>.actions_children().len() == <span class="number">1
                 </span>&amp;&amp; <span class="self">self
                     </span>.actions_children()
-                    .nth(<span class="number">0</span>)
+                    .next()
                     .unwrap()
                     .<span class="number">1
                     </span>.is_good_for_puzzle(step - <span class="number">1</span>)
