@@ -113,9 +113,9 @@ impl GameRule {
     }
 
     /// Update judgement rule when both bosses are surrounded simultaneously
-    pub fn with_suicide_atk_judge(self, judgement: Judge) -> Self {
+    pub fn with_suicide_atk_judge(self, judge: Judge) -> Self {
         Self {
-            suicide_atk_judge: judgement,
+            suicide_atk_judge: judge,
             ..self
         }
     }
