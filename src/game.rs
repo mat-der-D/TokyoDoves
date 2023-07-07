@@ -34,7 +34,7 @@ pub enum GameError {
 /// ```ignore
 /// use std::str::FromStr;
 /// use tokyodoves::{Color, Board, BoardBuilder};
-/// use tokyodoves::game::{GameRule, WinnerJudgement};
+/// use tokyodoves::game::{GameRule, Judge};
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// // Set whether `Remove` is allowed or not
@@ -66,7 +66,7 @@ impl GameRule {
     ///
     /// The values of fields are as below:
     /// - `first_player`: `Color::Red`
-    /// - `suicide_atk_judge`: `WinnerJudgement::NextPlayer`
+    /// - `suicide_atk_judge`: `Judge::NextWins`
     /// - `initial_board`: `BoardConverter::new_game().board`
     pub fn new(is_remove_accepted: bool) -> Self {
         let first_player = Color::Red;
