@@ -304,7 +304,7 @@ impl ActionTree {
     }
 
     pub fn child(&self, action: &Action) -> Option<&ActionTree> {
-        self.0.get(&action)
+        self.0.get(action)
     }
 
     pub fn children(&self) -> hash_map::Values<'_, Action, ActionTree> {
@@ -348,7 +348,7 @@ impl ActionTree {
             self.actions_children().len() == 1
                 && self
                     .actions_children()
-                    .nth(0)
+                    .next()
                     .unwrap()
                     .1
                     .is_good_for_puzzle(step - 1)
