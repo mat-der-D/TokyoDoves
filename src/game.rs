@@ -220,7 +220,7 @@ pub enum GameStatus {
 ///
 /// # fn main() {
 /// let mut rule = GameRule::default().with_is_remove_accepted(false).with_first_player(Color::Green);
-/// let game = Game::from_rule(rule);
+/// let game = Game::new_with_rule(rule);
 /// println!("{}", game);
 /// # }
 /// ```
@@ -242,11 +242,11 @@ impl Game {
             is_remove_accepted,
             ..Default::default()
         };
-        Self::from_rule(rule)
+        Self::new_with_rule(rule)
     }
 
     /// Constructs [`Game`] with a specified `rule`
-    pub fn from_rule(rule: GameRule) -> Game {
+    pub fn new_with_rule(rule: GameRule) -> Game {
         let board = rule.initial_board;
         let player = rule.first_player;
         let status = GameStatus::Ongoing;
@@ -260,7 +260,7 @@ impl Game {
 
     /// Reset [`Game`] to the initial state
     pub fn reset(&mut self) {
-        *self = Self::from_rule(self.rule)
+        *self = Self::new_with_rule(self.rule)
     }
 
     /// Get a reference to game rule
