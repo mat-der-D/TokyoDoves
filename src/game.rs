@@ -219,7 +219,7 @@ pub enum GameStatus {
 /// use tokyodoves::game::{Game, GameRule};
 ///
 /// # fn main() {
-/// let mut rule = GameRule::default().set_allow_remove(false).with_first_player(Color::Green);
+/// let mut rule = GameRule::default().with_is_remove_accepted(false).with_first_player(Color::Green);
 /// let game = Game::from_rule(rule);
 /// println!("{}", game);
 /// # }
@@ -237,9 +237,9 @@ pub struct Game {
 
 impl Game {
     /// Constructs [`Game`]
-    pub fn new(allow_remove: bool) -> Game {
+    pub fn new(is_remove_accepted: bool) -> Game {
         let rule = GameRule {
-            is_remove_accepted: allow_remove,
+            is_remove_accepted,
             ..Default::default()
         };
         Self::from_rule(rule)
