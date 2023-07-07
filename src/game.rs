@@ -7,6 +7,25 @@ use crate::prelude::{
 };
 
 // ************************************************************
+//  Errors
+// ************************************************************
+/// Errors associated to [`Game`](`super::game::Game`)
+#[derive(Debug, Clone, Copy, thiserror::Error)]
+pub enum GameError {
+    #[error("[BoardError] {:?}", .error)]
+    BoardError { error: error::BoardError },
+
+    #[error("[PlayerMismatchError]")]
+    PlayerMismatchError,
+
+    #[error("[ProhibitedRemoveError] Action: {:?}", .action)]
+    ProhibitedRemoveError { action: Action },
+
+    #[error("[GameFinishedError] Status: {:?}", .game_status)]
+    GameFinishedError { game_status: GameStatus },
+}
+
+// ************************************************************
 //  Building Blocks
 // ************************************************************
 /// Some kinds of detailed rules
@@ -14,7 +33,8 @@ use crate::prelude::{
 /// # Examples
 /// ```ignore
 /// use std::str::FromStr;
-/// use tokyodoves::{GameRule, Color, Board, WinnerJudgement, BoardBuilder};
+/// use tokyodoves::{Color, Board, BoardBuilder};
+/// use tokyodoves::game::{GameRule, WinnerJudgement};
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// // Set whether `Remove` is allowed or not
@@ -159,7 +179,8 @@ pub enum GameStatus {
 /// # Examples
 /// The following is a simple example in which one game is played:
 /// ```ignore
-/// use tokyodoves::{ActionContainer, Game};
+/// use tokyodoves::ActionContainer;
+/// use tokyodoves::game::Game;
 ///
 /// fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///     // Create a [`Game`] object allowing `Remove` action
@@ -194,7 +215,8 @@ pub enum GameStatus {
 /// ```
 /// To customize the rule more, you can create [`Game`] from [`GameRule`] object:
 /// ```ignore
-/// use tokyodoves::{Color, Game, GameRule};
+/// use tokyodoves::Color;
+/// use tokyodoves::game::{Game, GameRule};
 ///
 /// # fn main() {
 /// let mut rule = GameRule::default().set_allow_remove(false).with_first_player(Color::Green);
@@ -288,30 +310,30 @@ impl Game {
     ///
     /// # Errors
     /// It returns:
-    /// - `Err(error::GameError::GameFinishedError)` if the game has already been finished.
-    /// - `Err(error::GameError::PlayerMismatchError)` if the player of `action`
+    /// - `Err(GameError::GameFinishedError)` if the game has already been finished.
+    /// - `Err(GameError::PlayerMismatchError)` if the player of `action`
     ///     is different from the next player.
-    /// - `Err(error::GameError::BoardError { .. })` if performing `action` is illegal for board.
+    /// - `Err(GameError::BoardError { .. })` if performing `action` is illegal for board.
     ///
     /// In any cases, `Game` object is left unchanged.
-    pub fn perform(&mut self, action: Action) -> Result<(), error::GameError> {
+    pub fn perform(&mut self, action: Action) -> Result<(), GameError> {
         if !self.is_ongoing() {
-            return Err(error::GameError::GameFinishedError {
+            return Err(GameError::GameFinishedError {
                 game_status: self.status,
             });
         }
 
         if self.player != *action.player() {
-            return Err(error::GameError::PlayerMismatchError);
+            return Err(GameError::PlayerMismatchError);
         }
 
         if !self.rule.allow_remove && matches!(action, Action::Remove(_, _)) {
-            return Err(error::GameError::ProhibitedRemoveError { action });
+            return Err(GameError::ProhibitedRemoveError { action });
         }
 
         self.board
             .perform(action)
-            .map_err(|e| error::GameError::BoardError { error: e })?;
+            .map_err(|e| GameError::BoardError { error: e })?;
 
         use GameStatus::*;
         use SurroundedStatus::*;

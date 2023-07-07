@@ -1,4 +1,5 @@
-use crate::prelude::{Board, Color, GameRule, SurroundedStatus, WinnerJudgement};
+use crate::game::{GameRule, WinnerJudgement};
+use crate::prelude::{Board, Color, SurroundedStatus};
 
 #[derive(Debug, Clone, Copy, thiserror::Error)]
 pub enum CompareBoardValueError {
@@ -130,7 +131,8 @@ mod tests {
     fn test_compare_value() {
         use std::str::FromStr;
         use tools::BoardValue::*;
-        let rule = GameRule::new(true).with_simultaneous_surrounding(WinnerJudgement::NextPlayer);
+        let rule = game::GameRule::new(true)
+            .with_simultaneous_surrounding(game::WinnerJudgement::NextPlayer);
         let board_value = [
             (" B; a;TH y;b mM", Win(5)),
             (" By;H  a;A m;  Yb", Win(3)),

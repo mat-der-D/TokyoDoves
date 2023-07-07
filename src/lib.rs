@@ -5,6 +5,7 @@ pub use strum;
 pub use strum_macros;
 pub use thiserror;
 
+pub mod game;
 mod prelude;
 pub mod tools;
 
