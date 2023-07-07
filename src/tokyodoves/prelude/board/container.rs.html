@@ -207,6 +207,16 @@
 <a href="#207" id="207">207</a>
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Container structs of some objects
 
 </span><span class="kw">use </span><span class="kw">crate</span>::prelude::{
@@ -218,8 +228,12 @@
 //  Action Container
 // *******************************************************************
 </span><span class="doccomment">/// Read-only [`Sized`] container of [`Action`]s.
+///
+/// This trait is sealed, i.e. it forces implementers to implement `Sealed` trait,
+/// to prevent crate users from implementing this trait.
+/// See also `https://sinkuu.github.io/api-guidelines/future-proofing.html#c-sealed`.
 </span><span class="kw">pub trait </span>ActionContainer:
-    Clone + IntoIterator&lt;Item = Action&gt; + std::ops::Index&lt;usize, Output = Action&gt;
+    Clone + IntoIterator&lt;Item = Action&gt; + std::ops::Index&lt;usize, Output = Action&gt; + private::Sealed
 {
     <span class="doccomment">/// Returns the number of elements.
     </span><span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize;
@@ -231,6 +245,10 @@
     </span><span class="kw">fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; bool;
 }
 
+<span class="kw">pub mod </span>private {
+    <span class="kw">pub trait </span>Sealed {}
+}
+
 <span class="doccomment">/// An [`ActionContainer`] with a finite capacity.
 ///
 /// The generic constant `N` is the maximum number of items
@@ -240,6 +258,8 @@
     container: [<span class="prelude-ty">Option</span>&lt;Action&gt;; N],
     cursor: usize,
 }
+
+<span class="kw">impl</span>&lt;<span class="kw">const </span>N: usize&gt; private::Sealed <span class="kw">for </span>FiniteActionContainer&lt;N&gt; {}
 
 <span class="kw">impl</span>&lt;<span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span>FiniteActionContainer&lt;N&gt; {
     <span class="kw">type </span>Item = Action;

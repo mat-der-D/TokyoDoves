@@ -1438,6 +1438,8 @@
 <a href="#1438" id="1438">1438</a>
 <a href="#1439" id="1439">1439</a>
 <a href="#1440" id="1440">1440</a>
+<a href="#1441" id="1441">1441</a>
+<a href="#1442" id="1442">1442</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">use </span><span class="kw">crate</span>::prelude::{
@@ -1491,6 +1493,8 @@
                     <span class="self">self</span>.<span class="number">0</span>.index(index)
                 }
             }
+
+            <span class="kw">impl </span>private::Sealed <span class="kw">for </span><span class="macro-nonterminal">$target </span>{}
 
             <span class="kw">impl </span>ActionContainer <span class="kw">for </span><span class="macro-nonterminal">$target </span>{
                 <span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
