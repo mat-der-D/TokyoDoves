@@ -172,7 +172,7 @@ impl Board {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let result = board.perform(action);
     /// assert!(result.is_ok());
     /// # Ok(())
@@ -196,7 +196,7 @@ impl Board {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let next_board = board.perform_copied(action)?;
     /// # Ok(())
     /// # }
@@ -218,7 +218,7 @@ impl Board {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: -1 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(-1, 1));
     /// let result = board.perform_bwd(action);
     /// assert!(result.is_ok());
     /// # Ok(())
@@ -242,7 +242,7 @@ impl Board {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let next_board = board.perform_bwd_copied(action)?;
     /// # Ok(())
     /// # }
@@ -278,7 +278,7 @@ impl Board {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// board.perform_unchecked(action);
     /// # Ok(())
     /// # }
@@ -326,7 +326,7 @@ impl Board {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let next_board = board.perform_unchecked_copied(action);
     /// # Ok(())
     /// # }
@@ -351,7 +351,7 @@ impl Board {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: 0 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// assert!(board.check_action(action).is_ok());
     /// # Ok(())
     /// # }
@@ -371,7 +371,7 @@ impl Board {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut board = BoardBuilder::new().build()?;
-    /// let action = Action::Put(Color::Red, Dove::A, Shift { dh: 1, dv: -1 });
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(-1, 1));
     /// assert!(board.check_action_bwd(action).is_ok());
     /// # Ok(())
     /// # }
