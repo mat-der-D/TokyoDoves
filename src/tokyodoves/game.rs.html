@@ -416,7 +416,7 @@
 </span><span class="attr">#[derive(Debug, Clone, Copy)]
 </span><span class="kw">pub struct </span>GameRule {
     <span class="doccomment">/// Allow [`Action::Remove`] as a legal action or not
-    </span>allow_remove: bool,
+    </span>is_remove_accepted: bool,
     <span class="doccomment">/// The player who moves first
     </span>first_player: Color,
     <span class="doccomment">/// Winner judgement when both bosses are surrounded simultaneously
@@ -432,20 +432,20 @@
     /// - `first_player`: `Color::Red`
     /// - `simultaneous_surrounding`: `WinnerJudgement::NextPlayer`
     /// - `initial_board`: `BoardConverter::new_game().board`
-    </span><span class="kw">pub fn </span>new(allow_remove: bool) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(is_remove_accepted: bool) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>first_player = Color::Red;
         <span class="kw">let </span>simultaneous_surrounding = WinnerJudgement::NextPlayer;
         <span class="kw">let </span>initial_board = BoardBuilder::new().build_unchecked();
         <span class="self">Self </span>{
-            allow_remove,
+            is_remove_accepted,
             first_player,
             simultaneous_surrounding,
             initial_board,
         }
     }
 
-    <span class="kw">pub fn </span>allow_remove(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>bool {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.allow_remove
+    <span class="kw">pub fn </span>is_remove_accepted(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>bool {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.is_remove_accepted
     }
 
     <span class="kw">pub fn </span>first_player(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Color {
@@ -460,10 +460,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.initial_board
     }
 
-    <span class="doccomment">/// Update whether allow `Remove` in the game or not
-    </span><span class="kw">pub fn </span>set_allow_remove(<span class="self">self</span>, allow_remove: bool) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// Update whether accept `Remove` in the game or not
+    </span><span class="kw">pub fn </span>with_is_remove_accepted(<span class="self">self</span>, is_remove_accepted: bool) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            allow_remove,
+            is_remove_accepted,
             ..<span class="self">self
         </span>}
     }
@@ -583,7 +583,7 @@
 /// use tokyodoves::game::{Game, GameRule};
 ///
 /// # fn main() {
-/// let mut rule = GameRule::default().set_allow_remove(false).with_first_player(Color::Green);
+/// let mut rule = GameRule::default().with_is_remove_accepted(false).with_first_player(Color::Green);
 /// let game = Game::from_rule(rule);
 /// println!(&quot;{}&quot;, game);
 /// # }
@@ -601,9 +601,9 @@
 
 <span class="kw">impl </span>Game {
     <span class="doccomment">/// Constructs [`Game`]
-    </span><span class="kw">pub fn </span>new(allow_remove: bool) -&gt; Game {
+    </span><span class="kw">pub fn </span>new(is_remove_accepted: bool) -&gt; Game {
         <span class="kw">let </span>rule = GameRule {
-            allow_remove,
+            is_remove_accepted,
             ..Default::default()
         };
         <span class="self">Self</span>::from_rule(rule)
@@ -667,7 +667,7 @@
     <span class="doccomment">/// Returns an [`ActionContainer`](`super::board::container::ActionContainer`) of legal [`Action`]s.
     </span><span class="kw">pub fn </span>legal_actions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ActionsFwd {
         <span class="self">self</span>.board
-            .legal_actions(<span class="self">self</span>.player, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="self">self</span>.rule.allow_remove)
+            .legal_actions(<span class="self">self</span>.player, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="self">self</span>.rule.is_remove_accepted)
     }
 
     <span class="doccomment">/// Performs `action`.
@@ -691,7 +691,7 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(GameError::PlayerMismatchError);
         }
 
-        <span class="kw">if </span>!<span class="self">self</span>.rule.allow_remove &amp;&amp; <span class="macro">matches!</span>(action, Action::Remove(<span class="kw">_</span>, <span class="kw">_</span>)) {
+        <span class="kw">if </span>!<span class="self">self</span>.rule.is_remove_accepted &amp;&amp; <span class="macro">matches!</span>(action, Action::Remove(<span class="kw">_</span>, <span class="kw">_</span>)) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(GameError::ProhibitedRemoveError { action });
         }
 

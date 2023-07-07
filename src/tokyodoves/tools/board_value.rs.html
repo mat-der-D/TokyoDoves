@@ -232,7 +232,7 @@
         NextPlayer =&gt; <span class="bool-val">false</span>,
         Draw =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(DrawNotSupportedError),
     };
-    <span class="kw">let </span>allow_remove = rule.allow_remove();
+    <span class="kw">let </span>allow_remove = rule.is_remove_accepted();
     <span class="prelude-val">Ok</span>(compare_board_value_core(
         n,
         board,
