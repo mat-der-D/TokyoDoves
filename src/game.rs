@@ -1,5 +1,3 @@
-use std::collections::{HashMap, HashSet};
-
 use crate::prelude::{
     error, Action, ActionContainer, ActionsFwd, Board, BoardBuilder, Color, SurroundedStatus,
 };
@@ -369,13 +367,14 @@ pub trait Agent {
     fn play(&mut self, game: &mut Game);
 }
 
+#[derive(Default)]
 pub struct RandomAgent {
     n: usize,
 }
 
 impl RandomAgent {
     pub fn new() -> Self {
-        Self { n: 0 }
+        Self::default()
     }
 
     fn update_parameter(&mut self) {
@@ -392,12 +391,12 @@ impl Agent for RandomAgent {
     }
 }
 
-pub struct AnalistAgent {
+pub struct AnalystAgent {
     depth: usize,
     declare_near_to_end: bool,
 }
 
-impl AnalistAgent {
+impl AnalystAgent {
     pub fn new(depth: usize, declare_near_to_end: bool) -> Self {
         Self {
             depth,
@@ -406,21 +405,21 @@ impl AnalistAgent {
     }
 }
 
-impl Agent for AnalistAgent {
+impl Agent for AnalystAgent {
     fn play(&mut self, game: &mut Game) {
         use BoardValue::*;
 
         let player = *game.next_player();
         let rule = *game.rule();
 
-        let val = evaluate_board(&game.board(), self.depth, player, rule).unwrap();
+        let val = evaluate_board(game.board(), self.depth, player, rule).unwrap();
 
         if !matches!(val, BoardValue::Unknown) {
             if self.declare_near_to_end {
                 println!("----> About To End! value={:?}", val);
             }
-            let tree = create_checkmate_tree(&game.board(), val, player, rule).unwrap();
-            let action = *tree.actions().nth(0).unwrap();
+            let tree = create_checkmate_tree(game.board(), val, player, rule).unwrap();
+            let action = *tree.actions().next().unwrap();
             game.perform(action).unwrap();
             return;
         }
@@ -429,7 +428,7 @@ impl Agent for AnalistAgent {
         let mut action_win1 = None;
         let mut action_best = None;
         for a in game.legal_actions() {
-            let mut g = game.clone();
+            let mut g = *game;
             g.perform(a).unwrap();
             if matches!(g.winner(), Some(p) if p == player) {
                 *game = g;
@@ -438,7 +437,7 @@ impl Agent for AnalistAgent {
                 continue;
             }
             let next_val_tmp =
-                evaluate_board(&g.board(), self.depth, *g.next_player(), *g.rule()).unwrap();
+                evaluate_board(g.board(), self.depth, *g.next_player(), *g.rule()).unwrap();
             if matches!(next_val_tmp, Win(1)) {
                 action_win1 = Some(a);
             } else if next_val_tmp < next_val {
@@ -452,6 +451,7 @@ impl Agent for AnalistAgent {
     }
 }
 
+#[derive(Default)]
 pub struct ConsoleAgent;
 
 impl ConsoleAgent {
