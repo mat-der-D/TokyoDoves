@@ -95,17 +95,6 @@
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
 <a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Error variants
 //!
 //! A rough sketch of dependency tree:
@@ -115,22 +104,11 @@
 //! - [`BoardError`]
 //!     - [`ActionPerformErrorType`]
 //!     - [`BoardCreateErrorType`]
-//! - [`GameError`]
-//!     - [`BoardError`]
-//!         - ...
-//! - [`GameRuleError`]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::prelude::{
     actions::Action,
     pieces::{Color, Dove},
 };
-
-<span class="doccomment">/// Errors associated to [`GameRule`](`super::game::GameRule`)
-</span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
-</span><span class="kw">pub enum </span>GameRuleError {
-    <span class="attr">#[error(<span class="string">&quot;[InitialBoardError]&quot;</span>)]
-    </span>InitialBoardError,
-}
 
 <span class="doccomment">/// Errors associated to [`Board`](`super::board::main::Board`)
 </span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
