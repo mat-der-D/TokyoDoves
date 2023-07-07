@@ -9,7 +9,7 @@ use crate::prelude::{
 // ************************************************************
 //  Errors
 // ************************************************************
-/// Errors associated to [`Game`](`super::game::Game`)
+/// Errors associated to [`Game`]
 #[derive(Debug, Clone, Copy, thiserror::Error)]
 pub enum GameError {
     #[error("[BoardError] {:?}", .error)]
@@ -23,6 +23,13 @@ pub enum GameError {
 
     #[error("[GameFinishedError] Status: {:?}", .game_status)]
     GameFinishedError { game_status: GameStatus },
+}
+
+/// Errors associated to [`GameRule`](`super::game::GameRule`)
+#[derive(Debug, Clone, Copy, thiserror::Error)]
+pub enum GameRuleError {
+    #[error("[InitialBoardError]")]
+    InitialBoardError,
 }
 
 // ************************************************************
@@ -124,11 +131,11 @@ impl GameRule {
     ///
     /// # Errors
     /// It returns:
-    /// - `Err(error::GameRuleError::InitialBoardError)`
+    /// - `Err(GameRuleError::InitialBoardError)`
     ///     if `initial_board` is that of finished game
-    pub fn with_initial_board(self, initial_board: Board) -> Result<Self, error::GameRuleError> {
+    pub fn with_initial_board(self, initial_board: Board) -> Result<Self, GameRuleError> {
         if !matches!(initial_board.surrounded_status(), SurroundedStatus::None) {
-            return Err(error::GameRuleError::InitialBoardError);
+            return Err(GameRuleError::InitialBoardError);
         }
         let rule = Self {
             initial_board,
