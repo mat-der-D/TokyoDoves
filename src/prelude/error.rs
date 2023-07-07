@@ -12,24 +12,10 @@
 //!         - ...
 //! - [`GameRuleError`]
 
-use super::game::GameStatus;
-use crate::prelude::{Action, Color, Dove};
-
-/// Errors associated to [`Game`](`super::game::Game`)
-#[derive(Debug, Clone, Copy, thiserror::Error)]
-pub enum GameError {
-    #[error("[BoardError] {:?}", .error)]
-    BoardError { error: BoardError },
-
-    #[error("[PlayerMismatchError]")]
-    PlayerMismatchError,
-
-    #[error("[ProhibitedRemoveError] Action: {:?}", .action)]
-    ProhibitedRemoveError { action: Action },
-
-    #[error("[GameFinishedError] Status: {:?}", .game_status)]
-    GameFinishedError { game_status: GameStatus },
-}
+use crate::prelude::{
+    actions::Action,
+    pieces::{Color, Dove},
+};
 
 /// Errors associated to [`GameRule`](`super::game::GameRule`)
 #[derive(Debug, Clone, Copy, thiserror::Error)]
