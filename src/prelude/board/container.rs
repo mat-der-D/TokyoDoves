@@ -9,8 +9,12 @@ use crate::prelude::{
 //  Action Container
 // *******************************************************************
 /// Read-only [`Sized`] container of [`Action`]s.
+///
+/// This trait is sealed, i.e. it forces implementers to implement `Sealed` trait,
+/// to prevent crate users from implementing this trait.
+/// See also `https://sinkuu.github.io/api-guidelines/future-proofing.html#c-sealed`.
 pub trait ActionContainer:
-    Clone + IntoIterator<Item = Action> + std::ops::Index<usize, Output = Action>
+    Clone + IntoIterator<Item = Action> + std::ops::Index<usize, Output = Action> + private::Sealed
 {
     /// Returns the number of elements.
     fn len(&self) -> usize;
@@ -22,6 +26,10 @@ pub trait ActionContainer:
     fn contains(&self, action: Action) -> bool;
 }
 
+pub mod private {
+    pub trait Sealed {}
+}
+
 /// An [`ActionContainer`] with a finite capacity.
 ///
 /// The generic constant `N` is the maximum number of items
@@ -31,6 +39,8 @@ pub struct FiniteActionContainer<const N: usize> {
     container: [Option<Action>; N],
     cursor: usize,
 }
+
+impl<const N: usize> private::Sealed for FiniteActionContainer<N> {}
 
 impl<const N: usize> IntoIterator for FiniteActionContainer<N> {
     type Item = Action;
