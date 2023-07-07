@@ -52,7 +52,7 @@ pub enum GameError {
 #[derive(Debug, Clone, Copy)]
 pub struct GameRule {
     /// Allow [`Action::Remove`] as a legal action or not
-    allow_remove: bool,
+    is_remove_accepted: bool,
     /// The player who moves first
     first_player: Color,
     /// Winner judgement when both bosses are surrounded simultaneously
@@ -68,20 +68,20 @@ impl GameRule {
     /// - `first_player`: `Color::Red`
     /// - `simultaneous_surrounding`: `WinnerJudgement::NextPlayer`
     /// - `initial_board`: `BoardConverter::new_game().board`
-    pub fn new(allow_remove: bool) -> Self {
+    pub fn new(is_remove_accepted: bool) -> Self {
         let first_player = Color::Red;
         let simultaneous_surrounding = WinnerJudgement::NextPlayer;
         let initial_board = BoardBuilder::new().build_unchecked();
         Self {
-            allow_remove,
+            is_remove_accepted,
             first_player,
             simultaneous_surrounding,
             initial_board,
         }
     }
 
-    pub fn allow_remove(&self) -> &bool {
-        &self.allow_remove
+    pub fn is_remove_accepted(&self) -> &bool {
+        &self.is_remove_accepted
     }
 
     pub fn first_player(&self) -> &Color {
@@ -96,10 +96,10 @@ impl GameRule {
         &self.initial_board
     }
 
-    /// Update whether allow `Remove` in the game or not
-    pub fn set_allow_remove(self, allow_remove: bool) -> Self {
+    /// Update whether accept `Remove` in the game or not
+    pub fn with_is_remove_accepted(self, is_remove_accepted: bool) -> Self {
         Self {
-            allow_remove,
+            is_remove_accepted,
             ..self
         }
     }
@@ -239,7 +239,7 @@ impl Game {
     /// Constructs [`Game`]
     pub fn new(allow_remove: bool) -> Game {
         let rule = GameRule {
-            allow_remove,
+            is_remove_accepted: allow_remove,
             ..Default::default()
         };
         Self::from_rule(rule)
@@ -303,7 +303,7 @@ impl Game {
     /// Returns an [`ActionContainer`](`super::board::container::ActionContainer`) of legal [`Action`]s.
     pub fn legal_actions(&self) -> ActionsFwd {
         self.board
-            .legal_actions(self.player, true, true, self.rule.allow_remove)
+            .legal_actions(self.player, true, true, self.rule.is_remove_accepted)
     }
 
     /// Performs `action`.
@@ -327,7 +327,7 @@ impl Game {
             return Err(GameError::PlayerMismatchError);
         }
 
-        if !self.rule.allow_remove && matches!(action, Action::Remove(_, _)) {
+        if !self.rule.is_remove_accepted && matches!(action, Action::Remove(_, _)) {
             return Err(GameError::ProhibitedRemoveError { action });
         }
 
