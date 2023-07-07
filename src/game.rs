@@ -56,7 +56,7 @@ pub struct GameRule {
     /// The player who moves first
     first_player: Color,
     /// Winner judgement when both bosses are surrounded simultaneously
-    suicide_atk_judge: WinnerJudgement,
+    suicide_atk_judge: Judge,
     /// Initial board
     initial_board: Board,
 }
@@ -70,7 +70,7 @@ impl GameRule {
     /// - `initial_board`: `BoardConverter::new_game().board`
     pub fn new(is_remove_accepted: bool) -> Self {
         let first_player = Color::Red;
-        let suicide_atk_judge = WinnerJudgement::NextPlayer;
+        let suicide_atk_judge = Judge::NextWins;
         let initial_board = BoardBuilder::new().build_unchecked();
         Self {
             is_remove_accepted,
@@ -88,7 +88,7 @@ impl GameRule {
         &self.first_player
     }
 
-    pub fn suicide_atk_judge(&self) -> &WinnerJudgement {
+    pub fn suicide_atk_judge(&self) -> &Judge {
         &self.suicide_atk_judge
     }
 
@@ -113,7 +113,7 @@ impl GameRule {
     }
 
     /// Update judgement rule when both bosses are surrounded simultaneously
-    pub fn with_suicide_atk_judge(self, judgement: WinnerJudgement) -> Self {
+    pub fn with_suicide_atk_judge(self, judgement: Judge) -> Self {
         Self {
             suicide_atk_judge: judgement,
             ..self
@@ -151,11 +151,11 @@ impl Default for GameRule {
 
 /// Judgement of winner on some event
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum WinnerJudgement {
+pub enum Judge {
     /// The player just before the event is treated as the winner
-    LastPlayer,
+    LastWins,
     /// The player just after the event is treated as the winner
-    NextPlayer,
+    NextWins,
     /// It is a draw game
     Draw,
 }
@@ -339,9 +339,9 @@ impl Game {
         use SurroundedStatus::*;
         match self.board.surrounded_status() {
             Both => match self.rule.suicide_atk_judge {
-                WinnerJudgement::LastPlayer => self.status = Win(self.player),
-                WinnerJudgement::NextPlayer => self.status = Win(!self.player),
-                WinnerJudgement::Draw => self.status = Draw,
+                Judge::LastWins => self.status = Win(self.player),
+                Judge::NextWins => self.status = Win(!self.player),
+                Judge::Draw => self.status = Draw,
             },
             OneSide(player) => self.status = Win(!player),
             None => self.player = !self.player,

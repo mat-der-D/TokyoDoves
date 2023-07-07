@@ -1,4 +1,4 @@
-use crate::game::{GameRule, WinnerJudgement};
+use crate::game::{GameRule, Judge};
 use crate::prelude::{Board, Color, SurroundedStatus};
 
 #[derive(Debug, Clone, Copy, thiserror::Error)]
@@ -73,10 +73,10 @@ pub fn compare_board_value(
         }
     };
 
-    use WinnerJudgement::*;
+    use Judge::*;
     let wins_if_both = match rule.suicide_atk_judge() {
-        LastPlayer => true,
-        NextPlayer => false,
+        LastWins => true,
+        NextWins => false,
         Draw => return Err(DrawNotSupportedError),
     };
     let allow_remove = rule.is_remove_accepted();
@@ -131,8 +131,7 @@ mod tests {
     fn test_compare_value() {
         use std::str::FromStr;
         use tools::BoardValue::*;
-        let rule =
-            game::GameRule::new(true).with_suicide_atk_judge(game::WinnerJudgement::NextPlayer);
+        let rule = game::GameRule::new(true).with_suicide_atk_judge(game::Judge::NextWins);
         let board_value = [
             (" B; a;TH y;b mM", Win(5)),
             (" By;H  a;A m;  Yb", Win(3)),
