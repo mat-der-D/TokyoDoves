@@ -149,7 +149,10 @@
 <a href="#149" id="149">149</a>
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, Color, GameRule, SurroundedStatus, WinnerJudgement};
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::game::{GameRule, WinnerJudgement};
+<span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, Color, SurroundedStatus};
 
 <span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
 </span><span class="kw">pub enum </span>CompareBoardValueError {
@@ -281,7 +284,8 @@
     </span><span class="kw">fn </span>test_compare_value() {
         <span class="kw">use </span>std::str::FromStr;
         <span class="kw">use </span>tools::BoardValue::<span class="kw-2">*</span>;
-        <span class="kw">let </span>rule = GameRule::new(<span class="bool-val">true</span>).with_simultaneous_surrounding(WinnerJudgement::NextPlayer);
+        <span class="kw">let </span>rule = game::GameRule::new(<span class="bool-val">true</span>)
+            .with_simultaneous_surrounding(game::WinnerJudgement::NextPlayer);
         <span class="kw">let </span>board_value = [
             (<span class="string">&quot; B; a;TH y;b mM&quot;</span>, Win(<span class="number">5</span>)),
             (<span class="string">&quot; By;H  a;A m;  Yb&quot;</span>, Win(<span class="number">3</span>)),

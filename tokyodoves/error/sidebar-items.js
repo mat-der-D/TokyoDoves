@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ActionConvertError","ActionPerformErrorType","BoardCreateErrorType","BoardError","GameError","GameRuleError","SSNDecodingErrorType","SSNEncodingErrorType"]};
+window.SIDEBAR_ITEMS = {"enum":["ActionConvertError","ActionPerformErrorType","BoardCreateErrorType","BoardError","GameRuleError","SSNDecodingErrorType","SSNEncodingErrorType"]};
