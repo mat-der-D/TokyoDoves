@@ -74,7 +74,7 @@ pub fn compare_board_value(
     };
 
     use WinnerJudgement::*;
-    let wins_if_both = match rule.simultaneous_surrounding() {
+    let wins_if_both = match rule.suicide_attack_judge() {
         LastPlayer => true,
         NextPlayer => false,
         Draw => return Err(DrawNotSupportedError),
@@ -131,8 +131,8 @@ mod tests {
     fn test_compare_value() {
         use std::str::FromStr;
         use tools::BoardValue::*;
-        let rule = game::GameRule::new(true)
-            .with_simultaneous_surrounding(game::WinnerJudgement::NextPlayer);
+        let rule =
+            game::GameRule::new(true).with_suicide_atk_judge(game::WinnerJudgement::NextPlayer);
         let board_value = [
             (" B; a;TH y;b mM", Win(5)),
             (" By;H  a;A m;  Yb", Win(3)),
