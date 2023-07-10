@@ -310,7 +310,7 @@ impl BoardValueTree {
         self.children.get(action)
     }
 
-    pub fn actions<'a>(&'a self) -> Actions<'a> {
+    pub fn actions(&self) -> Actions<'_> {
         Actions::new(self.children.keys())
     }
 
@@ -408,17 +408,21 @@ impl Interval {
     }
 }
 
-// fn print_tree(tree: &BoardValueTree) {
-//     print_tree_core(tree, "");
-// }
+/// Prints contents of [`BoardValueTree`] (experimental api)
+///
+/// Similar functions should be implemented as [`std::fmt::Display`]
+/// for [`BoardValueTree`].
+pub fn print_tree(tree: &BoardValueTree) {
+    print_tree_core(tree, "");
+}
 
-// fn print_tree_core(tree: &BoardValueTree, top: &str) {
-//     let next_top = format!("\t{}", top);
-//     println!("{}{}", top, tree.value);
-//     for (_, t) in tree.children.iter() {
-//         print_tree_core(t, &next_top);
-//     }
-// }
+fn print_tree_core(tree: &BoardValueTree, top: &str) {
+    let next_top = format!("\t{}", top);
+    println!("{}{}", top, tree.value);
+    for (_, t) in tree.children.iter() {
+        print_tree_core(t, &next_top);
+    }
+}
 
 // ****************************************************************************
 //  Functions for Analysis
@@ -520,13 +524,13 @@ pub fn create_checkmate_tree_with_value(
     player: Color,
     rule: GameRule,
 ) -> Result<BoardValueTree, CreateCheckmateTreeWithValueError> {
-    validate_args(board, value, rule)
-        .map_err(|e| CreateCheckmateTreeWithValueError::ArgsValidationError(e))?;
+    type Error = CreateCheckmateTreeWithValueError;
+    validate_args(board, value, rule).map_err(Error::ArgsValidationError)?;
     let (tree, cmp) = create_checkmate_tree_with_value_unchecked(board, value, player, rule);
     if cmp == Ordering::Equal {
         Ok(tree)
     } else {
-        Err(CreateCheckmateTreeWithValueError::ValueMismatchError(cmp))
+        Err(Error::ValueMismatchError(cmp))
     }
 }
 

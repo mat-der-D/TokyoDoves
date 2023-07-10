@@ -6,7 +6,7 @@ use crate::tools::{evaluate_board, find_best_actions};
 // ************************************************************
 //  Errors
 // ************************************************************
-/// Errors associated to [`Game`](`super::game::Game`)
+/// Errors associated to [`Game`]
 #[derive(Debug, Clone, Copy, thiserror::Error)]
 pub enum GameError {
     #[error("[BoardError] {:?}", .error)]

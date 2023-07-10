@@ -7,17 +7,13 @@
 //! - [`BoardError`]
 //!     - [`ActionPerformErrorType`]
 //!     - [`BoardCreateErrorType`]
-//! - [`GameError`]
-//!     - [`BoardError`]
-//!         - ...
-//! - [`GameRuleError`]
 
 use crate::prelude::{
     actions::Action,
     pieces::{Color, Dove},
 };
 
-/// Errors associated to [`GameRule`](`super::game::GameRule`)
+/// Errors associated to [`GameRule`](`crate::game::GameRule`)
 #[derive(Debug, Clone, Copy, thiserror::Error)]
 pub enum GameRuleError {
     #[error("[InitialBoardError]")]
