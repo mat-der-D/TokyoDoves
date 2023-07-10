@@ -407,47 +407,48 @@ impl AnalystAgent {
 
 impl Agent for AnalystAgent {
     fn play(&mut self, game: &mut Game) {
-        use BoardValue::*;
+        todo!("replace to new implementation")
+        // use BoardValue::*;
 
-        let player = *game.next_player();
-        let rule = *game.rule();
+        // let player = *game.next_player();
+        // let rule = *game.rule();
 
-        let val = evaluate_board(game.board(), self.depth, player, rule).unwrap();
+        // let val = evaluate_board(game.board(), self.depth, player, rule).unwrap();
 
-        if !matches!(val, BoardValue::Unknown) {
-            if self.declare_near_to_end {
-                println!("----> About To End! value={:?}", val);
-            }
-            let tree = create_checkmate_tree(game.board(), val, player, rule).unwrap();
-            let action = *tree.actions().next().unwrap();
-            game.perform(action).unwrap();
-            return;
-        }
+        // if !matches!(val, BoardValue::Unknown) {
+        //     if self.declare_near_to_end {
+        //         println!("----> About To End! value={:?}", val);
+        //     }
+        //     let tree = create_checkmate_tree(game.board(), val, player, rule).unwrap();
+        //     let action = *tree.actions().next().unwrap();
+        //     game.perform(action).unwrap();
+        //     return;
+        // }
 
-        let mut next_val = Win(1);
-        let mut action_win1 = None;
-        let mut action_best = None;
-        for a in game.legal_actions() {
-            let mut g = *game;
-            g.perform(a).unwrap();
-            if matches!(g.winner(), Some(p) if p == player) {
-                *game = g;
-                return;
-            } else if !g.is_ongoing() {
-                continue;
-            }
-            let next_val_tmp =
-                evaluate_board(g.board(), self.depth, *g.next_player(), *g.rule()).unwrap();
-            if matches!(next_val_tmp, Win(1)) {
-                action_win1 = Some(a);
-            } else if next_val_tmp < next_val {
-                next_val = next_val_tmp;
-                action_best = Some(a);
-            }
-        }
+        // let mut next_val = Win(1);
+        // let mut action_win1 = None;
+        // let mut action_best = None;
+        // for a in game.legal_actions() {
+        //     let mut g = *game;
+        //     g.perform(a).unwrap();
+        //     if matches!(g.winner(), Some(p) if p == player) {
+        //         *game = g;
+        //         return;
+        //     } else if !g.is_ongoing() {
+        //         continue;
+        //     }
+        //     let next_val_tmp =
+        //         evaluate_board(g.board(), self.depth, *g.next_player(), *g.rule()).unwrap();
+        //     if matches!(next_val_tmp, Win(1)) {
+        //         action_win1 = Some(a);
+        //     } else if next_val_tmp < next_val {
+        //         next_val = next_val_tmp;
+        //         action_best = Some(a);
+        //     }
+        // }
 
-        let action = action_best.unwrap_or_else(|| action_win1.unwrap());
-        game.perform(action).unwrap();
+        // let action = action_best.unwrap_or_else(|| action_win1.unwrap());
+        // game.perform(action).unwrap();
     }
 }
 
