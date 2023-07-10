@@ -1,198 +1,591 @@
-use std::collections::hash_map;
-use std::collections::HashMap;
+use std::cmp::{Ord, Ordering, PartialOrd};
+use std::collections::{hash_map, HashMap};
 
-use crate::game::{GameRule, Judge};
-use crate::prelude::{Action, Board, Color, SurroundedStatus};
+use crate::{
+    game::{GameRule, Judge},
+    Action, ActionsFwdIntoIter, Board, BoardBuilder, Color, SurroundedStatus,
+};
 
-// ************************************************************
-//  Errors
-// ************************************************************
-/// Error variants for validating [`BoardValue`]
-#[derive(Debug, Clone, Copy, thiserror::Error)]
-pub enum BoardValueError {
-    #[error("[WinArgMustOdd] {}", .0)]
-    WinArgMustOdd(usize),
-
-    #[error("[LoseArgMustPositiveEven] {}", .0)]
-    LoseArgMustPositiveEven(usize),
-
-    #[error("[UnknownNotSupported]")]
-    UnknownNotSupported,
+// ****************************************************************************
+//  BoardValue
+// ****************************************************************************
+/// Three kinds of [`BoardValue`]
+///
+/// This type is returned by [`BoardValue::kind`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum BoardValueKind {
+    Win,
+    Lose,
+    Unknown,
 }
 
-/// Error variants for [`evaluate_board`]
-#[derive(Debug, Clone, Copy, thiserror::Error)]
-pub enum EvaluateBoardError {
-    #[error("[BoardAlreadyFinished]")]
-    BoardAlreadyFinished,
-
-    #[error("[DrawNotSupportedError]")]
-    DrawNotSupportedError,
+impl Default for BoardValueKind {
+    fn default() -> Self {
+        Self::Unknown
+    }
 }
 
-/// Error variants for [`compare_board_value`]
-#[derive(Debug, Clone, Copy, thiserror::Error)]
-pub enum CompareBoardValueError {
-    #[error("[BoardAlreadyFinished]")]
-    BoardAlreadyFinished,
-
-    #[error("[BoardValueError]")]
-    BoardValueError { detail: BoardValueError },
-
-    #[error("[DrawNotSupportedError]")]
-    DrawNotSupportedError,
+impl PartialOrd for BoardValueKind {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
-/// Error variants for [`create_checkmate_tree`]
-#[derive(Debug, Clone, Copy, thiserror::Error)]
-pub enum CreateCheckmateTreeError {
-    #[error("[BoardAlreadyFinished]")]
-    BoardAlreadyFinished,
+impl Ord for BoardValueKind {
+    fn cmp(&self, other: &Self) -> Ordering {
+        fn _kind_to_u8(kind: &BoardValueKind) -> u8 {
+            use BoardValueKind::*;
+            match kind {
+                Win => 2,
+                Unknown => 1,
+                Lose => 0,
+            }
+        }
 
-    #[error("[BoardValueError]")]
-    BoardValueError { detail: BoardValueError },
-
-    #[error("[DrawNotSupportedError]")]
-    DrawNotSupportedError,
-
-    #[error("[EmptyTreeError]")]
-    EmptyTreeError,
+        _kind_to_u8(self).cmp(&_kind_to_u8(other))
+    }
 }
 
-// ************************************************************
-//  Building Blocks
-// ************************************************************
 /// Value of board
 ///
 /// The order of the values is as follows:
 /// ```text
 /// Lose(2) < Lose(4) < Lose(6) < ... < Unknown < ... < Win(5) < Win(3) < Win(1)
 /// ```
-///
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum BoardValue {
-    /// `Win(n)` means the player will win in `n` turns at least.
-    Win(usize),
-    /// `Lose(n)` means the player will lose in `n` turns at most.
-    Lose(usize),
-    /// Cannot detect win or lose.
-    /// This variant does not mean the value of the board cannot be determined ultimately,
-    /// but the value cannot be determined within the reach of search performed.
-    Unknown,
+/// - n of `Lose(n)` means that the player will lose in n turns at most.
+/// - n of `Win(n)` means that the player will win in n turns at least.
+/// - `Unknown` means that the value of the board was failed to be determined.
+///     It can change to `Lose(n)` or `Win(n)` if you search more deeply.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+pub struct BoardValue {
+    value: Option<usize>,
+}
+
+impl std::fmt::Display for BoardValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let kind = self.kind();
+        let s = match kind {
+            BoardValueKind::Unknown => format!("{:?}", kind),
+            _ => {
+                let num = self.value.unwrap();
+                format!("{:?}({})", kind, num)
+            }
+        };
+        write!(f, "{}", s)
+    }
+}
+
+impl BoardValue {
+    pub const MAX: BoardValue = BoardValue { value: Some(1) };
+    pub const MIN: BoardValue = BoardValue { value: Some(2) };
+
+    pub fn kind(&self) -> BoardValueKind {
+        use BoardValueKind::*;
+        match self.value {
+            None | Some(0) => Unknown,
+            Some(n) => match n % 2 {
+                0 => Lose,
+                1 => Win,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    pub fn win(num: usize) -> Option<Self> {
+        if num % 2 == 1 {
+            Some(BoardValue { value: Some(num) })
+        } else {
+            None
+        }
+    }
+
+    pub fn lose(num: usize) -> Option<Self> {
+        if num != 0 && num % 2 == 0 {
+            Some(BoardValue { value: Some(num) })
+        } else {
+            None
+        }
+    }
+
+    pub fn unknown() -> Self {
+        BoardValue { value: None }
+    }
+
+    pub fn is_win(&self) -> bool {
+        matches!(self.kind(), BoardValueKind::Win)
+    }
+
+    pub fn is_lose(&self) -> bool {
+        matches!(self.kind(), BoardValueKind::Lose)
+    }
+
+    pub fn is_unknown(&self) -> bool {
+        matches!(self.kind(), BoardValueKind::Unknown)
+    }
+
+    pub fn increment(&self) -> Self {
+        if self.is_unknown() {
+            *self
+        } else {
+            Self {
+                value: self.value.map(|num| num + 1),
+            }
+        }
+    }
+
+    pub fn try_decrement(&self) -> Option<Self> {
+        match self.value {
+            None | Some(0) => Some(*self),
+            Some(1) => None,
+            Some(num) => Some(Self {
+                value: Some(num - 1),
+            }),
+        }
+    }
+}
+
+impl From<Option<usize>> for BoardValue {
+    fn from(value: Option<usize>) -> Self {
+        match value {
+            Some(0) => Self { value: None },
+            value => Self { value },
+        }
+    }
+}
+
+impl From<BoardValue> for Option<usize> {
+    fn from(board_value: BoardValue) -> Self {
+        match board_value.value {
+            Some(0) => None,
+            value => value,
+        }
+    }
 }
 
 impl PartialOrd for BoardValue {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
 impl Ord for BoardValue {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        fn _val_to_i8(val: &BoardValue) -> i8 {
-            use BoardValue::*;
-            match val {
-                Win(_) => 1,
-                Unknown => 0,
-                Lose(_) => -1,
-            }
+    fn cmp(&self, other: &Self) -> Ordering {
+        let left_kind = self.kind();
+        let right_kind = other.kind();
+
+        use BoardValueKind::*;
+        if (left_kind != right_kind) || (left_kind == Unknown) {
+            return left_kind.cmp(&right_kind);
         }
 
-        use std::cmp::Ordering::*;
-        use BoardValue::*;
-        match (self, other) {
-            (Unknown, Unknown) => Equal,
-            (Win(left), Win(right)) => right.cmp(left),
-            (Lose(left), Lose(right)) => left.cmp(right),
-            (left, right) => _val_to_i8(left).cmp(&_val_to_i8(right)),
+        // In the following, left_kind == right_kind != Unknown
+
+        let left_num = self.value.as_ref().unwrap();
+        let right_num = other.value.as_ref().unwrap();
+        match left_kind {
+            Lose => left_num.cmp(right_num),
+            Win => right_num.cmp(left_num),
+            Unknown => unreachable!(),
         }
     }
 }
 
-impl TryFrom<BoardValue> for usize {
-    type Error = BoardValueError;
-    fn try_from(value: BoardValue) -> Result<Self, Self::Error> {
-        use BoardValue::*;
-        use BoardValueError::*;
-        let n = match value {
-            Win(n) => {
-                if n % 2 == 1 {
-                    n
-                } else {
-                    return Err(WinArgMustOdd(n));
-                }
-            }
-            Lose(n) => {
-                if (n != 0) && (n % 2 == 0) {
-                    n
-                } else {
-                    return Err(LoseArgMustPositiveEven(n));
-                }
-            }
-            Unknown => {
-                return Err(UnknownNotSupported);
-            }
+// ****************************************************************************
+//  NextBoardIter
+// ****************************************************************************
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+enum NextBoardStatus {
+    Win,
+    Lose,
+    Unknown,
+}
+
+struct NextBoardIter {
+    current_board: Board,
+    current_player: Color,
+    wins_if_both: bool,
+    actions_iter: ActionsFwdIntoIter,
+}
+
+impl NextBoardIter {
+    fn new(current_board: Board, current_player: Color, rule: GameRule) -> Self {
+        use Judge::*;
+        let wins_if_both = match rule.suicide_atk_judge() {
+            LastWins => true,
+            NextWins => false,
+            Draw => panic!("validation error"),
         };
-        Ok(n)
+        let actions_iter = current_board
+            .legal_actions(current_player, true, true, *rule.is_remove_accepted())
+            .into_iter();
+        Self {
+            current_board,
+            current_player,
+            wins_if_both,
+            actions_iter,
+        }
     }
 }
 
-// ************************************************************
-//  Evaluate Board
-// ************************************************************
-/// Evaluates `Board`
+impl Iterator for NextBoardIter {
+    type Item = (Action, Board, NextBoardStatus);
+    fn next(&mut self) -> Option<Self::Item> {
+        let action = self.actions_iter.next()?;
+        let next_board = self.current_board.perform_unchecked_copied(action);
+
+        use SurroundedStatus::*;
+        let sur_status = next_board.surrounded_status();
+        let is_both = matches!(sur_status, Both);
+
+        use NextBoardStatus::*;
+        let next_board_status = if (self.wins_if_both && is_both)
+            || matches!(sur_status, OneSide(p) if p != self.current_player)
+        {
+            Win
+        } else if (!self.wins_if_both && is_both)
+            || matches!(sur_status, OneSide(p) if p == self.current_player)
+        {
+            Lose
+        } else {
+            Unknown
+        };
+        Some((action, next_board, next_board_status))
+    }
+}
+
+// ****************************************************************************
+//  BoardValueTree
+// ****************************************************************************
+#[derive(Clone)]
+pub struct Actions<'a>(hash_map::Keys<'a, Action, BoardValueTree>);
+
+impl<'a> Actions<'a> {
+    fn new(iter: hash_map::Keys<'a, Action, BoardValueTree>) -> Self {
+        Self(iter)
+    }
+}
+
+impl<'a> Iterator for Actions<'a> {
+    type Item = &'a Action;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next()
+    }
+}
+
+impl<'a> std::fmt::Debug for Actions<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+/// A tree structure that contains [`Board`] and [`BoardValue`] on its nodes,
+/// and [`Action`]s on its edges.
 ///
-/// It searches the value of `board` under `max_search_depth`.
-/// If it does not the value, it returns `Ok(Unknown)`
+/// It is returned by [`create_checkmate_tree`].
+#[derive(Debug, Clone)]
+pub struct BoardValueTree {
+    board_raw: u64,
+    value: BoardValue,
+    children: HashMap<Action, BoardValueTree>,
+}
+
+impl BoardValueTree {
+    pub fn new(board: Board) -> Self {
+        Self {
+            board_raw: board.to_u64(),
+            value: Default::default(),
+            children: Default::default(),
+        }
+    }
+
+    pub fn board(&self) -> Board {
+        BoardBuilder::from_u64(self.board_raw).build_unchecked()
+    }
+
+    pub fn value(&self) -> &BoardValue {
+        &self.value
+    }
+
+    pub fn child(&self, action: &Action) -> Option<&BoardValueTree> {
+        self.children.get(action)
+    }
+
+    pub fn actions(&self) -> Actions<'_> {
+        Actions::new(self.children.keys())
+    }
+
+    pub fn is_good_for_puzzle(&self, step: usize) -> bool {
+        if step == 0 {
+            true
+        } else {
+            self.children.len() == 1
+                && self
+                    .children
+                    .values()
+                    .all(|c| c.is_good_for_puzzle(step - 1))
+        }
+    }
+}
+
+// ****************************************************************************
+//  Helper Items
+// ****************************************************************************
+/// Error variants on validation of arguments
+#[derive(Debug, thiserror::Error)]
+pub enum ArgsValidationError {
+    #[error("board of finished game")]
+    FinishedBoardError { board: Board },
+
+    #[error("BoardValue::Unknown not supported")]
+    UnknownBoardValueError,
+
+    #[error("Judge::Draw not supported")]
+    DrawJudgeError,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum CreateCheckmateTreeWithValueError {
+    #[error(transparent)]
+    ArgsValidationError(#[from] ArgsValidationError),
+
+    #[error("value of board differs from value in argument")]
+    ValueMismatchError(Ordering),
+}
+
+fn validate_args(
+    board: Board,
+    value: BoardValue,
+    rule: GameRule,
+) -> Result<(), ArgsValidationError> {
+    use ArgsValidationError::*;
+    if board.surrounded_status() != SurroundedStatus::None {
+        return Err(FinishedBoardError { board });
+    }
+    if value.is_unknown() {
+        return Err(UnknownBoardValueError);
+    }
+    if !matches!(rule.suicide_atk_judge(), Judge::NextWins | Judge::LastWins) {
+        return Err(DrawJudgeError);
+    }
+    Ok(())
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Interval {
+    left: BoardValue,
+    right: BoardValue,
+}
+
+impl std::fmt::Display for Interval {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[{}, {}]", self.left, self.right)
+    }
+}
+
+impl Interval {
+    pub fn new(left: BoardValue, right: BoardValue) -> Self {
+        Self { left, right }
+    }
+
+    pub fn left(&self) -> &BoardValue {
+        &self.left
+    }
+
+    pub fn right(&self) -> &BoardValue {
+        &self.right
+    }
+
+    pub fn contains(&self, item: &BoardValue) -> bool {
+        self.left <= *item && *item <= self.right
+    }
+
+    pub fn single(&self) -> Option<BoardValue> {
+        if self.left == self.right {
+            Some(self.left)
+        } else {
+            None
+        }
+    }
+}
+
+/// Prints contents of [`BoardValueTree`] (experimental api)
+///
+/// Similar functions should be implemented as [`std::fmt::Display`]
+/// for [`BoardValueTree`].
+pub fn print_tree(tree: &BoardValueTree) {
+    print_tree_core(tree, "");
+}
+
+fn print_tree_core(tree: &BoardValueTree, top: &str) {
+    let next_top = format!("\t{}", top);
+    println!("{}{}", top, tree.value);
+    for (_, t) in tree.children.iter() {
+        print_tree_core(t, &next_top);
+    }
+}
+
+// ****************************************************************************
+//  Functions for Analysis
+// ****************************************************************************
+/// Creates an [`BoardValueTree`] that describes routes to ends of the game.
+///
+/// Once the value of a board in a search process is determined,
+/// succeeding edges whose values are not the "next" value are pruned.
+/// The following diagram describes what "next" value means:
+/// ```text
+/// ... -> Win(5) -> Lose(4) -> Win(3) -> Lose(2) -> Win(1)
+/// ```
+/// Especially, the node with the value `Win(1)` becomes a leaf node,
+/// that is, all the succeeding edges are pruned.
+///
+/// If you know the value of `board` in advance,
+/// [`create_checkmate_tree_with_value`], a much faster version,
+/// would be more appropriate.
 ///
 /// # Errors
-/// Returns `Err` only when the argument is invalid. Specifically,
+/// Returns `Err` when the argument is invalid. Specifically,
 /// the following cases are invalid:
 /// - `board` is already finished (at least one boss is surrounded)
+/// - `value` is `Unknown`, `Win(even number)` or `Lose(odd or zero)`
 /// - `rule.suicide_atk_judge` is `Judge::Draw`
-pub fn evaluate_board(
-    board: &Board,
-    max_search_depth: usize,
+pub fn create_checkmate_tree(
+    board: Board,
     player: Color,
+    max_depth: usize,
     rule: GameRule,
-) -> Result<BoardValue, EvaluateBoardError> {
-    use BoardValue::*;
-    if max_search_depth == 0 {
-        return Ok(Unknown);
-    }
-
-    use EvaluateBoardError::*;
-    if !matches!(board.surrounded_status(), SurroundedStatus::None) {
-        return Err(BoardAlreadyFinished);
-    }
-
-    use Judge::*;
-    let wins_if_both = match rule.suicide_atk_judge() {
-        LastWins => true,
-        NextWins => false,
-        Draw => return Err(DrawNotSupportedError),
-    };
-    let is_remove_accepted = *rule.is_remove_accepted();
-
-    for depth in 1..=max_search_depth {
-        let cmp = compare_board_value_core(board, depth, player, is_remove_accepted, wins_if_both);
-        if cmp == 0 {
-            return match depth {
-                0 => unreachable!(),
-                n => match n % 2 {
-                    0 => Ok(Lose(n)),
-                    1 => Ok(Win(n)),
-                    _ => unreachable!(),
-                },
-            };
-        }
-    }
-    Ok(Unknown)
+) -> Result<BoardValueTree, ArgsValidationError> {
+    validate_args(board, BoardValue::MAX, rule)?;
+    Ok(create_checkmate_tree_unchecked(
+        board, player, max_depth, rule,
+    ))
 }
 
-// ************************************************************
-//  Compare Value
-// ************************************************************
+fn create_checkmate_tree_unchecked(
+    board: Board,
+    player: Color,
+    max_depth: usize,
+    rule: GameRule,
+) -> BoardValueTree {
+    if max_depth == 0 {
+        return BoardValueTree::new(board);
+    }
+
+    let mut tree = BoardValueTree::new(board);
+    tree.value = BoardValue::MIN;
+
+    for (action, next_board, status) in NextBoardIter::new(board, player, rule) {
+        use NextBoardStatus::*;
+        match status {
+            Win => {
+                tree.value = BoardValue::win(1).unwrap();
+                tree.children.clear();
+                return tree;
+            }
+            Lose => continue,
+            Unknown => {
+                let child =
+                    create_checkmate_tree_unchecked(next_board, !player, max_depth - 1, rule);
+                let child_value_increment = child.value.increment();
+                if child_value_increment < tree.value {
+                    continue;
+                }
+                if child_value_increment > tree.value {
+                    tree.value = child_value_increment;
+                    tree.children.clear();
+                }
+                tree.children.insert(action, child);
+            }
+        }
+    }
+    tree
+}
+
+/// Creates an [`BoardValueTree`] that describes routes to ends of the game.
+///
+/// This function behaves almost similar to [`create_checkmate_tree`],
+/// except that it receives `value` ([`BoardValue`]) instead of search depth,
+/// and requires `value` coinsides with the value of `board`.
+/// This function runs much faster than [`create_checkmate_tree_with_value`]
+/// in exchange for restriction of possible arguments.
+///
+/// # Errors
+/// Returns `Err` when the argument is invalid. Specifically,
+/// the following cases are invalid:
+/// - `board` is already finished (at least one boss is surrounded)
+/// - `value` is `Unknown`, `Win(even number)` or `Lose(odd or zero)`
+/// - `rule.suicide_atk_judge` is `Judge::Draw`
+/// Furthermore, it returns `Err` when the value of `board` differs from `value`.
+/// In such a case, returned value contains a variant of [`std::cmp::Ordering`],
+/// which means that the value of board is greater (`Greater`) or less (`Less`)
+/// than the specified `value`.
+pub fn create_checkmate_tree_with_value(
+    board: Board,
+    value: BoardValue,
+    player: Color,
+    rule: GameRule,
+) -> Result<BoardValueTree, CreateCheckmateTreeWithValueError> {
+    type Error = CreateCheckmateTreeWithValueError;
+    validate_args(board, value, rule).map_err(Error::ArgsValidationError)?;
+    let (tree, cmp) = create_checkmate_tree_with_value_unchecked(board, value, player, rule);
+    if cmp == Ordering::Equal {
+        Ok(tree)
+    } else {
+        Err(Error::ValueMismatchError(cmp))
+    }
+}
+
+fn create_checkmate_tree_with_value_unchecked(
+    board: Board,
+    value: BoardValue,
+    player: Color,
+    rule: GameRule,
+) -> (BoardValueTree, Ordering) {
+    use Ordering::*;
+    let mut tree = BoardValueTree::new(board);
+    tree.value = value;
+    let mut cmp = Less;
+    // tree.value = value;
+    for (action, next_board, status) in NextBoardIter::new(board, player, rule) {
+        use NextBoardStatus::*;
+        match status {
+            Win => {
+                if value == BoardValue::MAX {
+                    cmp = Equal;
+                } else {
+                    cmp = Greater;
+                    tree.value = BoardValue::unknown();
+                }
+                tree.children.clear();
+                return (tree, cmp);
+            }
+            Lose => continue,
+            Unknown => {
+                if value == BoardValue::MAX {
+                    continue;
+                }
+                let next_value = value.try_decrement().unwrap();
+                let (child, next_cmp) = create_checkmate_tree_with_value_unchecked(
+                    next_board, next_value, !player, rule,
+                );
+                if next_cmp == Less {
+                    tree.value = BoardValue::unknown();
+                    tree.children.clear();
+                    return (tree, Greater);
+                }
+                if next_cmp == Equal {
+                    tree.children.insert(action, child);
+                }
+                cmp = cmp.max(next_cmp.reverse());
+            }
+        }
+    }
+    if cmp != Equal {
+        tree.value = BoardValue::unknown();
+        tree.children.clear();
+    }
+    (tree, cmp)
+}
+
 /// Compares the value of specified [`Board`] to a given [`BoardValue`].
 ///
 /// It returns:
@@ -207,244 +600,176 @@ pub fn evaluate_board(
 /// - `value` is `Unknown`, `Win(even number)` or `Lose(odd or zero)`
 /// - `rule.suicide_atk_judge` is `Judge::Draw`
 pub fn compare_board_value(
-    board: &Board,
+    board: Board,
     value: BoardValue,
     player: Color,
     rule: GameRule,
-) -> Result<std::cmp::Ordering, CompareBoardValueError> {
-    use CompareBoardValueError::*;
-    if !matches!(board.surrounded_status(), SurroundedStatus::None) {
-        return Err(BoardAlreadyFinished);
-    }
-
-    let n = value
-        .try_into()
-        .map_err(|e| CompareBoardValueError::BoardValueError { detail: e })?;
-
-    use Judge::*;
-    let wins_if_both = match rule.suicide_atk_judge() {
-        LastWins => true,
-        NextWins => false,
-        Draw => return Err(DrawNotSupportedError),
-    };
-    let is_remove_accepted = *rule.is_remove_accepted();
-    use std::cmp::Ordering::*;
-    let cmp = match compare_board_value_core(board, n, player, is_remove_accepted, wins_if_both) {
-        -1 => Less,
-        0 => Equal,
-        1 => Greater,
-        _ => unreachable!(),
-    };
-    Ok(cmp)
+) -> Result<Ordering, ArgsValidationError> {
+    validate_args(board, value, rule)?;
+    Ok(compare_board_value_unchecked(board, value, player, rule))
 }
 
-fn compare_board_value_core(
-    board: &Board,
-    step_to_finish: usize,
+fn compare_board_value_unchecked(
+    board: Board,
+    value: BoardValue,
     player: Color,
-    is_remove_accepted: bool,
-    wins_if_both: bool,
-) -> i8 {
-    let mut cmp = if step_to_finish == 2 { 0 } else { -1 };
-    for action in board.legal_actions(player, true, true, is_remove_accepted) {
-        let next_board = board.perform_unchecked_copied(action);
-
-        use SurroundedStatus::*;
-        let status = next_board.surrounded_status();
-        let is_both = matches!(status, Both);
-        if (wins_if_both && is_both) || matches!(status, OneSide(p) if p != player) {
-            return if step_to_finish == 1 { 0 } else { 1 };
-        } else if (step_to_finish == 1)
-            || (!wins_if_both && is_both)
-            || matches!(status, OneSide(p) if p == player)
-        {
-            continue;
-        } else {
-            let next_cmp = compare_board_value_core(
-                &next_board,
-                step_to_finish - 1,
-                !player,
-                is_remove_accepted,
-                wins_if_both,
-            );
-            if next_cmp == -1 {
-                return 1;
+    rule: GameRule,
+) -> Ordering {
+    use Ordering::*;
+    let mut cmp = Less;
+    for (_, next_board, status) in NextBoardIter::new(board, player, rule) {
+        use NextBoardStatus::*;
+        match status {
+            Win => {
+                if value == BoardValue::MAX {
+                    return Equal;
+                } else {
+                    return Greater;
+                }
             }
-            cmp = cmp.max(-next_cmp);
+            Lose => continue,
+            Unknown => {
+                let Some(next_val) = value.try_decrement() else {
+                    continue;
+                };
+                let next_cmp = compare_board_value_unchecked(next_board, next_val, !player, rule);
+                if next_cmp == Less {
+                    return Greater;
+                }
+                cmp = cmp.max(next_cmp.reverse());
+            }
         }
     }
     cmp
 }
 
-// ************************************************************
-//  Action Tree
-// ************************************************************
-/// A tree structure that contains [`Action`]s on its edges.
+/// Calculates [`BoardValue`] of specified [`Board`].
 ///
-/// It is returned by [`create_checkmate_tree`] to describe
-/// routes, i.e. possible serieses of `Action`s, to ends of the game.
-#[derive(Debug, Clone)]
-pub struct ActionTree(HashMap<Action, ActionTree>);
-
-impl ActionTree {
-    fn new() -> Self {
-        Self(HashMap::new())
-    }
-
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    fn insert(&mut self, action: Action, tree: ActionTree) {
-        self.0.insert(action, tree);
-    }
-
-    pub fn child(&self, action: &Action) -> Option<&ActionTree> {
-        self.0.get(action)
-    }
-
-    pub fn children(&self) -> hash_map::Values<'_, Action, ActionTree> {
-        self.0.values()
-    }
-
-    pub fn actions(&self) -> hash_map::Keys<'_, Action, ActionTree> {
-        self.0.keys()
-    }
-
-    pub fn actions_children(&self) -> hash_map::Iter<'_, Action, ActionTree> {
-        self.0.iter()
-    }
-
-    pub fn depth(&self) -> usize {
-        if self.0.is_empty() {
-            0
-        } else {
-            self.0.values().map(|t| t.depth()).max().unwrap() + 1
-        }
-    }
-
-    pub fn to_serieses(&self) -> Vec<Vec<&Action>> {
-        let mut serieses = Vec::new();
-        for (a, t) in self.actions_children() {
-            if t.depth() == 2 {
-                serieses.push(vec![a]);
-            }
-            for next_vec in t.to_serieses() {
-                let series: Vec<&Action> = [a].into_iter().chain(next_vec.into_iter()).collect();
-                serieses.push(series);
-            }
-        }
-        serieses
-    }
-
-    pub fn is_good_for_puzzle(&self, step: usize) -> bool {
-        if step == 0 {
-            true
-        } else {
-            self.actions_children().len() == 1
-                && self
-                    .actions_children()
-                    .next()
-                    .unwrap()
-                    .1
-                    .is_good_for_puzzle(step - 1)
-        }
-    }
-}
-
-/// Creates an [`ActionTree`] that describes routes to ends of the game.
-///
-/// It supposes the value of `board` equals to `value`.
-/// [`compare_board_value`] may be a good tool to examine this in advance.
+/// It searches the value of `board` by pursuing `search_depth` turns forward.
+/// The result is returned in [`Interval`], which is a closed interval
+/// between two [`BoardValue`]s.
 ///
 /// # Errors
-/// Returns `Err` when the argument is invalid. Specifically,
+/// Returns `Err` only when the argument is invalid. Specifically,
 /// the following cases are invalid:
 /// - `board` is already finished (at least one boss is surrounded)
-/// - `value` is `Unknown`, `Win(even number)` or `Lose(odd or zero)`
 /// - `rule.suicide_atk_judge` is `Judge::Draw`
-/// Furthermore, it returns `Err(EmptyTreeError)` if the value of `board`
-/// does not equal to `value`.
-pub fn create_checkmate_tree(
-    board: &Board,
-    value: BoardValue,
+pub fn evaluate_board(
+    board: Board,
     player: Color,
+    search_depth: usize,
     rule: GameRule,
-) -> Result<ActionTree, CreateCheckmateTreeError> {
-    use CreateCheckmateTreeError::*;
-    if !matches!(board.surrounded_status(), SurroundedStatus::None) {
-        return Err(BoardAlreadyFinished);
-    }
-
-    let n = value
-        .try_into()
-        .map_err(|e| CreateCheckmateTreeError::BoardValueError { detail: e })?;
-
-    use Judge::*;
-    let wins_if_both = match rule.suicide_atk_judge() {
-        LastWins => true,
-        NextWins => false,
-        Draw => return Err(DrawNotSupportedError),
-    };
-    let is_remove_accepted = *rule.is_remove_accepted();
-
-    let (_, tree) = create_checkmate_tree_core(board, n, player, is_remove_accepted, wins_if_both);
-    if tree.is_empty() {
-        return Err(EmptyTreeError);
-    }
-    Ok(tree)
+) -> Result<Interval, ArgsValidationError> {
+    validate_args(board, BoardValue::MAX, rule)?;
+    Ok(evaluate_board_unchecked(board, player, search_depth, rule))
 }
 
-fn create_checkmate_tree_core(
-    board: &Board,
-    step_to_finish: usize,
+fn evaluate_board_unchecked(
+    board: Board,
     player: Color,
-    is_remove_accepted: bool,
-    wins_if_both: bool,
-) -> (i8, ActionTree) {
-    let mut tree = ActionTree::new();
-    let mut cmp = if step_to_finish == 2 { 0 } else { -1 };
-    for action in board.legal_actions(player, true, true, is_remove_accepted) {
-        let next_board = board.perform_unchecked_copied(action);
-
-        use SurroundedStatus::*;
-        let status = next_board.surrounded_status();
-        let is_both = matches!(status, Both);
-        if (wins_if_both && is_both) || matches!(status, OneSide(p) if p != player) {
-            if step_to_finish == 1 {
-                tree.insert(action, ActionTree::new());
-                cmp = 0;
-                continue;
-            } else {
-                return (1, ActionTree::new());
-            };
-        } else if (step_to_finish == 1)
-            || (!wins_if_both && is_both)
-            || matches!(status, OneSide(p) if p == player)
-        {
-            continue;
-        } else {
-            let (next_cmp, next_tree) = create_checkmate_tree_core(
-                &next_board,
-                step_to_finish - 1,
-                !player,
-                is_remove_accepted,
-                wins_if_both,
-            );
-            if next_cmp == -1 {
-                return (1, ActionTree::new());
-            }
-            if next_cmp == 0 {
-                tree.insert(action, next_tree);
-            }
-            cmp = cmp.max(-next_cmp);
+    search_depth: usize,
+    rule: GameRule,
+) -> Interval {
+    for depth in 1..=search_depth {
+        let value = BoardValue::from(Some(depth));
+        if matches!(
+            compare_board_value_unchecked(board, value, player, rule),
+            Ordering::Equal
+        ) {
+            return Interval::new(value, value);
         }
     }
-    (cmp, tree)
+    let (left_num, right_num) = if search_depth % 2 == 0 {
+        (search_depth + 2, search_depth + 1)
+    } else {
+        (search_depth + 1, search_depth + 2)
+    };
+    let left = BoardValue::from(Some(left_num));
+    let right = BoardValue::from(Some(right_num));
+    Interval::new(left, right)
+}
+
+/// Collects the best [`Action`]s by [`BoardValue`]
+///
+/// # Errors
+/// Returns `Err` only when the argument is invalid. Specifically,
+/// the following cases are invalid:
+/// - `board` is already finished (at least one boss is surrounded)
+/// - `rule.suicide_atk_judge` is `Judge::Draw`
+pub fn find_best_actions(
+    board: Board,
+    player: Color,
+    search_depth: usize,
+    rule: GameRule,
+) -> Result<Vec<Action>, ArgsValidationError> {
+    validate_args(board, BoardValue::MAX, rule)?;
+    Ok(find_best_actions_unchecked(
+        board,
+        player,
+        search_depth,
+        rule,
+    ))
+}
+
+fn find_best_actions_unchecked(
+    board: Board,
+    player: Color,
+    search_depth: usize,
+    rule: GameRule,
+) -> Vec<Action> {
+    if search_depth == 0 {
+        return board
+            .legal_actions(player, true, true, *rule.is_remove_accepted())
+            .into_iter()
+            .collect();
+    }
+
+    let value_interval = evaluate_board_unchecked(board, player, search_depth, rule);
+    let value = value_interval.single().unwrap_or(BoardValue::unknown());
+
+    let mut actions = Vec::new();
+    for (action, next_board, status) in NextBoardIter::new(board, player, rule) {
+        use NextBoardStatus::*;
+        match status {
+            Win => {
+                if value != BoardValue::MAX {
+                    unreachable!()
+                }
+                actions.push(action);
+                continue;
+            }
+            Lose => continue,
+            Unknown => (),
+        }
+
+        if value == BoardValue::MAX {
+            continue;
+        }
+
+        let next_value = value.try_decrement().unwrap();
+        if next_value.is_unknown() {
+            if !matches!(
+                compare_board_value_unchecked(
+                    next_board,
+                    value_interval.left().try_decrement().unwrap(),
+                    !player,
+                    rule
+                ),
+                Ordering::Greater
+            ) {
+                actions.push(action);
+            }
+        } else {
+            // next_value is Win or Lose
+            if matches!(
+                compare_board_value_unchecked(next_board, next_value, !player, rule),
+                Ordering::Equal
+            ) {
+                actions.push(action);
+            }
+        }
+    }
+    actions
 }
 
 // ************************************************************
@@ -452,51 +777,53 @@ fn create_checkmate_tree_core(
 // ************************************************************
 #[cfg(test)]
 mod tests {
-    use crate::{tools::create_checkmate_tree, *};
+    use crate::{tools::BoardValue, *};
 
     #[test]
     fn test_evaluate_board() {
         use std::str::FromStr;
-        use tools::BoardValue::*;
+        use tools::BoardValue;
         let rule = game::GameRule::new(true).with_suicide_atk_judge(game::Judge::NextWins);
         let board_value = [
-            (" B; a;TH y;b mM", Win(5)),
-            (" By;H  a;A m;  Yb", Win(3)),
-            ("bB; H;Y h;  T", Win(3)),
-            ("T; B b;  yY; t", Win(3)),
-            ("hB A;maYT; Htb;M y", Win(5)),
-            ("Ba;  H;  hA;MY b", Win(5)),
-            (" B;a  b; MtY;T  H", Win(7)),
-            ("Y; B;y hA; M b", Win(5)),
-            ("bB;T YA", Win(5)),
+            (" B; a;TH y;b mM", 5),
+            (" By;H  a;A m;  Yb", 3),
+            ("bB; H;Y h;  T", 3),
+            ("T; B b;  yY; t", 3),
+            ("hB A;maYT; Htb;M y", 5),
+            ("Ba;  H;  hA;MY b", 5),
+            (" B;a  b; MtY;T  H", 7),
+            ("Y; B;y hA; M b", 5),
+            ("bB;T YA", 5),
         ];
         let max_depth = 10; // it must be greater than all n of Win(n)
-        for (s, val) in board_value {
+        for (s, num) in board_value {
+            let val = BoardValue::win(num).unwrap();
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            let evaluated = tools::evaluate_board(&board, max_depth, Color::Red, rule).unwrap();
-            assert_eq!(evaluated, val);
+            let evaluated = tools::evaluate_board(board, Color::Red, max_depth, rule).unwrap();
+            assert_eq!(evaluated.single().unwrap(), val);
         }
     }
 
     #[test]
     fn test_compare_value() {
         use std::str::FromStr;
-        use tools::BoardValue::*;
+        use tools::BoardValue;
         let rule = game::GameRule::new(true).with_suicide_atk_judge(game::Judge::NextWins);
         let board_value = [
-            (" B; a;TH y;b mM", Win(5)),
-            (" By;H  a;A m;  Yb", Win(3)),
-            ("bB; H;Y h;  T", Win(3)),
-            ("T; B b;  yY; t", Win(3)),
-            ("hB A;maYT; Htb;M y", Win(5)),
-            ("Ba;  H;  hA;MY b", Win(5)),
-            (" B;a  b; MtY;T  H", Win(7)),
-            ("Y; B;y hA; M b", Win(5)),
-            ("bB;T YA", Win(5)),
+            (" B; a;TH y;b mM", 5),
+            (" By;H  a;A m;  Yb", 3),
+            ("bB; H;Y h;  T", 3),
+            ("T; B b;  yY; t", 3),
+            ("hB A;maYT; Htb;M y", 5),
+            ("Ba;  H;  hA;MY b", 5),
+            (" B;a  b; MtY;T  H", 7),
+            ("Y; B;y hA; M b", 5),
+            ("bB;T YA", 5),
         ];
-        for (s, val) in board_value {
+        for (s, num) in board_value {
+            let val = BoardValue::win(num).unwrap();
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            let cmp = tools::compare_board_value(&board, val, Color::Red, rule);
+            let cmp = tools::compare_board_value(board, val, Color::Red, rule);
             assert!(matches!(cmp, Ok(std::cmp::Ordering::Equal)));
         }
     }
@@ -504,24 +831,43 @@ mod tests {
     #[test]
     fn test_checkmate_tree() {
         use std::str::FromStr;
-        use tools::BoardValue::*;
         let rule = game::GameRule::new(true).with_suicide_atk_judge(game::Judge::NextWins);
         let board_value = [
-            (" B; a;TH y;b mM", Win(5)),
-            (" By;H  a;A m;  Yb", Win(3)),
-            ("bB; H;Y h;  T", Win(3)),
-            ("T; B b;  yY; t", Win(3)),
-            ("hB A;maYT; Htb;M y", Win(5)),
-            ("Ba;  H;  hA;MY b", Win(5)),
-            (" B;a  b; MtY;T  H", Win(7)),
-            ("Y; B;y hA; M b", Win(5)),
-            ("bB;T YA", Win(5)),
+            (" B; a;TH y;b mM", 5),
+            (" By;H  a;A m;  Yb", 3),
+            ("bB; H;Y h;  T", 3),
+            ("T; B b;  yY; t", 3),
+            ("hB A;maYT; Htb;M y", 5),
+            ("bB;T YA", 5),
         ];
-        for (s, val) in board_value {
+        for (s, num) in board_value {
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            let tree = create_checkmate_tree(&board, val, Color::Red, rule).unwrap();
-            let step_to_finish: usize = val.try_into().unwrap();
-            assert!(tree.is_good_for_puzzle(step_to_finish - 2));
+            let tree = tools::create_checkmate_tree(board, Color::Red, num, rule).unwrap();
+            assert!(tree.is_good_for_puzzle(num - 2));
+        }
+    }
+
+    #[test]
+    fn test_checkmate_tree_with_value() {
+        use std::str::FromStr;
+        let rule = game::GameRule::new(true).with_suicide_atk_judge(game::Judge::NextWins);
+        let board_value = [
+            (" B; a;TH y;b mM", 5),
+            (" By;H  a;A m;  Yb", 3),
+            ("bB; H;Y h;  T", 3),
+            ("T; B b;  yY; t", 3),
+            ("hB A;maYT; Htb;M y", 5),
+            ("Ba;  H;  hA;MY b", 5),
+            (" B;a  b; MtY;T  H", 7),
+            ("Y; B;y hA; M b", 5),
+            ("bB;T YA", 5),
+        ];
+        for (s, num) in board_value {
+            let val = BoardValue::win(num).unwrap();
+            let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
+            let tree =
+                tools::create_checkmate_tree_with_value(board, val, Color::Red, rule).unwrap();
+            assert!(tree.is_good_for_puzzle(num - 2));
         }
     }
 }
