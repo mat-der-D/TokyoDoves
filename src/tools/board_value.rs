@@ -343,6 +343,15 @@ pub enum ArgsValidationError {
     DrawJudgeError,
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum CreateCheckmateTreeWithValueError {
+    #[error(transparent)]
+    ArgsValidationError(#[from] ArgsValidationError),
+
+    #[error("value of board differs from value in argument")]
+    ValueMismatchError(Ordering),
+}
+
 fn validate_args(
     board: Board,
     value: BoardValue,
@@ -399,17 +408,17 @@ impl Interval {
     }
 }
 
-fn print_tree(tree: &BoardValueTree) {
-    print_tree_core(tree, "");
-}
+// fn print_tree(tree: &BoardValueTree) {
+//     print_tree_core(tree, "");
+// }
 
-fn print_tree_core(tree: &BoardValueTree, top: &str) {
-    let next_top = format!("\t{}", top);
-    println!("{}{}", top, tree.value);
-    for (_, t) in tree.children.iter() {
-        print_tree_core(t, &next_top);
-    }
-}
+// fn print_tree_core(tree: &BoardValueTree, top: &str) {
+//     let next_top = format!("\t{}", top);
+//     println!("{}{}", top, tree.value);
+//     for (_, t) in tree.children.iter() {
+//         print_tree_core(t, &next_top);
+//     }
+// }
 
 // ****************************************************************************
 //  Functions for Analysis
@@ -424,6 +433,10 @@ fn print_tree_core(tree: &BoardValueTree, top: &str) {
 /// ```
 /// Especially, the node with the value `Win(1)` becomes a leaf node,
 /// that is, all the succeeding edges are pruned.
+///
+/// If you know the value of `board` in advance,
+/// [`create_checkmate_tree_with_value`], a much faster version,
+/// would be more appropriate.
 ///
 /// # Errors
 /// Returns `Err` when the argument is invalid. Specifically,
@@ -443,15 +456,7 @@ pub fn create_checkmate_tree(
     ))
 }
 
-/// Creates an [`BoardValueTree`] that describes routes to ends of the game
-/// without any argument validations.
-///
-/// It behaves similarly to [`compare_board_value`]
-/// except that it panics if the arguments are invalid.
-///
-/// # Panics
-/// See # Errors in [`compare_board_value`].
-pub fn create_checkmate_tree_unchecked(
+fn create_checkmate_tree_unchecked(
     board: Board,
     player: Color,
     max_depth: usize,
@@ -491,6 +496,92 @@ pub fn create_checkmate_tree_unchecked(
     tree
 }
 
+/// Creates an [`BoardValueTree`] that describes routes to ends of the game.
+///
+/// This function behaves almost similar to [`create_checkmate_tree`],
+/// except that it receives `value` ([`BoardValue`]) instead of search depth,
+/// and requires `value` coinsides with the value of `board`.
+/// This function runs much faster than [`create_checkmate_tree_with_value`]
+/// in exchange for restriction of possible arguments.
+///
+/// # Errors
+/// Returns `Err` when the argument is invalid. Specifically,
+/// the following cases are invalid:
+/// - `board` is already finished (at least one boss is surrounded)
+/// - `value` is `Unknown`, `Win(even number)` or `Lose(odd or zero)`
+/// - `rule.suicide_atk_judge` is `Judge::Draw`
+/// Furthermore, it returns `Err` when the value of `board` differs from `value`.
+/// In such a case, returned value contains a variant of [`std::cmp::Ordering`],
+/// which means that the value of board is greater (`Greater`) or less (`Less`)
+/// than the specified `value`.
+pub fn create_checkmate_tree_with_value(
+    board: Board,
+    value: BoardValue,
+    player: Color,
+    rule: GameRule,
+) -> Result<BoardValueTree, CreateCheckmateTreeWithValueError> {
+    validate_args(board, value, rule)
+        .map_err(|e| CreateCheckmateTreeWithValueError::ArgsValidationError(e))?;
+    let (tree, cmp) = create_checkmate_tree_with_value_unchecked(board, value, player, rule);
+    if cmp == Ordering::Equal {
+        Ok(tree)
+    } else {
+        Err(CreateCheckmateTreeWithValueError::ValueMismatchError(cmp))
+    }
+}
+
+fn create_checkmate_tree_with_value_unchecked(
+    board: Board,
+    value: BoardValue,
+    player: Color,
+    rule: GameRule,
+) -> (BoardValueTree, Ordering) {
+    use Ordering::*;
+    let mut tree = BoardValueTree::new(board);
+    tree.value = value;
+    let mut cmp = Less;
+    // tree.value = value;
+    for (action, next_board, status) in NextBoardIter::new(board, player, rule) {
+        use NextBoardStatus::*;
+        match status {
+            Win => {
+                if value == BoardValue::MAX {
+                    cmp = Equal;
+                } else {
+                    cmp = Greater;
+                    tree.value = BoardValue::unknown();
+                }
+                tree.children.clear();
+                return (tree, cmp);
+            }
+            Lose => continue,
+            Unknown => {
+                if value == BoardValue::MAX {
+                    continue;
+                }
+                let next_value = value.try_decrement().unwrap();
+                let (child, next_cmp) = create_checkmate_tree_with_value_unchecked(
+                    next_board, next_value, !player, rule,
+                );
+                if next_cmp == Less {
+                    tree.value = BoardValue::unknown();
+                    tree.children.clear();
+                    return (tree, Greater);
+                }
+                if next_cmp == Equal {
+                    tree.children.insert(action, child);
+                }
+                cmp = cmp.max(next_cmp.reverse());
+            }
+        }
+    }
+    if cmp != Equal {
+        tree.value = BoardValue::unknown();
+        tree.children.clear();
+    }
+    (tree, cmp)
+}
+
 /// Compares the value of specified [`Board`] to a given [`BoardValue`].
 ///
 /// It returns:
@@ -514,14 +605,7 @@ pub fn compare_board_value(
     Ok(compare_board_value_unchecked(board, value, player, rule))
 }
 
-/// Compares the value of specified [`Board`] to a given [`BoardValue`] without any argument validations.
-///
-/// It behaves similarly to [`compare_board_value`]
-/// except that it panics if the arguments are invalid.
-///
-/// # Panics
-/// See # Errors in [`compare_board_value`].
-pub fn compare_board_value_unchecked(
+fn compare_board_value_unchecked(
     board: Board,
     value: BoardValue,
     player: Color,
@@ -555,7 +639,7 @@ pub fn compare_board_value_unchecked(
     cmp
 }
 
-/// Evaluates `Board`
+/// Calculates [`BoardValue`] of specified [`Board`].
 ///
 /// It searches the value of `board` by pursuing `search_depth` turns forward.
 /// The result is returned in [`Interval`], which is a closed interval
@@ -576,14 +660,7 @@ pub fn evaluate_board(
     Ok(evaluate_board_unchecked(board, player, search_depth, rule))
 }
 
-/// Evaluates `Board` without argument validations.
-///
-/// It behaves similarly to [`evaluate_board`],
-/// except that it panics if the arguments are invalid.
-///
-/// # Panics
-/// See # Errors in [`evaluate_board`]
-pub fn evaluate_board_unchecked(
+fn evaluate_board_unchecked(
     board: Board,
     player: Color,
     search_depth: usize,
@@ -608,6 +685,13 @@ pub fn evaluate_board_unchecked(
     Interval::new(left, right)
 }
 
+/// Collects the best [`Action`]s by [`BoardValue`]
+///
+/// # Errors
+/// Returns `Err` only when the argument is invalid. Specifically,
+/// the following cases are invalid:
+/// - `board` is already finished (at least one boss is surrounded)
+/// - `rule.suicide_atk_judge` is `Judge::Draw`
 pub fn find_best_actions(
     board: Board,
     player: Color,
@@ -623,12 +707,19 @@ pub fn find_best_actions(
     ))
 }
 
-pub fn find_best_actions_unchecked(
+fn find_best_actions_unchecked(
     board: Board,
     player: Color,
     search_depth: usize,
     rule: GameRule,
 ) -> Vec<Action> {
+    if search_depth == 0 {
+        return board
+            .legal_actions(player, true, true, *rule.is_remove_accepted())
+            .into_iter()
+            .collect();
+    }
+
     let value_interval = evaluate_board_unchecked(board, player, search_depth, rule);
     let value = value_interval.single().unwrap_or(BoardValue::unknown());
 
@@ -637,7 +728,9 @@ pub fn find_best_actions_unchecked(
         use NextBoardStatus::*;
         match status {
             Win => {
-                // ToDo: validate here ?
+                if value != BoardValue::MAX {
+                    unreachable!()
+                }
                 actions.push(action);
                 continue;
             }
@@ -680,14 +773,12 @@ pub fn find_best_actions_unchecked(
     actions
 }
 
-// --- ORIGINAL -------------------------------------------------------------------------------
-
 // ************************************************************
 //  Tests
 // ************************************************************
 #[cfg(test)]
 mod tests {
-    use crate::{tools::create_checkmate_tree, *};
+    use crate::{tools::BoardValue, *};
 
     #[test]
     fn test_evaluate_board() {
@@ -752,7 +843,31 @@ mod tests {
         ];
         for (s, num) in board_value {
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            let tree = create_checkmate_tree(board, Color::Red, num, rule).unwrap();
+            let tree = tools::create_checkmate_tree(board, Color::Red, num, rule).unwrap();
+            assert!(tree.is_good_for_puzzle(num - 2));
+        }
+    }
+
+    #[test]
+    fn test_checkmate_tree_with_value() {
+        use std::str::FromStr;
+        let rule = game::GameRule::new(true).with_suicide_atk_judge(game::Judge::NextWins);
+        let board_value = [
+            (" B; a;TH y;b mM", 5),
+            (" By;H  a;A m;  Yb", 3),
+            ("bB; H;Y h;  T", 3),
+            ("T; B b;  yY; t", 3),
+            ("hB A;maYT; Htb;M y", 5),
+            ("Ba;  H;  hA;MY b", 5),
+            (" B;a  b; MtY;T  H", 7),
+            ("Y; B;y hA; M b", 5),
+            ("bB;T YA", 5),
+        ];
+        for (s, num) in board_value {
+            let val = BoardValue::win(num).unwrap();
+            let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
+            let tree =
+                tools::create_checkmate_tree_with_value(board, val, Color::Red, rule).unwrap();
             assert!(tree.is_good_for_puzzle(num - 2));
         }
     }
