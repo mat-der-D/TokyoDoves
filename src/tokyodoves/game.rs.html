@@ -521,32 +521,15 @@
 <a href="#521" id="521">521</a>
 <a href="#522" id="522">522</a>
 <a href="#523" id="523">523</a>
-<a href="#524" id="524">524</a>
-<a href="#525" id="525">525</a>
-<a href="#526" id="526">526</a>
-<a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
-<a href="#531" id="531">531</a>
-<a href="#532" id="532">532</a>
-<a href="#533" id="533">533</a>
-<a href="#534" id="534">534</a>
-<a href="#535" id="535">535</a>
-<a href="#536" id="536">536</a>
-<a href="#537" id="537">537</a>
-<a href="#538" id="538">538</a>
-<a href="#539" id="539">539</a>
-<a href="#540" id="540">540</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::prelude::{
     error, Action, ActionContainer, ActionsFwd, Board, BoardBuilder, Color, SurroundedStatus,
 };
-<span class="kw">use </span><span class="kw">crate</span>::tools::{create_checkmate_tree, evaluate_board, BoardValue};
+<span class="kw">use </span><span class="kw">crate</span>::tools::{evaluate_board, find_best_actions};
 
 <span class="comment">// ************************************************************
 //  Errors
 // ************************************************************
-</span><span class="doccomment">/// Errors associated to [`Game`](`super::game::Game`)
+</span><span class="doccomment">/// Errors associated to [`Game`]
 </span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
 </span><span class="kw">pub enum </span>GameError {
     <span class="attr">#[error(<span class="string">&quot;[BoardError] {:?}&quot;</span>, .error)]
@@ -918,7 +901,7 @@
     }
 
     <span class="kw">fn </span>update_parameter(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.n = (<span class="number">33 </span>* <span class="self">self</span>.n + <span class="number">33</span>) % <span class="number">65536
+        <span class="self">self</span>.n = (<span class="number">33 </span>* <span class="self">self</span>.n + <span class="number">31</span>) % <span class="number">65536
     </span>}
 }
 
@@ -933,60 +916,42 @@
 
 <span class="kw">pub struct </span>AnalystAgent {
     depth: usize,
-    declare_near_to_end: bool,
+    n: usize,
+    declare_about_to_end: bool,
 }
 
 <span class="kw">impl </span>AnalystAgent {
-    <span class="kw">pub fn </span>new(depth: usize, declare_near_to_end: bool) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(depth: usize, declare_about_to_end: bool) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             depth,
-            declare_near_to_end,
+            n: <span class="number">0</span>,
+            declare_about_to_end,
         }
     }
+
+    <span class="kw">fn </span>update_parameter(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.n = (<span class="number">33 </span>* <span class="self">self</span>.n + <span class="number">31</span>) % <span class="number">65536
+    </span>}
 }
 
 <span class="kw">impl </span>Agent <span class="kw">for </span>AnalystAgent {
     <span class="kw">fn </span>play(<span class="kw-2">&amp;mut </span><span class="self">self</span>, game: <span class="kw-2">&amp;mut </span>Game) {
-        <span class="kw">use </span>BoardValue::<span class="kw-2">*</span>;
-
+        <span class="self">self</span>.update_parameter();
+        <span class="kw">let </span>board = <span class="kw-2">*</span>game.board();
         <span class="kw">let </span>player = <span class="kw-2">*</span>game.next_player();
         <span class="kw">let </span>rule = <span class="kw-2">*</span>game.rule();
+        <span class="kw">let </span>candidates = find_best_actions(board, player, <span class="self">self</span>.depth, rule).unwrap();
+        <span class="kw">let </span>action = candidates[<span class="self">self</span>.n % candidates.len()];
 
-        <span class="kw">let </span>val = evaluate_board(game.board(), <span class="self">self</span>.depth, player, rule).unwrap();
-
-        <span class="kw">if </span>!<span class="macro">matches!</span>(val, BoardValue::Unknown) {
-            <span class="kw">if </span><span class="self">self</span>.declare_near_to_end {
-                <span class="macro">println!</span>(<span class="string">&quot;----&gt; About To End! value={:?}&quot;</span>, val);
-            }
-            <span class="kw">let </span>tree = create_checkmate_tree(game.board(), val, player, rule).unwrap();
-            <span class="kw">let </span>action = <span class="kw-2">*</span>tree.actions().next().unwrap();
-            game.perform(action).unwrap();
-            <span class="kw">return</span>;
-        }
-
-        <span class="kw">let </span><span class="kw-2">mut </span>next_val = Win(<span class="number">1</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>action_win1 = <span class="prelude-val">None</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>action_best = <span class="prelude-val">None</span>;
-        <span class="kw">for </span>a <span class="kw">in </span>game.legal_actions() {
-            <span class="kw">let </span><span class="kw-2">mut </span>g = <span class="kw-2">*</span>game;
-            g.perform(a).unwrap();
-            <span class="kw">if </span><span class="macro">matches!</span>(g.winner(), <span class="prelude-val">Some</span>(p) <span class="kw">if </span>p == player) {
-                <span class="kw-2">*</span>game = g;
-                <span class="kw">return</span>;
-            } <span class="kw">else if </span>!g.is_ongoing() {
-                <span class="kw">continue</span>;
-            }
-            <span class="kw">let </span>next_val_tmp =
-                evaluate_board(g.board(), <span class="self">self</span>.depth, <span class="kw-2">*</span>g.next_player(), <span class="kw-2">*</span>g.rule()).unwrap();
-            <span class="kw">if </span><span class="macro">matches!</span>(next_val_tmp, Win(<span class="number">1</span>)) {
-                action_win1 = <span class="prelude-val">Some</span>(a);
-            } <span class="kw">else if </span>next_val_tmp &lt; next_val {
-                next_val = next_val_tmp;
-                action_best = <span class="prelude-val">Some</span>(a);
+        <span class="kw">if </span><span class="self">self</span>.declare_about_to_end {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(val) = evaluate_board(board, player, <span class="self">self</span>.depth, rule)
+                .unwrap()
+                .single()
+            {
+                <span class="macro">println!</span>(<span class="string">&quot;!!! This game is about to end: value={}&quot;</span>, val);
             }
         }
 
-        <span class="kw">let </span>action = action_best.unwrap_or_else(|| action_win1.unwrap());
         game.perform(action).unwrap();
     }
 }
@@ -1070,11 +1035,12 @@
             }
         }
 
+        <span class="macro">println!</span>(<span class="string">&quot;~~~~~~ Game Finished! ~~~~~~&quot;</span>);
         <span class="macro">println!</span>(<span class="string">&quot;Total {} turns&quot;</span>, num_turns);
         <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.game);
         <span class="kw">match </span><span class="self">self</span>.game.winner() {
-            <span class="prelude-val">Some</span>(player) =&gt; <span class="macro">println!</span>(<span class="string">&quot;*** {:?} win! ***&quot;</span>, player),
-            <span class="prelude-val">None </span>=&gt; <span class="macro">println!</span>(<span class="string">&quot;*** Draw! ***&quot;</span>),
+            <span class="prelude-val">Some</span>(player) =&gt; <span class="macro">println!</span>(<span class="string">&quot;---&gt; {:?} win!&quot;</span>, player),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">println!</span>(<span class="string">&quot;---&gt; Draw!&quot;</span>),
         }
     }
 }

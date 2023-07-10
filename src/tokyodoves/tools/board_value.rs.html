@@ -525,202 +525,941 @@
 <a href="#525" id="525">525</a>
 <a href="#526" id="526">526</a>
 <a href="#527" id="527">527</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::hash_map;
-<span class="kw">use </span>std::collections::HashMap;
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
+<a href="#628" id="628">628</a>
+<a href="#629" id="629">629</a>
+<a href="#630" id="630">630</a>
+<a href="#631" id="631">631</a>
+<a href="#632" id="632">632</a>
+<a href="#633" id="633">633</a>
+<a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
+<a href="#819" id="819">819</a>
+<a href="#820" id="820">820</a>
+<a href="#821" id="821">821</a>
+<a href="#822" id="822">822</a>
+<a href="#823" id="823">823</a>
+<a href="#824" id="824">824</a>
+<a href="#825" id="825">825</a>
+<a href="#826" id="826">826</a>
+<a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
+<a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::{Ord, Ordering, PartialOrd};
+<span class="kw">use </span>std::collections::{hash_map, HashMap};
 
-<span class="kw">use </span><span class="kw">crate</span>::game::{GameRule, Judge};
-<span class="kw">use </span><span class="kw">crate</span>::prelude::{Action, Board, Color, SurroundedStatus};
+<span class="kw">use crate</span>::{
+    game::{GameRule, Judge},
+    Action, ActionsFwdIntoIter, Board, BoardBuilder, Color, SurroundedStatus,
+};
 
-<span class="comment">// ************************************************************
-//  Errors
-// ************************************************************
-</span><span class="doccomment">/// Error variants for validating [`BoardValue`]
-</span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
-</span><span class="kw">pub enum </span>BoardValueError {
-    <span class="attr">#[error(<span class="string">&quot;[WinArgMustOdd] {}&quot;</span>, .<span class="number">0</span>)]
-    </span>WinArgMustOdd(usize),
-
-    <span class="attr">#[error(<span class="string">&quot;[LoseArgMustPositiveEven] {}&quot;</span>, .<span class="number">0</span>)]
-    </span>LoseArgMustPositiveEven(usize),
-
-    <span class="attr">#[error(<span class="string">&quot;[UnknownNotSupported]&quot;</span>)]
-    </span>UnknownNotSupported,
+<span class="comment">// ****************************************************************************
+//  BoardValue
+// ****************************************************************************
+</span><span class="doccomment">/// Three kinds of [`BoardValue`]
+///
+/// This type is returned by [`BoardValue::kind`].
+</span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+</span><span class="kw">pub enum </span>BoardValueKind {
+    Win,
+    Lose,
+    Unknown,
 }
 
-<span class="doccomment">/// Error variants for [`evaluate_board`]
-</span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
-</span><span class="kw">pub enum </span>EvaluateBoardError {
-    <span class="attr">#[error(<span class="string">&quot;[BoardAlreadyFinished]&quot;</span>)]
-    </span>BoardAlreadyFinished,
-
-    <span class="attr">#[error(<span class="string">&quot;[DrawNotSupportedError]&quot;</span>)]
-    </span>DrawNotSupportedError,
+<span class="kw">impl </span>Default <span class="kw">for </span>BoardValueKind {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::Unknown
+    }
 }
 
-<span class="doccomment">/// Error variants for [`compare_board_value`]
-</span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
-</span><span class="kw">pub enum </span>CompareBoardValueError {
-    <span class="attr">#[error(<span class="string">&quot;[BoardAlreadyFinished]&quot;</span>)]
-    </span>BoardAlreadyFinished,
-
-    <span class="attr">#[error(<span class="string">&quot;[BoardValueError]&quot;</span>)]
-    </span>BoardValueError { detail: BoardValueError },
-
-    <span class="attr">#[error(<span class="string">&quot;[DrawNotSupportedError]&quot;</span>)]
-    </span>DrawNotSupportedError,
+<span class="kw">impl </span>PartialOrd <span class="kw">for </span>BoardValueKind {
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.cmp(other))
+    }
 }
 
-<span class="doccomment">/// Error variants for [`create_checkmate_tree`]
-</span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
-</span><span class="kw">pub enum </span>CreateCheckmateTreeError {
-    <span class="attr">#[error(<span class="string">&quot;[BoardAlreadyFinished]&quot;</span>)]
-    </span>BoardAlreadyFinished,
+<span class="kw">impl </span>Ord <span class="kw">for </span>BoardValueKind {
+    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering {
+        <span class="kw">fn </span>_kind_to_u8(kind: <span class="kw-2">&amp;</span>BoardValueKind) -&gt; u8 {
+            <span class="kw">use </span>BoardValueKind::<span class="kw-2">*</span>;
+            <span class="kw">match </span>kind {
+                Win =&gt; <span class="number">2</span>,
+                Unknown =&gt; <span class="number">1</span>,
+                Lose =&gt; <span class="number">0</span>,
+            }
+        }
 
-    <span class="attr">#[error(<span class="string">&quot;[BoardValueError]&quot;</span>)]
-    </span>BoardValueError { detail: BoardValueError },
-
-    <span class="attr">#[error(<span class="string">&quot;[DrawNotSupportedError]&quot;</span>)]
-    </span>DrawNotSupportedError,
-
-    <span class="attr">#[error(<span class="string">&quot;[EmptyTreeError]&quot;</span>)]
-    </span>EmptyTreeError,
+        _kind_to_u8(<span class="self">self</span>).cmp(<span class="kw-2">&amp;</span>_kind_to_u8(other))
+    }
 }
 
-<span class="comment">// ************************************************************
-//  Building Blocks
-// ************************************************************
-</span><span class="doccomment">/// Value of board
+<span class="doccomment">/// Value of board
 ///
 /// The order of the values is as follows:
 /// ```text
 /// Lose(2) &lt; Lose(4) &lt; Lose(6) &lt; ... &lt; Unknown &lt; ... &lt; Win(5) &lt; Win(3) &lt; Win(1)
 /// ```
-///
-</span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-</span><span class="kw">pub enum </span>BoardValue {
-    <span class="doccomment">/// `Win(n)` means the player will win in `n` turns at least.
-    </span>Win(usize),
-    <span class="doccomment">/// `Lose(n)` means the player will lose in `n` turns at most.
-    </span>Lose(usize),
-    <span class="doccomment">/// Cannot detect win or lose.
-    /// This variant does not mean the value of the board cannot be determined ultimately,
-    /// but the value cannot be determined within the reach of search performed.
-    </span>Unknown,
+/// - n of `Lose(n)` means that the player will lose in n turns at most.
+/// - n of `Win(n)` means that the player will win in n turns at least.
+/// - `Unknown` means that the value of the board was failed to be determined.
+///     It can change to `Lose(n)` or `Win(n)` if you search more deeply.
+</span><span class="attr">#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+</span><span class="kw">pub struct </span>BoardValue {
+    value: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+}
+
+<span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>BoardValue {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span>kind = <span class="self">self</span>.kind();
+        <span class="kw">let </span>s = <span class="kw">match </span>kind {
+            BoardValueKind::Unknown =&gt; <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, kind),
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">let </span>num = <span class="self">self</span>.value.unwrap();
+                <span class="macro">format!</span>(<span class="string">&quot;{:?}({})&quot;</span>, kind, num)
+            }
+        };
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, s)
+    }
+}
+
+<span class="kw">impl </span>BoardValue {
+    <span class="kw">pub const </span>MAX: BoardValue = BoardValue { value: <span class="prelude-val">Some</span>(<span class="number">1</span>) };
+    <span class="kw">pub const </span>MIN: BoardValue = BoardValue { value: <span class="prelude-val">Some</span>(<span class="number">2</span>) };
+
+    <span class="kw">pub fn </span>kind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BoardValueKind {
+        <span class="kw">use </span>BoardValueKind::<span class="kw-2">*</span>;
+        <span class="kw">match </span><span class="self">self</span>.value {
+            <span class="prelude-val">None </span>| <span class="prelude-val">Some</span>(<span class="number">0</span>) =&gt; Unknown,
+            <span class="prelude-val">Some</span>(n) =&gt; <span class="kw">match </span>n % <span class="number">2 </span>{
+                <span class="number">0 </span>=&gt; Lose,
+                <span class="number">1 </span>=&gt; Win,
+                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
+            },
+        }
+    }
+
+    <span class="kw">pub fn </span>win(num: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">if </span>num % <span class="number">2 </span>== <span class="number">1 </span>{
+            <span class="prelude-val">Some</span>(BoardValue { value: <span class="prelude-val">Some</span>(num) })
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+
+    <span class="kw">pub fn </span>lose(num: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">if </span>num != <span class="number">0 </span>&amp;&amp; num % <span class="number">2 </span>== <span class="number">0 </span>{
+            <span class="prelude-val">Some</span>(BoardValue { value: <span class="prelude-val">Some</span>(num) })
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+
+    <span class="kw">pub fn </span>unknown() -&gt; <span class="self">Self </span>{
+        BoardValue { value: <span class="prelude-val">None </span>}
+    }
+
+    <span class="kw">pub fn </span>is_win(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="macro">matches!</span>(<span class="self">self</span>.kind(), BoardValueKind::Win)
+    }
+
+    <span class="kw">pub fn </span>is_lose(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="macro">matches!</span>(<span class="self">self</span>.kind(), BoardValueKind::Lose)
+    }
+
+    <span class="kw">pub fn </span>is_unknown(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="macro">matches!</span>(<span class="self">self</span>.kind(), BoardValueKind::Unknown)
+    }
+
+    <span class="kw">pub fn </span>increment(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span><span class="self">self</span>.is_unknown() {
+            <span class="kw-2">*</span><span class="self">self
+        </span>} <span class="kw">else </span>{
+            <span class="self">Self </span>{
+                value: <span class="self">self</span>.value.map(|num| num + <span class="number">1</span>),
+            }
+        }
+    }
+
+    <span class="kw">pub fn </span>try_decrement(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">match </span><span class="self">self</span>.value {
+            <span class="prelude-val">None </span>| <span class="prelude-val">Some</span>(<span class="number">0</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="self">self</span>),
+            <span class="prelude-val">Some</span>(<span class="number">1</span>) =&gt; <span class="prelude-val">None</span>,
+            <span class="prelude-val">Some</span>(num) =&gt; <span class="prelude-val">Some</span>(<span class="self">Self </span>{
+                value: <span class="prelude-val">Some</span>(num - <span class="number">1</span>),
+            }),
+        }
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="prelude-ty">Option</span>&lt;usize&gt;&gt; <span class="kw">for </span>BoardValue {
+    <span class="kw">fn </span>from(value: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>value {
+            <span class="prelude-val">Some</span>(<span class="number">0</span>) =&gt; <span class="self">Self </span>{ value: <span class="prelude-val">None </span>},
+            value =&gt; <span class="self">Self </span>{ value },
+        }
+    }
+}
+
+<span class="kw">impl </span>From&lt;BoardValue&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;usize&gt; {
+    <span class="kw">fn </span>from(board_value: BoardValue) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>board_value.value {
+            <span class="prelude-val">Some</span>(<span class="number">0</span>) =&gt; <span class="prelude-val">None</span>,
+            value =&gt; value,
+        }
+    }
 }
 
 <span class="kw">impl </span>PartialOrd <span class="kw">for </span>BoardValue {
-    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;std::cmp::Ordering&gt; {
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.cmp(other))
     }
 }
 
 <span class="kw">impl </span>Ord <span class="kw">for </span>BoardValue {
-    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; std::cmp::Ordering {
-        <span class="kw">fn </span>_val_to_i8(val: <span class="kw-2">&amp;</span>BoardValue) -&gt; i8 {
-            <span class="kw">use </span>BoardValue::<span class="kw-2">*</span>;
-            <span class="kw">match </span>val {
-                Win(<span class="kw">_</span>) =&gt; <span class="number">1</span>,
-                Unknown =&gt; <span class="number">0</span>,
-                Lose(<span class="kw">_</span>) =&gt; -<span class="number">1</span>,
-            }
+    <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering {
+        <span class="kw">let </span>left_kind = <span class="self">self</span>.kind();
+        <span class="kw">let </span>right_kind = other.kind();
+
+        <span class="kw">use </span>BoardValueKind::<span class="kw-2">*</span>;
+        <span class="kw">if </span>(left_kind != right_kind) || (left_kind == Unknown) {
+            <span class="kw">return </span>left_kind.cmp(<span class="kw-2">&amp;</span>right_kind);
         }
 
-        <span class="kw">use </span>std::cmp::Ordering::<span class="kw-2">*</span>;
-        <span class="kw">use </span>BoardValue::<span class="kw-2">*</span>;
-        <span class="kw">match </span>(<span class="self">self</span>, other) {
-            (Unknown, Unknown) =&gt; Equal,
-            (Win(left), Win(right)) =&gt; right.cmp(left),
-            (Lose(left), Lose(right)) =&gt; left.cmp(right),
-            (left, right) =&gt; _val_to_i8(left).cmp(<span class="kw-2">&amp;</span>_val_to_i8(right)),
+        <span class="comment">// In the following, left_kind == right_kind != Unknown
+
+        </span><span class="kw">let </span>left_num = <span class="self">self</span>.value.as_ref().unwrap();
+        <span class="kw">let </span>right_num = other.value.as_ref().unwrap();
+        <span class="kw">match </span>left_kind {
+            Lose =&gt; left_num.cmp(right_num),
+            Win =&gt; right_num.cmp(left_num),
+            Unknown =&gt; <span class="macro">unreachable!</span>(),
         }
     }
 }
 
-<span class="kw">impl </span>TryFrom&lt;BoardValue&gt; <span class="kw">for </span>usize {
-    <span class="kw">type </span>Error = BoardValueError;
-    <span class="kw">fn </span>try_from(value: BoardValue) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">use </span>BoardValue::<span class="kw-2">*</span>;
-        <span class="kw">use </span>BoardValueError::<span class="kw-2">*</span>;
-        <span class="kw">let </span>n = <span class="kw">match </span>value {
-            Win(n) =&gt; {
-                <span class="kw">if </span>n % <span class="number">2 </span>== <span class="number">1 </span>{
-                    n
-                } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(WinArgMustOdd(n));
-                }
-            }
-            Lose(n) =&gt; {
-                <span class="kw">if </span>(n != <span class="number">0</span>) &amp;&amp; (n % <span class="number">2 </span>== <span class="number">0</span>) {
-                    n
-                } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(LoseArgMustPositiveEven(n));
-                }
-            }
-            Unknown =&gt; {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(UnknownNotSupported);
-            }
+<span class="comment">// ****************************************************************************
+//  NextBoardIter
+// ****************************************************************************
+</span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+</span><span class="kw">enum </span>NextBoardStatus {
+    Win,
+    Lose,
+    Unknown,
+}
+
+<span class="kw">struct </span>NextBoardIter {
+    current_board: Board,
+    current_player: Color,
+    wins_if_both: bool,
+    actions_iter: ActionsFwdIntoIter,
+}
+
+<span class="kw">impl </span>NextBoardIter {
+    <span class="kw">fn </span>new(current_board: Board, current_player: Color, rule: GameRule) -&gt; <span class="self">Self </span>{
+        <span class="kw">use </span>Judge::<span class="kw-2">*</span>;
+        <span class="kw">let </span>wins_if_both = <span class="kw">match </span>rule.suicide_atk_judge() {
+            LastWins =&gt; <span class="bool-val">true</span>,
+            NextWins =&gt; <span class="bool-val">false</span>,
+            Draw =&gt; <span class="macro">panic!</span>(<span class="string">&quot;validation error&quot;</span>),
         };
-        <span class="prelude-val">Ok</span>(n)
+        <span class="kw">let </span>actions_iter = current_board
+            .legal_actions(current_player, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="kw-2">*</span>rule.is_remove_accepted())
+            .into_iter();
+        <span class="self">Self </span>{
+            current_board,
+            current_player,
+            wins_if_both,
+            actions_iter,
+        }
     }
 }
 
-<span class="comment">// ************************************************************
-//  Evaluate Board
-// ************************************************************
-</span><span class="doccomment">/// Evaluates `Board`
+<span class="kw">impl </span>Iterator <span class="kw">for </span>NextBoardIter {
+    <span class="kw">type </span>Item = (Action, Board, NextBoardStatus);
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">let </span>action = <span class="self">self</span>.actions_iter.next()<span class="question-mark">?</span>;
+        <span class="kw">let </span>next_board = <span class="self">self</span>.current_board.perform_unchecked_copied(action);
+
+        <span class="kw">use </span>SurroundedStatus::<span class="kw-2">*</span>;
+        <span class="kw">let </span>sur_status = next_board.surrounded_status();
+        <span class="kw">let </span>is_both = <span class="macro">matches!</span>(sur_status, Both);
+
+        <span class="kw">use </span>NextBoardStatus::<span class="kw-2">*</span>;
+        <span class="kw">let </span>next_board_status = <span class="kw">if </span>(<span class="self">self</span>.wins_if_both &amp;&amp; is_both)
+            || <span class="macro">matches!</span>(sur_status, OneSide(p) <span class="kw">if </span>p != <span class="self">self</span>.current_player)
+        {
+            Win
+        } <span class="kw">else if </span>(!<span class="self">self</span>.wins_if_both &amp;&amp; is_both)
+            || <span class="macro">matches!</span>(sur_status, OneSide(p) <span class="kw">if </span>p == <span class="self">self</span>.current_player)
+        {
+            Lose
+        } <span class="kw">else </span>{
+            Unknown
+        };
+        <span class="prelude-val">Some</span>((action, next_board, next_board_status))
+    }
+}
+
+<span class="comment">// ****************************************************************************
+//  BoardValueTree
+// ****************************************************************************
+</span><span class="attr">#[derive(Clone)]
+</span><span class="kw">pub struct </span>Actions&lt;<span class="lifetime">&#39;a</span>&gt;(hash_map::Keys&lt;<span class="lifetime">&#39;a</span>, Action, BoardValueTree&gt;);
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Actions&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>new(iter: hash_map::Keys&lt;<span class="lifetime">&#39;a</span>, Action, BoardValueTree&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(iter)
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Actions&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Action;
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="self">self</span>.<span class="number">0</span>.next()
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span>Actions&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="self">self</span>.<span class="number">0</span>.fmt(f)
+    }
+}
+
+<span class="doccomment">/// A tree structure that contains [`Board`] and [`BoardValue`] on its nodes,
+/// and [`Action`]s on its edges.
 ///
-/// It searches the value of `board` under `max_search_depth`.
-/// If it does not the value, it returns `Ok(Unknown)`
+/// It is returned by [`create_checkmate_tree`].
+</span><span class="attr">#[derive(Debug, Clone)]
+</span><span class="kw">pub struct </span>BoardValueTree {
+    board_raw: u64,
+    value: BoardValue,
+    children: HashMap&lt;Action, BoardValueTree&gt;,
+}
+
+<span class="kw">impl </span>BoardValueTree {
+    <span class="kw">pub fn </span>new(board: Board) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            board_raw: board.to_u64(),
+            value: Default::default(),
+            children: Default::default(),
+        }
+    }
+
+    <span class="kw">pub fn </span>board(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Board {
+        BoardBuilder::from_u64(<span class="self">self</span>.board_raw).build_unchecked()
+    }
+
+    <span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BoardValue {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.value
+    }
+
+    <span class="kw">pub fn </span>child(<span class="kw-2">&amp;</span><span class="self">self</span>, action: <span class="kw-2">&amp;</span>Action) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>BoardValueTree&gt; {
+        <span class="self">self</span>.children.get(action)
+    }
+
+    <span class="kw">pub fn </span>actions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Actions&lt;<span class="lifetime">&#39;_</span>&gt; {
+        Actions::new(<span class="self">self</span>.children.keys())
+    }
+
+    <span class="kw">pub fn </span>is_good_for_puzzle(<span class="kw-2">&amp;</span><span class="self">self</span>, step: usize) -&gt; bool {
+        <span class="kw">if </span>step == <span class="number">0 </span>{
+            <span class="bool-val">true
+        </span>} <span class="kw">else </span>{
+            <span class="self">self</span>.children.len() == <span class="number">1
+                </span>&amp;&amp; <span class="self">self
+                    </span>.children
+                    .values()
+                    .all(|c| c.is_good_for_puzzle(step - <span class="number">1</span>))
+        }
+    }
+}
+
+<span class="comment">// ****************************************************************************
+//  Helper Items
+// ****************************************************************************
+</span><span class="doccomment">/// Error variants on validation of arguments
+</span><span class="attr">#[derive(Debug, thiserror::Error)]
+</span><span class="kw">pub enum </span>ArgsValidationError {
+    <span class="attr">#[error(<span class="string">&quot;board of finished game&quot;</span>)]
+    </span>FinishedBoardError { board: Board },
+
+    <span class="attr">#[error(<span class="string">&quot;BoardValue::Unknown not supported&quot;</span>)]
+    </span>UnknownBoardValueError,
+
+    <span class="attr">#[error(<span class="string">&quot;Judge::Draw not supported&quot;</span>)]
+    </span>DrawJudgeError,
+}
+
+<span class="attr">#[derive(Debug, thiserror::Error)]
+</span><span class="kw">pub enum </span>CreateCheckmateTreeWithValueError {
+    <span class="attr">#[error(transparent)]
+    </span>ArgsValidationError(<span class="attr">#[from] </span>ArgsValidationError),
+
+    <span class="attr">#[error(<span class="string">&quot;value of board differs from value in argument&quot;</span>)]
+    </span>ValueMismatchError(Ordering),
+}
+
+<span class="kw">fn </span>validate_args(
+    board: Board,
+    value: BoardValue,
+    rule: GameRule,
+) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArgsValidationError&gt; {
+    <span class="kw">use </span>ArgsValidationError::<span class="kw-2">*</span>;
+    <span class="kw">if </span>board.surrounded_status() != SurroundedStatus::None {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(FinishedBoardError { board });
+    }
+    <span class="kw">if </span>value.is_unknown() {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(UnknownBoardValueError);
+    }
+    <span class="kw">if </span>!<span class="macro">matches!</span>(rule.suicide_atk_judge(), Judge::NextWins | Judge::LastWins) {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(DrawJudgeError);
+    }
+    <span class="prelude-val">Ok</span>(())
+}
+
+<span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+</span><span class="kw">pub struct </span>Interval {
+    left: BoardValue,
+    right: BoardValue,
+}
+
+<span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>Interval {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">&quot;[{}, {}]&quot;</span>, <span class="self">self</span>.left, <span class="self">self</span>.right)
+    }
+}
+
+<span class="kw">impl </span>Interval {
+    <span class="kw">pub fn </span>new(left: BoardValue, right: BoardValue) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ left, right }
+    }
+
+    <span class="kw">pub fn </span>left(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BoardValue {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.left
+    }
+
+    <span class="kw">pub fn </span>right(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BoardValue {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.right
+    }
+
+    <span class="kw">pub fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, item: <span class="kw-2">&amp;</span>BoardValue) -&gt; bool {
+        <span class="self">self</span>.left &lt;= <span class="kw-2">*</span>item &amp;&amp; <span class="kw-2">*</span>item &lt;= <span class="self">self</span>.right
+    }
+
+    <span class="kw">pub fn </span>single(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;BoardValue&gt; {
+        <span class="kw">if </span><span class="self">self</span>.left == <span class="self">self</span>.right {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.left)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
+    }
+}
+
+<span class="doccomment">/// Prints contents of [`BoardValueTree`] (experimental api)
+///
+/// Similar functions should be implemented as [`std::fmt::Display`]
+/// for [`BoardValueTree`].
+</span><span class="kw">pub fn </span>print_tree(tree: <span class="kw-2">&amp;</span>BoardValueTree) {
+    print_tree_core(tree, <span class="string">&quot;&quot;</span>);
+}
+
+<span class="kw">fn </span>print_tree_core(tree: <span class="kw-2">&amp;</span>BoardValueTree, top: <span class="kw-2">&amp;</span>str) {
+    <span class="kw">let </span>next_top = <span class="macro">format!</span>(<span class="string">&quot;\t{}&quot;</span>, top);
+    <span class="macro">println!</span>(<span class="string">&quot;{}{}&quot;</span>, top, tree.value);
+    <span class="kw">for </span>(<span class="kw">_</span>, t) <span class="kw">in </span>tree.children.iter() {
+        print_tree_core(t, <span class="kw-2">&amp;</span>next_top);
+    }
+}
+
+<span class="comment">// ****************************************************************************
+//  Functions for Analysis
+// ****************************************************************************
+</span><span class="doccomment">/// Creates an [`BoardValueTree`] that describes routes to ends of the game.
+///
+/// Once the value of a board in a search process is determined,
+/// succeeding edges whose values are not the &quot;next&quot; value are pruned.
+/// The following diagram describes what &quot;next&quot; value means:
+/// ```text
+/// ... -&gt; Win(5) -&gt; Lose(4) -&gt; Win(3) -&gt; Lose(2) -&gt; Win(1)
+/// ```
+/// Especially, the node with the value `Win(1)` becomes a leaf node,
+/// that is, all the succeeding edges are pruned.
+///
+/// If you know the value of `board` in advance,
+/// [`create_checkmate_tree_with_value`], a much faster version,
+/// would be more appropriate.
 ///
 /// # Errors
-/// Returns `Err` only when the argument is invalid. Specifically,
+/// Returns `Err` when the argument is invalid. Specifically,
 /// the following cases are invalid:
 /// - `board` is already finished (at least one boss is surrounded)
+/// - `value` is `Unknown`, `Win(even number)` or `Lose(odd or zero)`
 /// - `rule.suicide_atk_judge` is `Judge::Draw`
-</span><span class="kw">pub fn </span>evaluate_board(
-    board: <span class="kw-2">&amp;</span>Board,
-    max_search_depth: usize,
+</span><span class="kw">pub fn </span>create_checkmate_tree(
+    board: Board,
     player: Color,
+    max_depth: usize,
     rule: GameRule,
-) -&gt; <span class="prelude-ty">Result</span>&lt;BoardValue, EvaluateBoardError&gt; {
-    <span class="kw">use </span>BoardValue::<span class="kw-2">*</span>;
-    <span class="kw">if </span>max_search_depth == <span class="number">0 </span>{
-        <span class="kw">return </span><span class="prelude-val">Ok</span>(Unknown);
-    }
-
-    <span class="kw">use </span>EvaluateBoardError::<span class="kw-2">*</span>;
-    <span class="kw">if </span>!<span class="macro">matches!</span>(board.surrounded_status(), SurroundedStatus::None) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(BoardAlreadyFinished);
-    }
-
-    <span class="kw">use </span>Judge::<span class="kw-2">*</span>;
-    <span class="kw">let </span>wins_if_both = <span class="kw">match </span>rule.suicide_atk_judge() {
-        LastWins =&gt; <span class="bool-val">true</span>,
-        NextWins =&gt; <span class="bool-val">false</span>,
-        Draw =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(DrawNotSupportedError),
-    };
-    <span class="kw">let </span>is_remove_accepted = <span class="kw-2">*</span>rule.is_remove_accepted();
-
-    <span class="kw">for </span>depth <span class="kw">in </span><span class="number">1</span>..=max_search_depth {
-        <span class="kw">let </span>cmp = compare_board_value_core(board, depth, player, is_remove_accepted, wins_if_both);
-        <span class="kw">if </span>cmp == <span class="number">0 </span>{
-            <span class="kw">return match </span>depth {
-                <span class="number">0 </span>=&gt; <span class="macro">unreachable!</span>(),
-                n =&gt; <span class="kw">match </span>n % <span class="number">2 </span>{
-                    <span class="number">0 </span>=&gt; <span class="prelude-val">Ok</span>(Lose(n)),
-                    <span class="number">1 </span>=&gt; <span class="prelude-val">Ok</span>(Win(n)),
-                    <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
-                },
-            };
-        }
-    }
-    <span class="prelude-val">Ok</span>(Unknown)
+) -&gt; <span class="prelude-ty">Result</span>&lt;BoardValueTree, ArgsValidationError&gt; {
+    validate_args(board, BoardValue::MAX, rule)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(create_checkmate_tree_unchecked(
+        board, player, max_depth, rule,
+    ))
 }
 
-<span class="comment">// ************************************************************
-//  Compare Value
-// ************************************************************
-</span><span class="doccomment">/// Compares the value of specified [`Board`] to a given [`BoardValue`].
+<span class="kw">fn </span>create_checkmate_tree_unchecked(
+    board: Board,
+    player: Color,
+    max_depth: usize,
+    rule: GameRule,
+) -&gt; BoardValueTree {
+    <span class="kw">if </span>max_depth == <span class="number">0 </span>{
+        <span class="kw">return </span>BoardValueTree::new(board);
+    }
+
+    <span class="kw">let </span><span class="kw-2">mut </span>tree = BoardValueTree::new(board);
+    tree.value = BoardValue::MIN;
+
+    <span class="kw">for </span>(action, next_board, status) <span class="kw">in </span>NextBoardIter::new(board, player, rule) {
+        <span class="kw">use </span>NextBoardStatus::<span class="kw-2">*</span>;
+        <span class="kw">match </span>status {
+            Win =&gt; {
+                tree.value = BoardValue::win(<span class="number">1</span>).unwrap();
+                tree.children.clear();
+                <span class="kw">return </span>tree;
+            }
+            Lose =&gt; <span class="kw">continue</span>,
+            Unknown =&gt; {
+                <span class="kw">let </span>child =
+                    create_checkmate_tree_unchecked(next_board, !player, max_depth - <span class="number">1</span>, rule);
+                <span class="kw">let </span>child_value_increment = child.value.increment();
+                <span class="kw">if </span>child_value_increment &lt; tree.value {
+                    <span class="kw">continue</span>;
+                }
+                <span class="kw">if </span>child_value_increment &gt; tree.value {
+                    tree.value = child_value_increment;
+                    tree.children.clear();
+                }
+                tree.children.insert(action, child);
+            }
+        }
+    }
+    tree
+}
+
+<span class="doccomment">/// Creates an [`BoardValueTree`] that describes routes to ends of the game.
+///
+/// This function behaves almost similar to [`create_checkmate_tree`],
+/// except that it receives `value` ([`BoardValue`]) instead of search depth,
+/// and requires `value` coinsides with the value of `board`.
+/// This function runs much faster than [`create_checkmate_tree_with_value`]
+/// in exchange for restriction of possible arguments.
+///
+/// # Errors
+/// Returns `Err` when the argument is invalid. Specifically,
+/// the following cases are invalid:
+/// - `board` is already finished (at least one boss is surrounded)
+/// - `value` is `Unknown`, `Win(even number)` or `Lose(odd or zero)`
+/// - `rule.suicide_atk_judge` is `Judge::Draw`
+/// Furthermore, it returns `Err` when the value of `board` differs from `value`.
+/// In such a case, returned value contains a variant of [`std::cmp::Ordering`],
+/// which means that the value of board is greater (`Greater`) or less (`Less`)
+/// than the specified `value`.
+</span><span class="kw">pub fn </span>create_checkmate_tree_with_value(
+    board: Board,
+    value: BoardValue,
+    player: Color,
+    rule: GameRule,
+) -&gt; <span class="prelude-ty">Result</span>&lt;BoardValueTree, CreateCheckmateTreeWithValueError&gt; {
+    <span class="kw">type </span>Error = CreateCheckmateTreeWithValueError;
+    validate_args(board, value, rule).map_err(Error::ArgsValidationError)<span class="question-mark">?</span>;
+    <span class="kw">let </span>(tree, cmp) = create_checkmate_tree_with_value_unchecked(board, value, player, rule);
+    <span class="kw">if </span>cmp == Ordering::Equal {
+        <span class="prelude-val">Ok</span>(tree)
+    } <span class="kw">else </span>{
+        <span class="prelude-val">Err</span>(Error::ValueMismatchError(cmp))
+    }
+}
+
+<span class="kw">fn </span>create_checkmate_tree_with_value_unchecked(
+    board: Board,
+    value: BoardValue,
+    player: Color,
+    rule: GameRule,
+) -&gt; (BoardValueTree, Ordering) {
+    <span class="kw">use </span>Ordering::<span class="kw-2">*</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>tree = BoardValueTree::new(board);
+    tree.value = value;
+    <span class="kw">let </span><span class="kw-2">mut </span>cmp = Less;
+    <span class="comment">// tree.value = value;
+    </span><span class="kw">for </span>(action, next_board, status) <span class="kw">in </span>NextBoardIter::new(board, player, rule) {
+        <span class="kw">use </span>NextBoardStatus::<span class="kw-2">*</span>;
+        <span class="kw">match </span>status {
+            Win =&gt; {
+                <span class="kw">if </span>value == BoardValue::MAX {
+                    cmp = Equal;
+                } <span class="kw">else </span>{
+                    cmp = Greater;
+                    tree.value = BoardValue::unknown();
+                }
+                tree.children.clear();
+                <span class="kw">return </span>(tree, cmp);
+            }
+            Lose =&gt; <span class="kw">continue</span>,
+            Unknown =&gt; {
+                <span class="kw">if </span>value == BoardValue::MAX {
+                    <span class="kw">continue</span>;
+                }
+                <span class="kw">let </span>next_value = value.try_decrement().unwrap();
+                <span class="kw">let </span>(child, next_cmp) = create_checkmate_tree_with_value_unchecked(
+                    next_board, next_value, !player, rule,
+                );
+                <span class="kw">if </span>next_cmp == Less {
+                    tree.value = BoardValue::unknown();
+                    tree.children.clear();
+                    <span class="kw">return </span>(tree, Greater);
+                }
+                <span class="kw">if </span>next_cmp == Equal {
+                    tree.children.insert(action, child);
+                }
+                cmp = cmp.max(next_cmp.reverse());
+            }
+        }
+    }
+    <span class="kw">if </span>cmp != Equal {
+        tree.value = BoardValue::unknown();
+        tree.children.clear();
+    }
+    (tree, cmp)
+}
+
+<span class="doccomment">/// Compares the value of specified [`Board`] to a given [`BoardValue`].
 ///
 /// It returns:
 /// - `Ok(Greater)` if the value of `board` is greater than `value`
@@ -734,244 +1473,176 @@
 /// - `value` is `Unknown`, `Win(even number)` or `Lose(odd or zero)`
 /// - `rule.suicide_atk_judge` is `Judge::Draw`
 </span><span class="kw">pub fn </span>compare_board_value(
-    board: <span class="kw-2">&amp;</span>Board,
+    board: Board,
     value: BoardValue,
     player: Color,
     rule: GameRule,
-) -&gt; <span class="prelude-ty">Result</span>&lt;std::cmp::Ordering, CompareBoardValueError&gt; {
-    <span class="kw">use </span>CompareBoardValueError::<span class="kw-2">*</span>;
-    <span class="kw">if </span>!<span class="macro">matches!</span>(board.surrounded_status(), SurroundedStatus::None) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(BoardAlreadyFinished);
-    }
-
-    <span class="kw">let </span>n = value
-        .try_into()
-        .map_err(|e| CompareBoardValueError::BoardValueError { detail: e })<span class="question-mark">?</span>;
-
-    <span class="kw">use </span>Judge::<span class="kw-2">*</span>;
-    <span class="kw">let </span>wins_if_both = <span class="kw">match </span>rule.suicide_atk_judge() {
-        LastWins =&gt; <span class="bool-val">true</span>,
-        NextWins =&gt; <span class="bool-val">false</span>,
-        Draw =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(DrawNotSupportedError),
-    };
-    <span class="kw">let </span>is_remove_accepted = <span class="kw-2">*</span>rule.is_remove_accepted();
-    <span class="kw">use </span>std::cmp::Ordering::<span class="kw-2">*</span>;
-    <span class="kw">let </span>cmp = <span class="kw">match </span>compare_board_value_core(board, n, player, is_remove_accepted, wins_if_both) {
-        -<span class="number">1 </span>=&gt; Less,
-        <span class="number">0 </span>=&gt; Equal,
-        <span class="number">1 </span>=&gt; Greater,
-        <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
-    };
-    <span class="prelude-val">Ok</span>(cmp)
+) -&gt; <span class="prelude-ty">Result</span>&lt;Ordering, ArgsValidationError&gt; {
+    validate_args(board, value, rule)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(compare_board_value_unchecked(board, value, player, rule))
 }
 
-<span class="kw">fn </span>compare_board_value_core(
-    board: <span class="kw-2">&amp;</span>Board,
-    step_to_finish: usize,
+<span class="kw">fn </span>compare_board_value_unchecked(
+    board: Board,
+    value: BoardValue,
     player: Color,
-    is_remove_accepted: bool,
-    wins_if_both: bool,
-) -&gt; i8 {
-    <span class="kw">let </span><span class="kw-2">mut </span>cmp = <span class="kw">if </span>step_to_finish == <span class="number">2 </span>{ <span class="number">0 </span>} <span class="kw">else </span>{ -<span class="number">1 </span>};
-    <span class="kw">for </span>action <span class="kw">in </span>board.legal_actions(player, <span class="bool-val">true</span>, <span class="bool-val">true</span>, is_remove_accepted) {
-        <span class="kw">let </span>next_board = board.perform_unchecked_copied(action);
-
-        <span class="kw">use </span>SurroundedStatus::<span class="kw-2">*</span>;
-        <span class="kw">let </span>status = next_board.surrounded_status();
-        <span class="kw">let </span>is_both = <span class="macro">matches!</span>(status, Both);
-        <span class="kw">if </span>(wins_if_both &amp;&amp; is_both) || <span class="macro">matches!</span>(status, OneSide(p) <span class="kw">if </span>p != player) {
-            <span class="kw">return if </span>step_to_finish == <span class="number">1 </span>{ <span class="number">0 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
-        } <span class="kw">else if </span>(step_to_finish == <span class="number">1</span>)
-            || (!wins_if_both &amp;&amp; is_both)
-            || <span class="macro">matches!</span>(status, OneSide(p) <span class="kw">if </span>p == player)
-        {
-            <span class="kw">continue</span>;
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>next_cmp = compare_board_value_core(
-                <span class="kw-2">&amp;</span>next_board,
-                step_to_finish - <span class="number">1</span>,
-                !player,
-                is_remove_accepted,
-                wins_if_both,
-            );
-            <span class="kw">if </span>next_cmp == -<span class="number">1 </span>{
-                <span class="kw">return </span><span class="number">1</span>;
+    rule: GameRule,
+) -&gt; Ordering {
+    <span class="kw">use </span>Ordering::<span class="kw-2">*</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>cmp = Less;
+    <span class="kw">for </span>(<span class="kw">_</span>, next_board, status) <span class="kw">in </span>NextBoardIter::new(board, player, rule) {
+        <span class="kw">use </span>NextBoardStatus::<span class="kw-2">*</span>;
+        <span class="kw">match </span>status {
+            Win =&gt; {
+                <span class="kw">if </span>value == BoardValue::MAX {
+                    <span class="kw">return </span>Equal;
+                } <span class="kw">else </span>{
+                    <span class="kw">return </span>Greater;
+                }
             }
-            cmp = cmp.max(-next_cmp);
+            Lose =&gt; <span class="kw">continue</span>,
+            Unknown =&gt; {
+                <span class="kw">let </span><span class="prelude-val">Some</span>(next_val) = value.try_decrement() <span class="kw">else </span>{
+                    <span class="kw">continue</span>;
+                };
+                <span class="kw">let </span>next_cmp = compare_board_value_unchecked(next_board, next_val, !player, rule);
+                <span class="kw">if </span>next_cmp == Less {
+                    <span class="kw">return </span>Greater;
+                }
+                cmp = cmp.max(next_cmp.reverse());
+            }
         }
     }
     cmp
 }
 
-<span class="comment">// ************************************************************
-//  Action Tree
-// ************************************************************
-</span><span class="doccomment">/// A tree structure that contains [`Action`]s on its edges.
+<span class="doccomment">/// Calculates [`BoardValue`] of specified [`Board`].
 ///
-/// It is returned by [`create_checkmate_tree`] to describe
-/// routes, i.e. possible serieses of `Action`s, to ends of the game.
-</span><span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub struct </span>ActionTree(HashMap&lt;Action, ActionTree&gt;);
-
-<span class="kw">impl </span>ActionTree {
-    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(HashMap::new())
-    }
-
-    <span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.<span class="number">0</span>.len()
-    }
-
-    <span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.<span class="number">0</span>.is_empty()
-    }
-
-    <span class="kw">fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action, tree: ActionTree) {
-        <span class="self">self</span>.<span class="number">0</span>.insert(action, tree);
-    }
-
-    <span class="kw">pub fn </span>child(<span class="kw-2">&amp;</span><span class="self">self</span>, action: <span class="kw-2">&amp;</span>Action) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ActionTree&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.get(action)
-    }
-
-    <span class="kw">pub fn </span>children(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; hash_map::Values&lt;<span class="lifetime">&#39;_</span>, Action, ActionTree&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.values()
-    }
-
-    <span class="kw">pub fn </span>actions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; hash_map::Keys&lt;<span class="lifetime">&#39;_</span>, Action, ActionTree&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.keys()
-    }
-
-    <span class="kw">pub fn </span>actions_children(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; hash_map::Iter&lt;<span class="lifetime">&#39;_</span>, Action, ActionTree&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.iter()
-    }
-
-    <span class="kw">pub fn </span>depth(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="kw">if </span><span class="self">self</span>.<span class="number">0</span>.is_empty() {
-            <span class="number">0
-        </span>} <span class="kw">else </span>{
-            <span class="self">self</span>.<span class="number">0</span>.values().map(|t| t.depth()).max().unwrap() + <span class="number">1
-        </span>}
-    }
-
-    <span class="kw">pub fn </span>to_serieses(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;Vec&lt;<span class="kw-2">&amp;</span>Action&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>serieses = Vec::new();
-        <span class="kw">for </span>(a, t) <span class="kw">in </span><span class="self">self</span>.actions_children() {
-            <span class="kw">if </span>t.depth() == <span class="number">2 </span>{
-                serieses.push(<span class="macro">vec!</span>[a]);
-            }
-            <span class="kw">for </span>next_vec <span class="kw">in </span>t.to_serieses() {
-                <span class="kw">let </span>series: Vec&lt;<span class="kw-2">&amp;</span>Action&gt; = [a].into_iter().chain(next_vec.into_iter()).collect();
-                serieses.push(series);
-            }
-        }
-        serieses
-    }
-
-    <span class="kw">pub fn </span>is_good_for_puzzle(<span class="kw-2">&amp;</span><span class="self">self</span>, step: usize) -&gt; bool {
-        <span class="kw">if </span>step == <span class="number">0 </span>{
-            <span class="bool-val">true
-        </span>} <span class="kw">else </span>{
-            <span class="self">self</span>.actions_children().len() == <span class="number">1
-                </span>&amp;&amp; <span class="self">self
-                    </span>.actions_children()
-                    .next()
-                    .unwrap()
-                    .<span class="number">1
-                    </span>.is_good_for_puzzle(step - <span class="number">1</span>)
-        }
-    }
-}
-
-<span class="doccomment">/// Creates an [`ActionTree`] that describes routes to ends of the game.
-///
-/// It supposes the value of `board` equals to `value`.
-/// [`compare_board_value`] may be a good tool to examine this in advance.
+/// It searches the value of `board` by pursuing `search_depth` turns forward.
+/// The result is returned in [`Interval`], which is a closed interval
+/// between two [`BoardValue`]s.
 ///
 /// # Errors
-/// Returns `Err` when the argument is invalid. Specifically,
+/// Returns `Err` only when the argument is invalid. Specifically,
 /// the following cases are invalid:
 /// - `board` is already finished (at least one boss is surrounded)
-/// - `value` is `Unknown`, `Win(even number)` or `Lose(odd or zero)`
 /// - `rule.suicide_atk_judge` is `Judge::Draw`
-/// Furthermore, it returns `Err(EmptyTreeError)` if the value of `board`
-/// does not equal to `value`.
-</span><span class="kw">pub fn </span>create_checkmate_tree(
-    board: <span class="kw-2">&amp;</span>Board,
-    value: BoardValue,
+</span><span class="kw">pub fn </span>evaluate_board(
+    board: Board,
     player: Color,
+    search_depth: usize,
     rule: GameRule,
-) -&gt; <span class="prelude-ty">Result</span>&lt;ActionTree, CreateCheckmateTreeError&gt; {
-    <span class="kw">use </span>CreateCheckmateTreeError::<span class="kw-2">*</span>;
-    <span class="kw">if </span>!<span class="macro">matches!</span>(board.surrounded_status(), SurroundedStatus::None) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(BoardAlreadyFinished);
-    }
-
-    <span class="kw">let </span>n = value
-        .try_into()
-        .map_err(|e| CreateCheckmateTreeError::BoardValueError { detail: e })<span class="question-mark">?</span>;
-
-    <span class="kw">use </span>Judge::<span class="kw-2">*</span>;
-    <span class="kw">let </span>wins_if_both = <span class="kw">match </span>rule.suicide_atk_judge() {
-        LastWins =&gt; <span class="bool-val">true</span>,
-        NextWins =&gt; <span class="bool-val">false</span>,
-        Draw =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(DrawNotSupportedError),
-    };
-    <span class="kw">let </span>is_remove_accepted = <span class="kw-2">*</span>rule.is_remove_accepted();
-
-    <span class="kw">let </span>(<span class="kw">_</span>, tree) = create_checkmate_tree_core(board, n, player, is_remove_accepted, wins_if_both);
-    <span class="kw">if </span>tree.is_empty() {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(EmptyTreeError);
-    }
-    <span class="prelude-val">Ok</span>(tree)
+) -&gt; <span class="prelude-ty">Result</span>&lt;Interval, ArgsValidationError&gt; {
+    validate_args(board, BoardValue::MAX, rule)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(evaluate_board_unchecked(board, player, search_depth, rule))
 }
 
-<span class="kw">fn </span>create_checkmate_tree_core(
-    board: <span class="kw-2">&amp;</span>Board,
-    step_to_finish: usize,
+<span class="kw">fn </span>evaluate_board_unchecked(
+    board: Board,
     player: Color,
-    is_remove_accepted: bool,
-    wins_if_both: bool,
-) -&gt; (i8, ActionTree) {
-    <span class="kw">let </span><span class="kw-2">mut </span>tree = ActionTree::new();
-    <span class="kw">let </span><span class="kw-2">mut </span>cmp = <span class="kw">if </span>step_to_finish == <span class="number">2 </span>{ <span class="number">0 </span>} <span class="kw">else </span>{ -<span class="number">1 </span>};
-    <span class="kw">for </span>action <span class="kw">in </span>board.legal_actions(player, <span class="bool-val">true</span>, <span class="bool-val">true</span>, is_remove_accepted) {
-        <span class="kw">let </span>next_board = board.perform_unchecked_copied(action);
-
-        <span class="kw">use </span>SurroundedStatus::<span class="kw-2">*</span>;
-        <span class="kw">let </span>status = next_board.surrounded_status();
-        <span class="kw">let </span>is_both = <span class="macro">matches!</span>(status, Both);
-        <span class="kw">if </span>(wins_if_both &amp;&amp; is_both) || <span class="macro">matches!</span>(status, OneSide(p) <span class="kw">if </span>p != player) {
-            <span class="kw">if </span>step_to_finish == <span class="number">1 </span>{
-                tree.insert(action, ActionTree::new());
-                cmp = <span class="number">0</span>;
-                <span class="kw">continue</span>;
-            } <span class="kw">else </span>{
-                <span class="kw">return </span>(<span class="number">1</span>, ActionTree::new());
-            };
-        } <span class="kw">else if </span>(step_to_finish == <span class="number">1</span>)
-            || (!wins_if_both &amp;&amp; is_both)
-            || <span class="macro">matches!</span>(status, OneSide(p) <span class="kw">if </span>p == player)
-        {
-            <span class="kw">continue</span>;
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>(next_cmp, next_tree) = create_checkmate_tree_core(
-                <span class="kw-2">&amp;</span>next_board,
-                step_to_finish - <span class="number">1</span>,
-                !player,
-                is_remove_accepted,
-                wins_if_both,
-            );
-            <span class="kw">if </span>next_cmp == -<span class="number">1 </span>{
-                <span class="kw">return </span>(<span class="number">1</span>, ActionTree::new());
-            }
-            <span class="kw">if </span>next_cmp == <span class="number">0 </span>{
-                tree.insert(action, next_tree);
-            }
-            cmp = cmp.max(-next_cmp);
+    search_depth: usize,
+    rule: GameRule,
+) -&gt; Interval {
+    <span class="kw">for </span>depth <span class="kw">in </span><span class="number">1</span>..=search_depth {
+        <span class="kw">let </span>value = BoardValue::from(<span class="prelude-val">Some</span>(depth));
+        <span class="kw">if </span><span class="macro">matches!</span>(
+            compare_board_value_unchecked(board, value, player, rule),
+            Ordering::Equal
+        ) {
+            <span class="kw">return </span>Interval::new(value, value);
         }
     }
-    (cmp, tree)
+    <span class="kw">let </span>(left_num, right_num) = <span class="kw">if </span>search_depth % <span class="number">2 </span>== <span class="number">0 </span>{
+        (search_depth + <span class="number">2</span>, search_depth + <span class="number">1</span>)
+    } <span class="kw">else </span>{
+        (search_depth + <span class="number">1</span>, search_depth + <span class="number">2</span>)
+    };
+    <span class="kw">let </span>left = BoardValue::from(<span class="prelude-val">Some</span>(left_num));
+    <span class="kw">let </span>right = BoardValue::from(<span class="prelude-val">Some</span>(right_num));
+    Interval::new(left, right)
+}
+
+<span class="doccomment">/// Collects the best [`Action`]s by [`BoardValue`]
+///
+/// # Errors
+/// Returns `Err` only when the argument is invalid. Specifically,
+/// the following cases are invalid:
+/// - `board` is already finished (at least one boss is surrounded)
+/// - `rule.suicide_atk_judge` is `Judge::Draw`
+</span><span class="kw">pub fn </span>find_best_actions(
+    board: Board,
+    player: Color,
+    search_depth: usize,
+    rule: GameRule,
+) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Action&gt;, ArgsValidationError&gt; {
+    validate_args(board, BoardValue::MAX, rule)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(find_best_actions_unchecked(
+        board,
+        player,
+        search_depth,
+        rule,
+    ))
+}
+
+<span class="kw">fn </span>find_best_actions_unchecked(
+    board: Board,
+    player: Color,
+    search_depth: usize,
+    rule: GameRule,
+) -&gt; Vec&lt;Action&gt; {
+    <span class="kw">if </span>search_depth == <span class="number">0 </span>{
+        <span class="kw">return </span>board
+            .legal_actions(player, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="kw-2">*</span>rule.is_remove_accepted())
+            .into_iter()
+            .collect();
+    }
+
+    <span class="kw">let </span>value_interval = evaluate_board_unchecked(board, player, search_depth, rule);
+    <span class="kw">let </span>value = value_interval.single().unwrap_or(BoardValue::unknown());
+
+    <span class="kw">let </span><span class="kw-2">mut </span>actions = Vec::new();
+    <span class="kw">for </span>(action, next_board, status) <span class="kw">in </span>NextBoardIter::new(board, player, rule) {
+        <span class="kw">use </span>NextBoardStatus::<span class="kw-2">*</span>;
+        <span class="kw">match </span>status {
+            Win =&gt; {
+                <span class="kw">if </span>value != BoardValue::MAX {
+                    <span class="macro">unreachable!</span>()
+                }
+                actions.push(action);
+                <span class="kw">continue</span>;
+            }
+            Lose =&gt; <span class="kw">continue</span>,
+            Unknown =&gt; (),
+        }
+
+        <span class="kw">if </span>value == BoardValue::MAX {
+            <span class="kw">continue</span>;
+        }
+
+        <span class="kw">let </span>next_value = value.try_decrement().unwrap();
+        <span class="kw">if </span>next_value.is_unknown() {
+            <span class="kw">if </span>!<span class="macro">matches!</span>(
+                compare_board_value_unchecked(
+                    next_board,
+                    value_interval.left().try_decrement().unwrap(),
+                    !player,
+                    rule
+                ),
+                Ordering::Greater
+            ) {
+                actions.push(action);
+            }
+        } <span class="kw">else </span>{
+            <span class="comment">// next_value is Win or Lose
+            </span><span class="kw">if </span><span class="macro">matches!</span>(
+                compare_board_value_unchecked(next_board, next_value, !player, rule),
+                Ordering::Equal
+            ) {
+                actions.push(action);
+            }
+        }
+    }
+    actions
 }
 
 <span class="comment">// ************************************************************
@@ -979,51 +1650,53 @@
 // ************************************************************
 </span><span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use crate</span>::{tools::create_checkmate_tree, <span class="kw-2">*</span>};
+    <span class="kw">use crate</span>::{tools::BoardValue, <span class="kw-2">*</span>};
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_evaluate_board() {
         <span class="kw">use </span>std::str::FromStr;
-        <span class="kw">use </span>tools::BoardValue::<span class="kw-2">*</span>;
+        <span class="kw">use </span>tools::BoardValue;
         <span class="kw">let </span>rule = game::GameRule::new(<span class="bool-val">true</span>).with_suicide_atk_judge(game::Judge::NextWins);
         <span class="kw">let </span>board_value = [
-            (<span class="string">&quot; B; a;TH y;b mM&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot; By;H  a;A m;  Yb&quot;</span>, Win(<span class="number">3</span>)),
-            (<span class="string">&quot;bB; H;Y h;  T&quot;</span>, Win(<span class="number">3</span>)),
-            (<span class="string">&quot;T; B b;  yY; t&quot;</span>, Win(<span class="number">3</span>)),
-            (<span class="string">&quot;hB A;maYT; Htb;M y&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot;Ba;  H;  hA;MY b&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot; B;a  b; MtY;T  H&quot;</span>, Win(<span class="number">7</span>)),
-            (<span class="string">&quot;Y; B;y hA; M b&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot;bB;T YA&quot;</span>, Win(<span class="number">5</span>)),
+            (<span class="string">&quot; B; a;TH y;b mM&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot; By;H  a;A m;  Yb&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;bB; H;Y h;  T&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;T; B b;  yY; t&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;hB A;maYT; Htb;M y&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot;Ba;  H;  hA;MY b&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot; B;a  b; MtY;T  H&quot;</span>, <span class="number">7</span>),
+            (<span class="string">&quot;Y; B;y hA; M b&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot;bB;T YA&quot;</span>, <span class="number">5</span>),
         ];
         <span class="kw">let </span>max_depth = <span class="number">10</span>; <span class="comment">// it must be greater than all n of Win(n)
-        </span><span class="kw">for </span>(s, val) <span class="kw">in </span>board_value {
+        </span><span class="kw">for </span>(s, num) <span class="kw">in </span>board_value {
+            <span class="kw">let </span>val = BoardValue::win(num).unwrap();
             <span class="kw">let </span>board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            <span class="kw">let </span>evaluated = tools::evaluate_board(<span class="kw-2">&amp;</span>board, max_depth, Color::Red, rule).unwrap();
-            <span class="macro">assert_eq!</span>(evaluated, val);
+            <span class="kw">let </span>evaluated = tools::evaluate_board(board, Color::Red, max_depth, rule).unwrap();
+            <span class="macro">assert_eq!</span>(evaluated.single().unwrap(), val);
         }
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_compare_value() {
         <span class="kw">use </span>std::str::FromStr;
-        <span class="kw">use </span>tools::BoardValue::<span class="kw-2">*</span>;
+        <span class="kw">use </span>tools::BoardValue;
         <span class="kw">let </span>rule = game::GameRule::new(<span class="bool-val">true</span>).with_suicide_atk_judge(game::Judge::NextWins);
         <span class="kw">let </span>board_value = [
-            (<span class="string">&quot; B; a;TH y;b mM&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot; By;H  a;A m;  Yb&quot;</span>, Win(<span class="number">3</span>)),
-            (<span class="string">&quot;bB; H;Y h;  T&quot;</span>, Win(<span class="number">3</span>)),
-            (<span class="string">&quot;T; B b;  yY; t&quot;</span>, Win(<span class="number">3</span>)),
-            (<span class="string">&quot;hB A;maYT; Htb;M y&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot;Ba;  H;  hA;MY b&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot; B;a  b; MtY;T  H&quot;</span>, Win(<span class="number">7</span>)),
-            (<span class="string">&quot;Y; B;y hA; M b&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot;bB;T YA&quot;</span>, Win(<span class="number">5</span>)),
+            (<span class="string">&quot; B; a;TH y;b mM&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot; By;H  a;A m;  Yb&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;bB; H;Y h;  T&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;T; B b;  yY; t&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;hB A;maYT; Htb;M y&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot;Ba;  H;  hA;MY b&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot; B;a  b; MtY;T  H&quot;</span>, <span class="number">7</span>),
+            (<span class="string">&quot;Y; B;y hA; M b&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot;bB;T YA&quot;</span>, <span class="number">5</span>),
         ];
-        <span class="kw">for </span>(s, val) <span class="kw">in </span>board_value {
+        <span class="kw">for </span>(s, num) <span class="kw">in </span>board_value {
+            <span class="kw">let </span>val = BoardValue::win(num).unwrap();
             <span class="kw">let </span>board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            <span class="kw">let </span>cmp = tools::compare_board_value(<span class="kw-2">&amp;</span>board, val, Color::Red, rule);
+            <span class="kw">let </span>cmp = tools::compare_board_value(board, val, Color::Red, rule);
             <span class="macro">assert!</span>(<span class="macro">matches!</span>(cmp, <span class="prelude-val">Ok</span>(std::cmp::Ordering::Equal)));
         }
     }
@@ -1031,24 +1704,43 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_checkmate_tree() {
         <span class="kw">use </span>std::str::FromStr;
-        <span class="kw">use </span>tools::BoardValue::<span class="kw-2">*</span>;
         <span class="kw">let </span>rule = game::GameRule::new(<span class="bool-val">true</span>).with_suicide_atk_judge(game::Judge::NextWins);
         <span class="kw">let </span>board_value = [
-            (<span class="string">&quot; B; a;TH y;b mM&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot; By;H  a;A m;  Yb&quot;</span>, Win(<span class="number">3</span>)),
-            (<span class="string">&quot;bB; H;Y h;  T&quot;</span>, Win(<span class="number">3</span>)),
-            (<span class="string">&quot;T; B b;  yY; t&quot;</span>, Win(<span class="number">3</span>)),
-            (<span class="string">&quot;hB A;maYT; Htb;M y&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot;Ba;  H;  hA;MY b&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot; B;a  b; MtY;T  H&quot;</span>, Win(<span class="number">7</span>)),
-            (<span class="string">&quot;Y; B;y hA; M b&quot;</span>, Win(<span class="number">5</span>)),
-            (<span class="string">&quot;bB;T YA&quot;</span>, Win(<span class="number">5</span>)),
+            (<span class="string">&quot; B; a;TH y;b mM&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot; By;H  a;A m;  Yb&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;bB; H;Y h;  T&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;T; B b;  yY; t&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;hB A;maYT; Htb;M y&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot;bB;T YA&quot;</span>, <span class="number">5</span>),
         ];
-        <span class="kw">for </span>(s, val) <span class="kw">in </span>board_value {
+        <span class="kw">for </span>(s, num) <span class="kw">in </span>board_value {
             <span class="kw">let </span>board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            <span class="kw">let </span>tree = create_checkmate_tree(<span class="kw-2">&amp;</span>board, val, Color::Red, rule).unwrap();
-            <span class="kw">let </span>step_to_finish: usize = val.try_into().unwrap();
-            <span class="macro">assert!</span>(tree.is_good_for_puzzle(step_to_finish - <span class="number">2</span>));
+            <span class="kw">let </span>tree = tools::create_checkmate_tree(board, Color::Red, num, rule).unwrap();
+            <span class="macro">assert!</span>(tree.is_good_for_puzzle(num - <span class="number">2</span>));
+        }
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_checkmate_tree_with_value() {
+        <span class="kw">use </span>std::str::FromStr;
+        <span class="kw">let </span>rule = game::GameRule::new(<span class="bool-val">true</span>).with_suicide_atk_judge(game::Judge::NextWins);
+        <span class="kw">let </span>board_value = [
+            (<span class="string">&quot; B; a;TH y;b mM&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot; By;H  a;A m;  Yb&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;bB; H;Y h;  T&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;T; B b;  yY; t&quot;</span>, <span class="number">3</span>),
+            (<span class="string">&quot;hB A;maYT; Htb;M y&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot;Ba;  H;  hA;MY b&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot; B;a  b; MtY;T  H&quot;</span>, <span class="number">7</span>),
+            (<span class="string">&quot;Y; B;y hA; M b&quot;</span>, <span class="number">5</span>),
+            (<span class="string">&quot;bB;T YA&quot;</span>, <span class="number">5</span>),
+        ];
+        <span class="kw">for </span>(s, num) <span class="kw">in </span>board_value {
+            <span class="kw">let </span>val = BoardValue::win(num).unwrap();
+            <span class="kw">let </span>board = BoardBuilder::from_str(s).unwrap().build().unwrap();
+            <span class="kw">let </span>tree =
+                tools::create_checkmate_tree_with_value(board, val, Color::Red, rule).unwrap();
+            <span class="macro">assert!</span>(tree.is_good_for_puzzle(num - <span class="number">2</span>));
         }
     }
 }
