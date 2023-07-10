@@ -777,12 +777,12 @@ fn find_best_actions_unchecked(
 // ************************************************************
 #[cfg(test)]
 mod tests {
-    use crate::{tools::BoardValue, *};
+    use crate::{analysis::BoardValue, *};
 
     #[test]
     fn test_evaluate_board() {
+        use analysis::BoardValue;
         use std::str::FromStr;
-        use tools::BoardValue;
         let rule = game::GameRule::new(true).with_suicide_atk_judge(game::Judge::NextWins);
         let board_value = [
             (" B; a;TH y;b mM", 5),
@@ -799,15 +799,15 @@ mod tests {
         for (s, num) in board_value {
             let val = BoardValue::win(num).unwrap();
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            let evaluated = tools::evaluate_board(board, Color::Red, max_depth, rule).unwrap();
+            let evaluated = analysis::evaluate_board(board, Color::Red, max_depth, rule).unwrap();
             assert_eq!(evaluated.single().unwrap(), val);
         }
     }
 
     #[test]
     fn test_compare_value() {
+        use analysis::BoardValue;
         use std::str::FromStr;
-        use tools::BoardValue;
         let rule = game::GameRule::new(true).with_suicide_atk_judge(game::Judge::NextWins);
         let board_value = [
             (" B; a;TH y;b mM", 5),
@@ -823,7 +823,7 @@ mod tests {
         for (s, num) in board_value {
             let val = BoardValue::win(num).unwrap();
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            let cmp = tools::compare_board_value(board, val, Color::Red, rule);
+            let cmp = analysis::compare_board_value(board, val, Color::Red, rule);
             assert!(matches!(cmp, Ok(std::cmp::Ordering::Equal)));
         }
     }
@@ -842,7 +842,7 @@ mod tests {
         ];
         for (s, num) in board_value {
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
-            let tree = tools::create_checkmate_tree(board, Color::Red, num, rule).unwrap();
+            let tree = analysis::create_checkmate_tree(board, Color::Red, num, rule).unwrap();
             assert!(tree.is_good_for_puzzle(num - 2));
         }
     }
@@ -866,7 +866,7 @@ mod tests {
             let val = BoardValue::win(num).unwrap();
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
             let tree =
-                tools::create_checkmate_tree_with_value(board, val, Color::Red, rule).unwrap();
+                analysis::create_checkmate_tree_with_value(board, val, Color::Red, rule).unwrap();
             assert!(tree.is_good_for_puzzle(num - 2));
         }
     }

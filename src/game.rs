@@ -1,7 +1,7 @@
+use crate::analysis::{evaluate_board, find_best_actions};
 use crate::prelude::{
     error, Action, ActionContainer, ActionsFwd, Board, BoardBuilder, Color, SurroundedStatus,
 };
-use crate::tools::{evaluate_board, find_best_actions};
 
 // ************************************************************
 //  Errors
