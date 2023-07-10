@@ -1,7 +1,7 @@
 use crate::prelude::{
     error, Action, ActionContainer, ActionsFwd, Board, BoardBuilder, Color, SurroundedStatus,
 };
-use crate::tools::{create_checkmate_tree, evaluate_board, BoardValue};
+use crate::tools::{evaluate_board, find_best_actions};
 
 // ************************************************************
 //  Errors
@@ -378,7 +378,7 @@ impl RandomAgent {
     }
 
     fn update_parameter(&mut self) {
-        self.n = (33 * self.n + 33) % 65536
+        self.n = (33 * self.n + 31) % 65536
     }
 }
 
@@ -393,62 +393,43 @@ impl Agent for RandomAgent {
 
 pub struct AnalystAgent {
     depth: usize,
-    declare_near_to_end: bool,
+    n: usize,
+    declare_about_to_end: bool,
 }
 
 impl AnalystAgent {
-    pub fn new(depth: usize, declare_near_to_end: bool) -> Self {
+    pub fn new(depth: usize, declare_about_to_end: bool) -> Self {
         Self {
             depth,
-            declare_near_to_end,
+            n: 0,
+            declare_about_to_end,
         }
+    }
+
+    fn update_parameter(&mut self) {
+        self.n = (33 * self.n + 31) % 65536
     }
 }
 
 impl Agent for AnalystAgent {
     fn play(&mut self, game: &mut Game) {
-        todo!("replace to new implementation")
-        // use BoardValue::*;
+        self.update_parameter();
+        let board = *game.board();
+        let player = *game.next_player();
+        let rule = *game.rule();
+        let candidates = find_best_actions(board, player, self.depth, rule).unwrap();
+        let action = candidates[self.n % candidates.len()];
 
-        // let player = *game.next_player();
-        // let rule = *game.rule();
+        if self.declare_about_to_end {
+            if let Some(val) = evaluate_board(board, player, self.depth, rule)
+                .unwrap()
+                .single()
+            {
+                println!("!!! This game is about to end: value={}", val);
+            }
+        }
 
-        // let val = evaluate_board(game.board(), self.depth, player, rule).unwrap();
-
-        // if !matches!(val, BoardValue::Unknown) {
-        //     if self.declare_near_to_end {
-        //         println!("----> About To End! value={:?}", val);
-        //     }
-        //     let tree = create_checkmate_tree(game.board(), val, player, rule).unwrap();
-        //     let action = *tree.actions().next().unwrap();
-        //     game.perform(action).unwrap();
-        //     return;
-        // }
-
-        // let mut next_val = Win(1);
-        // let mut action_win1 = None;
-        // let mut action_best = None;
-        // for a in game.legal_actions() {
-        //     let mut g = *game;
-        //     g.perform(a).unwrap();
-        //     if matches!(g.winner(), Some(p) if p == player) {
-        //         *game = g;
-        //         return;
-        //     } else if !g.is_ongoing() {
-        //         continue;
-        //     }
-        //     let next_val_tmp =
-        //         evaluate_board(g.board(), self.depth, *g.next_player(), *g.rule()).unwrap();
-        //     if matches!(next_val_tmp, Win(1)) {
-        //         action_win1 = Some(a);
-        //     } else if next_val_tmp < next_val {
-        //         next_val = next_val_tmp;
-        //         action_best = Some(a);
-        //     }
-        // }
-
-        // let action = action_best.unwrap_or_else(|| action_win1.unwrap());
-        // game.perform(action).unwrap();
+        game.perform(action).unwrap();
     }
 }
 
@@ -531,11 +512,12 @@ where
             }
         }
 
+        println!("~~~~~~ Game Finished! ~~~~~~");
         println!("Total {} turns", num_turns);
         println!("{}", self.game);
         match self.game.winner() {
-            Some(player) => println!("*** {:?} win! ***", player),
-            None => println!("*** Draw! ***"),
+            Some(player) => println!("---> {:?} win!", player),
+            None => println!("---> Draw!"),
         }
     }
 }

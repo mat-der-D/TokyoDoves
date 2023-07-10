@@ -744,19 +744,14 @@ fn find_best_actions_unchecked(
 
         let next_value = value.try_decrement().unwrap();
         if next_value.is_unknown() {
-            let num_win = match search_depth % 2 {
-                0 => search_depth - 1,
-                1 => search_depth - 2,
-                _ => unreachable!(),
-            };
-            if matches!(
+            if !matches!(
                 compare_board_value_unchecked(
                     next_board,
-                    BoardValue::from(Some(num_win)),
+                    value_interval.left().try_decrement().unwrap(),
                     !player,
                     rule
                 ),
-                Ordering::Less,
+                Ordering::Greater
             ) {
                 actions.push(action);
             }
