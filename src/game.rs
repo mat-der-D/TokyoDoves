@@ -9,8 +9,8 @@ use crate::prelude::{
 /// Errors associated to [`Game`]
 #[derive(Debug, Clone, Copy, thiserror::Error)]
 pub enum GameError {
-    #[error("[BoardError] {:?}", .error)]
-    BoardError { error: error::BoardError },
+    #[error(transparent)]
+    BoardError(#[from] error::BoardError),
 
     #[error("[PlayerMismatchError]")]
     PlayerMismatchError,
@@ -297,6 +297,22 @@ impl Game {
         }
     }
 
+    /// Checks if the specified [`Action`] is legal
+    pub fn check_action(&self, action: Action) -> Result<(), GameError> {
+        if self.player != *action.player() {
+            return Err(GameError::PlayerMismatchError);
+        }
+
+        if !self.rule.is_remove_accepted && matches!(action, Action::Remove(_, _)) {
+            return Err(GameError::ProhibitedRemoveError { action });
+        }
+
+        self.board()
+            .check_action(action)
+            .map_err(GameError::BoardError)?;
+        Ok(())
+    }
+
     /// Returns an [`ActionContainer`](`super::board::container::ActionContainer`) of legal [`Action`]s.
     pub fn legal_actions(&self) -> ActionsFwd {
         self.board
@@ -319,18 +335,8 @@ impl Game {
                 game_status: self.status,
             });
         }
-
-        if self.player != *action.player() {
-            return Err(GameError::PlayerMismatchError);
-        }
-
-        if !self.rule.is_remove_accepted && matches!(action, Action::Remove(_, _)) {
-            return Err(GameError::ProhibitedRemoveError { action });
-        }
-
-        self.board
-            .perform(action)
-            .map_err(|e| GameError::BoardError { error: e })?;
+        self.check_action(action)?;
+        self.board.perform_unchecked(action);
 
         use GameStatus::*;
         use SurroundedStatus::*;
