@@ -521,6 +521,12 @@
 <a href="#521" id="521">521</a>
 <a href="#522" id="522">522</a>
 <a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{evaluate_board, find_best_actions};
 <span class="kw">use </span><span class="kw">crate</span>::prelude::{
     error, Action, ActionContainer, ActionsFwd, Board, BoardBuilder, Color, SurroundedStatus,
@@ -532,8 +538,8 @@
 </span><span class="doccomment">/// Errors associated to [`Game`]
 </span><span class="attr">#[derive(Debug, Clone, Copy, thiserror::Error)]
 </span><span class="kw">pub enum </span>GameError {
-    <span class="attr">#[error(<span class="string">&quot;[BoardError] {:?}&quot;</span>, .error)]
-    </span>BoardError { error: error::BoardError },
+    <span class="attr">#[error(transparent)]
+    </span>BoardError(<span class="attr">#[from] </span>error::BoardError),
 
     <span class="attr">#[error(<span class="string">&quot;[PlayerMismatchError]&quot;</span>)]
     </span>PlayerMismatchError,
@@ -820,6 +826,22 @@
         }
     }
 
+    <span class="doccomment">/// Checks if the specified [`Action`] is legal
+    </span><span class="kw">pub fn </span>check_action(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), GameError&gt; {
+        <span class="kw">if </span><span class="self">self</span>.player != <span class="kw-2">*</span>action.player() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(GameError::PlayerMismatchError);
+        }
+
+        <span class="kw">if </span>!<span class="self">self</span>.rule.is_remove_accepted &amp;&amp; <span class="macro">matches!</span>(action, Action::Remove(<span class="kw">_</span>, <span class="kw">_</span>)) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(GameError::ProhibitedRemoveError { action });
+        }
+
+        <span class="self">self</span>.board()
+            .check_action(action)
+            .map_err(GameError::BoardError)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
     <span class="doccomment">/// Returns an [`ActionContainer`](`super::board::container::ActionContainer`) of legal [`Action`]s.
     </span><span class="kw">pub fn </span>legal_actions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ActionsFwd {
         <span class="self">self</span>.board
@@ -842,18 +864,8 @@
                 game_status: <span class="self">self</span>.status,
             });
         }
-
-        <span class="kw">if </span><span class="self">self</span>.player != <span class="kw-2">*</span>action.player() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(GameError::PlayerMismatchError);
-        }
-
-        <span class="kw">if </span>!<span class="self">self</span>.rule.is_remove_accepted &amp;&amp; <span class="macro">matches!</span>(action, Action::Remove(<span class="kw">_</span>, <span class="kw">_</span>)) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(GameError::ProhibitedRemoveError { action });
-        }
-
-        <span class="self">self</span>.board
-            .perform(action)
-            .map_err(|e| GameError::BoardError { error: e })<span class="question-mark">?</span>;
+        <span class="self">self</span>.check_action(action)<span class="question-mark">?</span>;
+        <span class="self">self</span>.board.perform_unchecked(action);
 
         <span class="kw">use </span>GameStatus::<span class="kw-2">*</span>;
         <span class="kw">use </span>SurroundedStatus::<span class="kw-2">*</span>;
