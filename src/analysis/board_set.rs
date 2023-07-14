@@ -489,10 +489,7 @@ impl RawBoardSet {
 
     pub fn insert(&mut self, hash: u64) {
         let (k, v) = Self::u64_to_u32_u32(hash);
-        self.top2bottoms
-            .entry(k)
-            .or_insert_with(HashSet::new)
-            .insert(v);
+        self.top2bottoms.entry(k).or_default().insert(v);
     }
 
     pub fn remove(&mut self, hash: &u64) -> bool {
@@ -524,7 +521,7 @@ impl RawBoardSet {
             }
             self.top2bottoms
                 .entry(top)
-                .or_insert_with(HashSet::new)
+                .or_default()
                 .extend(bottoms.into_iter());
         }
     }
@@ -536,6 +533,7 @@ impl RawBoardSet {
         let mut iter = FragmentIter::new(reader);
         let mut dummy = HashSet::new();
         let mut set = &mut dummy;
+        let mut top = 0;
         loop {
             let Some(next) = iter.try_next()? else {
                 return Ok(());
@@ -543,10 +541,18 @@ impl RawBoardSet {
 
             use Fragment::*;
             match next {
-                Delimiter => continue,
-                Top(n) => set = self.top2bottoms.entry(n).or_insert_with(HashSet::new),
-                Bottom(n) => {
-                    set.insert(n);
+                Delimiter => {
+                    if set.is_empty() {
+                        set = &mut dummy;
+                        self.top2bottoms.remove(&top);
+                    }
+                }
+                Top(top_) => {
+                    set = self.top2bottoms.entry(top_).or_default();
+                    top = top_;
+                }
+                Bottom(bottom_) => {
+                    set.insert(bottom_);
                 }
             }
         }
@@ -575,7 +581,7 @@ impl RawBoardSet {
                     }
                 }
                 Top(top_) => {
-                    set = self.top2bottoms.entry(top_).or_insert_with(HashSet::new);
+                    set = self.top2bottoms.entry(top_).or_default();
                     top = top_;
                 }
                 Bottom(bottom) => {
