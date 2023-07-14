@@ -2536,7 +2536,7 @@
     </span><span class="kw">pub fn </span>to_framed_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">let </span>hframe = <span class="string">&quot;+---+---+---+---+&quot;</span>.to_string();
         <span class="kw">let </span><span class="kw-2">mut </span>lines = Vec::new();
-        <span class="kw">for </span>line <span class="kw">in </span><span class="self">self</span>.to_4x4_matrix().into_iter() {
+        <span class="kw">for </span>line <span class="kw">in </span><span class="self">self</span>.to_4x4_matrix() {
             lines.push(hframe.clone());
             <span class="kw">let </span>line_str: String = line
                 .into_iter()
@@ -2553,7 +2553,7 @@
 
     <span class="kw">pub fn </span>to_simple_string(<span class="kw-2">&amp;</span><span class="self">self</span>, empty: char, delimiter: <span class="kw-2">&amp;</span>str) -&gt; String {
         <span class="kw">let </span><span class="kw-2">mut </span>lines = Vec::new();
-        <span class="kw">for </span>line <span class="kw">in </span><span class="self">self</span>.to_4x4_matrix().into_iter() {
+        <span class="kw">for </span>line <span class="kw">in </span><span class="self">self</span>.to_4x4_matrix() {
             <span class="kw">let </span>line_str: String = line
                 .into_iter()
                 .map(|x| <span class="kw">match </span>x {

@@ -1168,7 +1168,7 @@
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
         <span class="kw">let </span><span class="kw-2">mut </span>idx = <span class="number">0_usize</span>;
-        <span class="kw">for </span>mask <span class="kw">in </span><span class="self">self</span>.for_idx.into_iter() {
+        <span class="kw">for </span>mask <span class="kw">in </span><span class="self">self</span>.for_idx {
             idx &lt;&lt;= <span class="number">1</span>;
             <span class="kw">if </span>bit &amp; mask == bit {
                 idx += <span class="number">1</span>;
@@ -1213,7 +1213,7 @@
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>idx = <span class="number">0_usize</span>;
-        <span class="kw">for </span>piece <span class="kw">in </span><span class="self">self</span>.pieces.into_iter() {
+        <span class="kw">for </span>piece <span class="kw">in </span><span class="self">self</span>.pieces {
             idx &lt;&lt;= <span class="number">1</span>;
             <span class="kw">if </span>target_bit &amp; piece == target_bit {
                 idx += <span class="number">1</span>;
