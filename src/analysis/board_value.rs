@@ -1,5 +1,6 @@
 use std::cmp::{Ord, Ordering, PartialOrd};
 use std::collections::{hash_map, HashMap};
+use std::io::{BufWriter, Write};
 
 use crate::{
     game::{GameRule, Judge},
@@ -509,6 +510,77 @@ impl BoardValueTree {
                     .values()
                     .all(|c| c.is_good_for_puzzle(step - 1))
         }
+    }
+
+    fn color_to_code(color: Color) -> &'static str {
+        use Color::*;
+        match color {
+            Red => "#ffcccc",
+            Green => "#ccffcc",
+        }
+    }
+
+    fn value_to_style(value: &BoardValue) -> &'static str {
+        if value.is_win() {
+            "bold,solid,filled"
+        } else {
+            "bold,dotted,filled"
+        }
+    }
+
+    pub fn save_as_dot<W>(&self, writer: W) -> std::io::Result<()>
+    where
+        W: Write,
+    {
+        let body = self.to_dot_string("", "");
+        let dot = vec![
+            "digraph {".to_string(),
+            format!(
+                "node[style=\"{}\" fontname=\"Courier New\" shape=\"box\"]",
+                Self::value_to_style(self.value())
+            ),
+            format!("node[fillcolor=\"{}\"]", Self::color_to_code(self.player)),
+            body,
+            "}".to_string(),
+        ]
+        .join("\n");
+        let mut fs = BufWriter::new(writer);
+        write!(fs, "{}", dot)
+    }
+
+    fn to_dot_string(&self, parent: &str, action: &str) -> String {
+        let mut dot: String;
+        let board = self.board().to_simple_string('-', "\\n");
+        let style = Self::value_to_style(self.value());
+        let name: String;
+        if parent.is_empty() {
+            name = String::from("Root");
+            dot = format!("{0}[label=\"{1}\", style=\"{2}\"]", name, board, style);
+        } else {
+            name = format!("{}_{}", parent, action.replace('+', "p").replace('-', "m"));
+            dot = format!(
+                "{0}[label=\"{1}\", style=\"{4}\"]\n{2} -> {0}[label=\"{3}\"]",
+                name, board, parent, action, style,
+            );
+        }
+
+        if !self.is_leaf() {
+            let sub_body = self
+                .actions_children()
+                .map(|(a, c)| {
+                    let ssn = a.to_ssn(&self.board()).unwrap();
+                    c.to_dot_string(&name, &ssn)
+                })
+                .collect::<Vec<String>>()
+                .join("\n");
+            let sub_graph = format!(
+                "subgraph {{\nnode[fillcolor=\"{0}\"]\n{1}\n}}",
+                Self::color_to_code(!self.player),
+                sub_body
+            );
+            dot = format!("{}\n{}", dot, sub_graph);
+        }
+        dot
     }
 }
 
