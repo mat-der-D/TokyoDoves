@@ -26,6 +26,12 @@ impl Default for BoardValueKind {
     }
 }
 
+impl std::fmt::Display for BoardValueKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 impl PartialOrd for BoardValueKind {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         fn _kind_to_u8(kind: &BoardValueKind) -> u8 {
@@ -77,10 +83,10 @@ impl std::fmt::Display for BoardValue {
         use BoardValueKind::*;
         let kind = self.kind();
         let s = match kind {
-            Unknown | Finished => format!("{:?}", kind),
+            Unknown | Finished => format!("{}", kind),
             _ => {
                 let num = self.value.unwrap();
-                format!("{:?}({})", kind, num)
+                format!("{}({})", kind, num)
             }
         };
         write!(f, "{}", s)
