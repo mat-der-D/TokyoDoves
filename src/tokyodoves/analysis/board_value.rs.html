@@ -1041,6 +1041,27 @@
 <a href="#1041" id="1041">1041</a>
 <a href="#1042" id="1042">1042</a>
 <a href="#1043" id="1043">1043</a>
+<a href="#1044" id="1044">1044</a>
+<a href="#1045" id="1045">1045</a>
+<a href="#1046" id="1046">1046</a>
+<a href="#1047" id="1047">1047</a>
+<a href="#1048" id="1048">1048</a>
+<a href="#1049" id="1049">1049</a>
+<a href="#1050" id="1050">1050</a>
+<a href="#1051" id="1051">1051</a>
+<a href="#1052" id="1052">1052</a>
+<a href="#1053" id="1053">1053</a>
+<a href="#1054" id="1054">1054</a>
+<a href="#1055" id="1055">1055</a>
+<a href="#1056" id="1056">1056</a>
+<a href="#1057" id="1057">1057</a>
+<a href="#1058" id="1058">1058</a>
+<a href="#1059" id="1059">1059</a>
+<a href="#1060" id="1060">1060</a>
+<a href="#1061" id="1061">1061</a>
+<a href="#1062" id="1062">1062</a>
+<a href="#1063" id="1063">1063</a>
+<a href="#1064" id="1064">1064</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::{Ord, Ordering, PartialOrd};
 <span class="kw">use </span>std::collections::{hash_map, HashMap};
 
@@ -1525,6 +1546,15 @@
         Actions::new(<span class="self">self</span>.children.keys())
     }
 
+    <span class="kw">pub fn </span>depth(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="number">1 </span>+ <span class="self">self
+            </span>.children
+            .values()
+            .map(|t| t.depth())
+            .max()
+            .unwrap_or_default()
+    }
+
     <span class="kw">pub fn </span>is_good_for_puzzle(<span class="kw-2">&amp;</span><span class="self">self</span>, step: usize) -&gt; bool {
         <span class="kw">if </span>step == <span class="number">0 </span>{
             <span class="bool-val">true
@@ -1691,6 +1721,13 @@
             Win =&gt; {
                 tree.value = BoardValue::win(<span class="number">1</span>).unwrap();
                 tree.children.clear();
+                NextBoardIter::new(board, player, rule)
+                    .filter(|(<span class="kw">_</span>, <span class="kw">_</span>, s)| <span class="macro">matches!</span>(s, Win))
+                    .for_each(|(action_, next_board_, <span class="kw">_</span>)| {
+                        <span class="kw">let </span><span class="kw-2">mut </span>child = BoardValueTree::new(next_board_, player);
+                        child.value = BoardValue::finished();
+                        tree.children.insert(action_, child);
+                    });
                 <span class="kw">return </span>tree;
             }
             Lose =&gt; <span class="kw">continue</span>,
@@ -1756,19 +1793,22 @@
     <span class="kw">let </span><span class="kw-2">mut </span>tree = BoardValueTree::new(board, player);
     tree.value = value;
     <span class="kw">let </span><span class="kw-2">mut </span>cmp = Less;
-    <span class="comment">// tree.value = value;
-    </span><span class="kw">for </span>(action, next_board, status) <span class="kw">in </span>NextBoardIter::new(board, player, rule) {
+    <span class="kw">for </span>(action, next_board, status) <span class="kw">in </span>NextBoardIter::new(board, player, rule) {
         <span class="kw">use </span>NextBoardStatus::<span class="kw-2">*</span>;
         <span class="kw">match </span>status {
             Win =&gt; {
                 <span class="kw">if </span>value == BoardValue::MAX {
                     cmp = Equal;
+                    <span class="kw">let </span><span class="kw-2">mut </span>child = BoardValueTree::new(next_board, !player);
+                    child.value = BoardValue::finished();
+                    tree.children.insert(action, child);
+                    <span class="kw">continue</span>;
                 } <span class="kw">else </span>{
+                    tree.children.clear();
                     cmp = Greater;
                     tree.value = BoardValue::unknown();
+                    <span class="kw">return </span>(tree, cmp);
                 }
-                tree.children.clear();
-                <span class="kw">return </span>(tree, cmp);
             }
             Lose =&gt; <span class="kw">continue</span>,
             Unknown =&gt; {
@@ -2056,6 +2096,7 @@
         <span class="kw">for </span>(s, num) <span class="kw">in </span>board_value {
             <span class="kw">let </span>board = BoardBuilder::from_str(s).unwrap().build().unwrap();
             <span class="kw">let </span>tree = analysis::create_checkmate_tree(board, Color::Red, num, rule).unwrap();
+            <span class="macro">assert_eq!</span>(tree.depth(), num + <span class="number">1</span>);
             <span class="macro">assert!</span>(tree.is_good_for_puzzle(num - <span class="number">2</span>));
         }
     }
@@ -2080,6 +2121,7 @@
             <span class="kw">let </span>board = BoardBuilder::from_str(s).unwrap().build().unwrap();
             <span class="kw">let </span>tree =
                 analysis::create_checkmate_tree_with_value(board, val, Color::Red, rule).unwrap();
+            <span class="macro">assert_eq!</span>(tree.depth(), num + <span class="number">1</span>);
             <span class="macro">assert!</span>(tree.is_good_for_puzzle(num - <span class="number">2</span>));
         }
     }
