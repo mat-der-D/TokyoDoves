@@ -17,6 +17,7 @@ pub enum BoardValueKind {
     Win,
     Lose,
     Unknown,
+    Finished,
 }
 
 impl Default for BoardValueKind {
@@ -25,24 +26,34 @@ impl Default for BoardValueKind {
     }
 }
 
-impl PartialOrd for BoardValueKind {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+impl std::fmt::Display for BoardValueKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
-impl Ord for BoardValueKind {
-    fn cmp(&self, other: &Self) -> Ordering {
+impl PartialOrd for BoardValueKind {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         fn _kind_to_u8(kind: &BoardValueKind) -> u8 {
             use BoardValueKind::*;
             match kind {
                 Win => 2,
                 Unknown => 1,
                 Lose => 0,
+                Finished => unreachable!(),
             }
         }
 
-        _kind_to_u8(self).cmp(&_kind_to_u8(other))
+        use BoardValueKind::*;
+        if matches!(self, Finished) || matches!(other, Finished) {
+            if self.eq(other) {
+                return Some(Ordering::Equal);
+            } else {
+                return None;
+            }
+        }
+
+        _kind_to_u8(self).partial_cmp(&_kind_to_u8(other))
     }
 }
 
@@ -50,12 +61,18 @@ impl Ord for BoardValueKind {
 ///
 /// The order of the values is as follows:
 /// ```text
-/// Lose(2) < Lose(4) < Lose(6) < ... < Unknown < ... < Win(5) < Win(3) < Win(1)
+/// BoardValue::MIN = Lose(2) < Lose(4) < Lose(6) < ...
+///     < Unknown
+///     < ... < Win(5) < Win(3) < Win(1) = BoardValue::MAX
 /// ```
 /// - n of `Lose(n)` means that the player will lose in n turns at most.
 /// - n of `Win(n)` means that the player will win in n turns at least.
 /// - `Unknown` means that the value of the board was failed to be determined.
 ///     It can change to `Lose(n)` or `Win(n)` if you search more deeply.
+///
+/// It takes another value `Finished`, which is attributed to boards of finished games.
+/// This value is, however, not compared to other values,
+/// which is the reason why `BoardValue` is `PartialOrd` but not `Ord`.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct BoardValue {
     value: Option<usize>,
@@ -63,12 +80,13 @@ pub struct BoardValue {
 
 impl std::fmt::Display for BoardValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use BoardValueKind::*;
         let kind = self.kind();
         let s = match kind {
-            BoardValueKind::Unknown => format!("{:?}", kind),
+            Unknown | Finished => format!("{}", kind),
             _ => {
                 let num = self.value.unwrap();
-                format!("{:?}({})", kind, num)
+                format!("{}({})", kind, num)
             }
         };
         write!(f, "{}", s)
@@ -76,13 +94,16 @@ impl std::fmt::Display for BoardValue {
 }
 
 impl BoardValue {
+    /// Win(1)
     pub const MAX: BoardValue = BoardValue { value: Some(1) };
+    /// Lose(2)
     pub const MIN: BoardValue = BoardValue { value: Some(2) };
 
     pub fn kind(&self) -> BoardValueKind {
         use BoardValueKind::*;
         match self.value {
-            None | Some(0) => Unknown,
+            None => Unknown,
+            Some(0) => Finished,
             Some(n) => match n % 2 {
                 0 => Lose,
                 1 => Win,
@@ -111,6 +132,21 @@ impl BoardValue {
         BoardValue { value: None }
     }
 
+    pub fn finished() -> Self {
+        BoardValue { value: Some(0) }
+    }
+
+    pub fn try_unwrap(&self) -> Option<usize> {
+        match self.value {
+            Some(num) if num >= 1 => self.value,
+            _ => None,
+        }
+    }
+
+    pub fn unwrap(&self) -> usize {
+        self.try_unwrap().unwrap()
+    }
+
     pub fn is_win(&self) -> bool {
         matches!(self.kind(), BoardValueKind::Win)
     }
@@ -123,69 +159,195 @@ impl BoardValue {
         matches!(self.kind(), BoardValueKind::Unknown)
     }
 
+    pub fn is_finished(&self) -> bool {
+        matches!(self.kind(), BoardValueKind::Finished)
+    }
+
+    /// Returns "next" value of a series below:
+    /// ```text
+    /// Unknown -> Unknown
+    /// Finished -> Win(1) -> Lose(2) -> Win(3) -> Lose(4) -> ...
+    /// ```
     pub fn increment(&self) -> Self {
-        if self.is_unknown() {
-            *self
-        } else {
-            Self {
-                value: self.value.map(|num| num + 1),
-            }
+        Self {
+            value: self.value.map(|num| num + 1),
         }
     }
 
+    /// Returns "next" values of a series below:
+    /// ```text
+    /// Unknown -> Unknown
+    /// ... -> Lose(4) -> Win(3) -> Lose(2) -> Win(1) -> Finish
+    /// ```
+    /// It returns `None` if self is `Finish`, otherwise `Some(next_value)`.
     pub fn try_decrement(&self) -> Option<Self> {
-        match self.value {
-            None | Some(0) => Some(*self),
-            Some(1) => None,
-            Some(num) => Some(Self {
-                value: Some(num - 1),
-            }),
-        }
+        let value = match self.value {
+            Some(0) => return None,
+            x => x.map(|num| num - 1),
+        };
+        Some(Self { value })
     }
 }
 
 impl From<Option<usize>> for BoardValue {
     fn from(value: Option<usize>) -> Self {
-        match value {
-            Some(0) => Self { value: None },
-            value => Self { value },
-        }
+        Self { value }
     }
 }
 
 impl From<BoardValue> for Option<usize> {
     fn from(board_value: BoardValue) -> Self {
-        match board_value.value {
-            Some(0) => None,
-            value => value,
-        }
+        board_value.value
     }
 }
 
 impl PartialOrd for BoardValue {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for BoardValue {
-    fn cmp(&self, other: &Self) -> Ordering {
         let left_kind = self.kind();
         let right_kind = other.kind();
 
         use BoardValueKind::*;
-        if (left_kind != right_kind) || (left_kind == Unknown) {
-            return left_kind.cmp(&right_kind);
+        if (left_kind != right_kind) || matches!(left_kind, Unknown | Finished) {
+            return left_kind.partial_cmp(&right_kind);
         }
 
-        // In the following, left_kind == right_kind != Unknown
+        // In the following, left_kind == right_kind not in {Unknown, Finished}
 
         let left_num = self.value.as_ref().unwrap();
         let right_num = other.value.as_ref().unwrap();
         match left_kind {
-            Lose => left_num.cmp(right_num),
-            Win => right_num.cmp(left_num),
-            Unknown => unreachable!(),
+            Lose => left_num.partial_cmp(right_num),
+            Win => right_num.partial_cmp(left_num),
+            _ => unreachable!(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests_board_value {
+    use crate::analysis::{BoardValue, BoardValueKind};
+
+    #[test]
+    fn test_create_win() {
+        for n in 0..100 {
+            let Some(val) = BoardValue::win(n) else {
+                continue;
+            };
+            assert_eq!(val, BoardValue::from(Some(n)));
+            assert!(val.is_win());
+            assert_eq!(val.kind(), BoardValueKind::Win);
+            let num = val.unwrap();
+            assert_eq!(n, num);
+            assert_eq!(val, BoardValue::win(num).unwrap());
+        }
+    }
+
+    #[test]
+    fn test_create_lose() {
+        for n in 0..100 {
+            let Some(val) = BoardValue::lose(n) else {
+                continue;
+            };
+            assert_eq!(val, BoardValue::from(Some(n)));
+            assert!(val.is_lose());
+            assert_eq!(val.kind(), BoardValueKind::Lose);
+            let num = val.unwrap();
+            assert_eq!(n, num);
+            assert_eq!(val, BoardValue::lose(num).unwrap());
+        }
+    }
+
+    #[test]
+    fn test_create_unknown() {
+        let val = BoardValue::unknown();
+        assert_eq!(val, BoardValue::from(None));
+        assert!(val.is_unknown());
+        assert_eq!(val.kind(), BoardValueKind::Unknown);
+        assert!(val.try_unwrap().is_none());
+    }
+
+    #[test]
+    fn test_create_finished() {
+        let val = BoardValue::finished();
+        assert_eq!(val, BoardValue::from(Some(0)));
+        assert!(val.is_finished());
+        assert_eq!(val.kind(), BoardValueKind::Finished);
+        assert!(val.try_unwrap().is_none());
+    }
+
+    #[test]
+    fn test_increment() {
+        assert_eq!(BoardValue::unknown(), BoardValue::unknown().increment());
+
+        let mut val = BoardValue::finished();
+        for num in 1..100 {
+            val = val.increment();
+            assert_eq!(val, BoardValue::from(Some(num)));
+            assert_eq!(val.unwrap(), num);
+        }
+    }
+
+    #[test]
+    fn test_try_decrement() {
+        assert_eq!(
+            BoardValue::unknown(),
+            BoardValue::unknown().try_decrement().unwrap()
+        );
+        let mut val = BoardValue::lose(100).unwrap();
+        for num in (0..100).rev() {
+            val = val.try_decrement().unwrap();
+            assert_eq!(val, BoardValue::from(Some(num)));
+            if num == 0 {
+                assert!(val.try_unwrap().is_none());
+            } else {
+                assert_eq!(val.unwrap(), num);
+            }
+        }
+        assert!(val.try_decrement().is_none());
+    }
+
+    #[test]
+    fn test_compare() {
+        let unknown = BoardValue::unknown();
+        let finished = BoardValue::finished();
+        assert!(!(finished < finished));
+        assert!(!(finished > finished));
+        assert_eq!(finished, finished);
+        assert!(!(finished < unknown));
+        assert!(!(unknown < finished));
+        assert!(!(finished > unknown));
+        assert!(!(unknown > finished));
+
+        let mut is_first_loop = true;
+        for num_win in (1..100).step_by(2) {
+            let win = BoardValue::win(num_win).unwrap();
+            assert!(win <= BoardValue::MAX);
+            if win != BoardValue::MAX {
+                assert!(win < BoardValue::MAX);
+            }
+            assert!(unknown < win);
+            assert!(!(finished < win));
+            assert!(!(finished > win));
+            assert!(!(win < finished));
+            assert!(!(win > finished));
+
+            for num_lose in (2..100).step_by(2) {
+                let lose = BoardValue::lose(num_lose).unwrap();
+                assert!(lose >= BoardValue::MIN);
+                if lose != BoardValue::MIN {
+                    assert!(lose > BoardValue::MIN);
+                }
+                assert!(lose < win);
+                assert!(lose < unknown);
+
+                if is_first_loop {
+                    assert!(!(finished < lose));
+                    assert!(!(finished > lose));
+                    assert!(!(lose < finished));
+                    assert!(!(lose > finished));
+                }
+            }
+            is_first_loop = false;
         }
     }
 }
@@ -336,8 +498,8 @@ pub enum ArgsValidationError {
     #[error("board of finished game")]
     FinishedBoardError { board: Board },
 
-    #[error("BoardValue::Unknown not supported")]
-    UnknownBoardValueError,
+    #[error("{} is not supported", .boad_value)]
+    UnsupportedValueError { boad_value: BoardValue },
 
     #[error("Judge::Draw not supported")]
     DrawJudgeError,
@@ -361,8 +523,8 @@ fn validate_args(
     if board.surrounded_status() != SurroundedStatus::None {
         return Err(FinishedBoardError { board });
     }
-    if value.is_unknown() {
-        return Err(UnknownBoardValueError);
+    if value.is_finished() || value.is_unknown() {
+        return Err(UnsupportedValueError { boad_value: value });
     }
     if !matches!(rule.suicide_atk_judge(), Judge::NextWins | Judge::LastWins) {
         return Err(DrawJudgeError);
@@ -370,6 +532,7 @@ fn validate_args(
     Ok(())
 }
 
+/// Represents closed interval between two [`BoardValue`]s
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Interval {
     left: BoardValue,
@@ -629,9 +792,10 @@ fn compare_board_value_unchecked(
             }
             Lose => continue,
             Unknown => {
-                let Some(next_val) = value.try_decrement() else {
+                if value == BoardValue::MAX {
                     continue;
-                };
+                }
+                let next_val = value.try_decrement().unwrap();
                 let next_cmp = compare_board_value_unchecked(next_board, next_val, !player, rule);
                 if next_cmp == Less {
                     return Greater;
