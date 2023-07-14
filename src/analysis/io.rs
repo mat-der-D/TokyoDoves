@@ -1,5 +1,11 @@
-use crate::prelude::{Board, BoardBuilder};
-use std::io::{BufReader, Read};
+use crate::{
+    analysis::board_set::{BoardSet, RawBoardSet},
+    prelude::{Board, BoardBuilder},
+};
+use std::{
+    collections::HashSet,
+    io::{BufReader, Read},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum Fragment {
@@ -108,6 +114,14 @@ where
             .try_next()
             .map(|x| x.map(|h| BoardBuilder::from(h).build_unchecked()))
     }
+
+    pub fn contains(self, board: Board) -> std::io::Result<bool> {
+        self.into_raw().contains(board.to_u64())
+    }
+
+    pub fn contains_all(self, boards: BoardSet) -> std::io::Result<bool> {
+        self.into_raw().contains_all(boards.into_raw())
+    }
 }
 
 impl<R> Iterator for LazyBoardLoader<R>
@@ -165,6 +179,65 @@ where
                 self.try_next()
             }
             Bottom(bottom) => Ok(Some(self.top | (bottom as u64))),
+        }
+    }
+
+    pub fn contains(self, board: u64) -> std::io::Result<bool> {
+        let boards = RawBoardSet::from_iter([board]);
+        self.contains_all(boards)
+    }
+
+    pub fn contains_all(mut self, mut boards: RawBoardSet) -> std::io::Result<bool> {
+        if boards.is_empty() {
+            return Ok(true);
+        }
+
+        let mut dummy_set = HashSet::new();
+        let mut bottoms_considering = &mut dummy_set;
+        let dummy_top = 0;
+        let mut top_considering = dummy_top;
+
+        loop {
+            let Some(next_fragment) = self.fragment_iter.try_next()? else {
+                return Ok(boards.is_empty());
+            };
+
+            use Fragment::*;
+            match next_fragment {
+                Delimiter => {
+                    if !bottoms_considering.is_empty() {
+                        return Ok(false);
+                    }
+                    bottoms_considering = &mut dummy_set;
+                    top_considering = dummy_top;
+                }
+                Top(top) => {
+                    top_considering = dummy_top;
+                    bottoms_considering = &mut dummy_set;
+
+                    if boards.top2bottoms.contains_key(&top) {
+                        let set = boards.top2bottoms.get_mut(&top).unwrap();
+                        if !set.is_empty() {
+                            bottoms_considering = set;
+                            top_considering = top;
+                        }
+                    }
+                }
+                Bottom(bottom) => {
+                    if top_considering == dummy_top {
+                        continue;
+                    }
+                    bottoms_considering.remove(&bottom);
+                    if !bottoms_considering.is_empty() {
+                        continue;
+                    }
+                    bottoms_considering = &mut dummy_set;
+                    top_considering = dummy_top;
+                    if boards.is_empty() {
+                        return Ok(true);
+                    }
+                }
+            }
         }
     }
 }
