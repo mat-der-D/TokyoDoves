@@ -1,10 +1,11 @@
-use crate::prelude::{Board, BoardBuilder};
+use crate::{
+    analysis::board_set::{BoardSet, RawBoardSet},
+    prelude::{Board, BoardBuilder},
+};
 use std::{
     collections::HashSet,
     io::{BufReader, Read},
 };
-
-use super::board_set::RawBoardSet;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum Fragment {
@@ -112,6 +113,14 @@ where
         self.raw
             .try_next()
             .map(|x| x.map(|h| BoardBuilder::from(h).build_unchecked()))
+    }
+
+    pub fn contains(self, board: Board) -> std::io::Result<bool> {
+        self.into_raw().contains(board.to_u64())
+    }
+
+    pub fn contains_all(self, boards: BoardSet) -> std::io::Result<bool> {
+        self.into_raw().contains_all(boards.into_raw())
     }
 }
 
