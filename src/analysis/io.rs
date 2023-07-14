@@ -184,7 +184,7 @@ where
         }
 
         let mut dummy_set = HashSet::new();
-        let mut set = &mut dummy_set;
+        let mut bottoms_considering = &mut dummy_set;
         let dummy_top = 0;
         let mut top_considering = dummy_top;
 
@@ -196,32 +196,36 @@ where
             use Fragment::*;
             match next_fragment {
                 Delimiter => {
-                    if !set.is_empty() {
+                    if !bottoms_considering.is_empty() {
                         return Ok(false);
                     }
-                    if boards.is_empty() {
-                        return Ok(true);
-                    }
-                    set = &mut dummy_set;
+                    bottoms_considering = &mut dummy_set;
                     top_considering = dummy_top;
                 }
                 Top(top) => {
-                    set = &mut dummy_set;
+                    top_considering = dummy_top;
+                    bottoms_considering = &mut dummy_set;
+
                     if boards.top2bottoms.contains_key(&top) {
-                        top_considering = top;
-                        set = boards.top2bottoms.get_mut(&top).unwrap();
+                        let set = boards.top2bottoms.get_mut(&top).unwrap();
+                        if !set.is_empty() {
+                            bottoms_considering = set;
+                            top_considering = top;
+                        }
                     }
                 }
                 Bottom(bottom) => {
-                    if top_considering != dummy_top {
-                        set.remove(&bottom);
-                        if set.is_empty() {
-                            set = &mut dummy_set;
-                            top_considering = dummy_top;
-                            if boards.is_empty() {
-                                return Ok(true);
-                            }
-                        }
+                    if top_considering == dummy_top {
+                        continue;
+                    }
+                    bottoms_considering.remove(&bottom);
+                    if !bottoms_considering.is_empty() {
+                        continue;
+                    }
+                    bottoms_considering = &mut dummy_set;
+                    top_considering = dummy_top;
+                    if boards.is_empty() {
+                        return Ok(true);
                     }
                 }
             }
