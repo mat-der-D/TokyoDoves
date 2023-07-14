@@ -132,6 +132,15 @@ where
     top: u64,
 }
 
+impl<R> From<LazyBoardLoader<R>> for LazyRawBoardLoader<R>
+where
+    R: Read,
+{
+    fn from(value: LazyBoardLoader<R>) -> Self {
+        value.into_raw()
+    }
+}
+
 impl<R> LazyRawBoardLoader<R>
 where
     R: Read,

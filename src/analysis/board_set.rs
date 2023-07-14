@@ -299,6 +299,12 @@ pub struct RawBoardSet {
     top2bottoms: HashMap<u32, HashSet<u32>>,
 }
 
+impl From<BoardSet> for RawBoardSet {
+    fn from(value: BoardSet) -> Self {
+        value.into_raw()
+    }
+}
+
 impl FromIterator<u64> for RawBoardSet {
     fn from_iter<T: IntoIterator<Item = u64>>(iter: T) -> Self {
         let mut set = Self::new();
