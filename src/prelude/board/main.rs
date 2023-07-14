@@ -850,7 +850,7 @@ impl Board {
     /// +---+---+---+---+
     /// ```
     /// In this case, the liberty of "B" is two.
-    /// The liberty of "M" is three,
+    /// The liberty of "M" is two,
     /// because two of four squares next to "M" is occupied
     /// by "H" and a wall.
     pub fn liberty(&self, player: Color, dove: Dove) -> Option<usize> {
