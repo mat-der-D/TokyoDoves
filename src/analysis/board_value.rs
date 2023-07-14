@@ -557,7 +557,7 @@ impl BoardValueTree {
             name = String::from("Root");
             dot = format!("{0}[label=\"{1}\", style=\"{2}\"]", name, board, style);
         } else {
-            name = format!("{}_{}", parent, action.replace("+", "p").replace("-", "m"));
+            name = format!("{}_{}", parent, action.replace('+', "p").replace('-', "m"));
             dot = format!(
                 "{0}[label=\"{1}\", style=\"{4}\"]\n{2} -> {0}[label=\"{3}\"]",
                 name, board, parent, action, style,
