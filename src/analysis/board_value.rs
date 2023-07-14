@@ -482,6 +482,15 @@ impl BoardValueTree {
         Actions::new(self.children.keys())
     }
 
+    pub fn depth(&self) -> usize {
+        1 + self
+            .children
+            .values()
+            .map(|t| t.depth())
+            .max()
+            .unwrap_or_default()
+    }
+
     pub fn is_good_for_puzzle(&self, step: usize) -> bool {
         if step == 0 {
             true
@@ -648,6 +657,13 @@ fn create_checkmate_tree_unchecked(
             Win => {
                 tree.value = BoardValue::win(1).unwrap();
                 tree.children.clear();
+                NextBoardIter::new(board, player, rule)
+                    .filter(|(_, _, s)| matches!(s, Win))
+                    .for_each(|(action_, next_board_, _)| {
+                        let mut child = BoardValueTree::new(next_board_, player);
+                        child.value = BoardValue::finished();
+                        tree.children.insert(action_, child);
+                    });
                 return tree;
             }
             Lose => continue,
@@ -713,19 +729,22 @@ fn create_checkmate_tree_with_value_unchecked(
     let mut tree = BoardValueTree::new(board, player);
     tree.value = value;
     let mut cmp = Less;
-    // tree.value = value;
     for (action, next_board, status) in NextBoardIter::new(board, player, rule) {
         use NextBoardStatus::*;
         match status {
             Win => {
                 if value == BoardValue::MAX {
                     cmp = Equal;
+                    let mut child = BoardValueTree::new(next_board, !player);
+                    child.value = BoardValue::finished();
+                    tree.children.insert(action, child);
+                    continue;
                 } else {
+                    tree.children.clear();
                     cmp = Greater;
                     tree.value = BoardValue::unknown();
+                    return (tree, cmp);
                 }
-                tree.children.clear();
-                return (tree, cmp);
             }
             Lose => continue,
             Unknown => {
@@ -1013,6 +1032,7 @@ mod tests {
         for (s, num) in board_value {
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
             let tree = analysis::create_checkmate_tree(board, Color::Red, num, rule).unwrap();
+            assert_eq!(tree.depth(), num + 1);
             assert!(tree.is_good_for_puzzle(num - 2));
         }
     }
@@ -1037,6 +1057,7 @@ mod tests {
             let board = BoardBuilder::from_str(s).unwrap().build().unwrap();
             let tree =
                 analysis::create_checkmate_tree_with_value(board, val, Color::Red, rule).unwrap();
+            assert_eq!(tree.depth(), num + 1);
             assert!(tree.is_good_for_puzzle(num - 2));
         }
     }
