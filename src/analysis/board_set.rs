@@ -329,7 +329,7 @@ impl_iterators!(
 // ********************************************************************
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct RawBoardSet {
-    top2bottoms: HashMap<u32, HashSet<u32>>,
+    pub(crate) top2bottoms: HashMap<u32, HashSet<u32>>,
 }
 
 impl From<BoardSet> for RawBoardSet {
@@ -451,11 +451,11 @@ impl RawBoardSet {
         RawIter::new(self)
     }
 
-    fn u64_to_u32_u32(n: u64) -> (u32, u32) {
+    pub(crate) fn u64_to_u32_u32(n: u64) -> (u32, u32) {
         ((n >> 32) as u32, n as u32)
     }
 
-    fn u32_u32_to_u64(top: u32, bottom: u32) -> u64 {
+    pub(crate) fn u32_u32_to_u64(top: u32, bottom: u32) -> u64 {
         ((top as u64) << 32) | (bottom as u64)
     }
 

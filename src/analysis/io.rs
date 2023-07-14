@@ -1,5 +1,10 @@
 use crate::prelude::{Board, BoardBuilder};
-use std::io::{BufReader, Read};
+use std::{
+    collections::HashSet,
+    io::{BufReader, Read},
+};
+
+use super::board_set::RawBoardSet;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum Fragment {
@@ -165,6 +170,61 @@ where
                 self.try_next()
             }
             Bottom(bottom) => Ok(Some(self.top | (bottom as u64))),
+        }
+    }
+
+    pub fn contains(self, board: u64) -> std::io::Result<bool> {
+        let boards = RawBoardSet::from_iter([board]);
+        self.contains_all(boards)
+    }
+
+    pub fn contains_all(mut self, mut boards: RawBoardSet) -> std::io::Result<bool> {
+        if boards.is_empty() {
+            return Ok(true);
+        }
+
+        let mut dummy_set = HashSet::new();
+        let mut set = &mut dummy_set;
+        let dummy_top = 0;
+        let mut top_considering = dummy_top;
+
+        loop {
+            let Some(next_fragment) = self.fragment_iter.try_next()? else {
+                return Ok(boards.is_empty());
+            };
+
+            use Fragment::*;
+            match next_fragment {
+                Delimiter => {
+                    if !set.is_empty() {
+                        return Ok(false);
+                    }
+                    if boards.is_empty() {
+                        return Ok(true);
+                    }
+                    set = &mut dummy_set;
+                    top_considering = dummy_top;
+                }
+                Top(top) => {
+                    set = &mut dummy_set;
+                    if boards.top2bottoms.contains_key(&top) {
+                        top_considering = top;
+                        set = boards.top2bottoms.get_mut(&top).unwrap();
+                    }
+                }
+                Bottom(bottom) => {
+                    if top_considering != dummy_top {
+                        set.remove(&bottom);
+                        if set.is_empty() {
+                            set = &mut dummy_set;
+                            top_considering = dummy_top;
+                            if boards.is_empty() {
+                                return Ok(true);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
