@@ -1035,6 +1035,12 @@
 <a href="#1035" id="1035">1035</a>
 <a href="#1036" id="1036">1036</a>
 <a href="#1037" id="1037">1037</a>
+<a href="#1038" id="1038">1038</a>
+<a href="#1039" id="1039">1039</a>
+<a href="#1040" id="1040">1040</a>
+<a href="#1041" id="1041">1041</a>
+<a href="#1042" id="1042">1042</a>
+<a href="#1043" id="1043">1043</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::{Ord, Ordering, PartialOrd};
 <span class="kw">use </span>std::collections::{hash_map, HashMap};
 
@@ -1484,14 +1490,16 @@
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>BoardValueTree {
     board_raw: u64,
+    player: Color,
     value: BoardValue,
     children: HashMap&lt;Action, BoardValueTree&gt;,
 }
 
 <span class="kw">impl </span>BoardValueTree {
-    <span class="kw">pub fn </span>new(board: Board) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(board: Board, player: Color) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             board_raw: board.to_u64(),
+            player,
             value: Default::default(),
             children: Default::default(),
         }
@@ -1499,6 +1507,10 @@
 
     <span class="kw">pub fn </span>board(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Board {
         BoardBuilder::from_u64(<span class="self">self</span>.board_raw).build_unchecked()
+    }
+
+    <span class="kw">pub fn </span>player(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Color {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.player
     }
 
     <span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BoardValue {
@@ -1667,10 +1679,10 @@
     rule: GameRule,
 ) -&gt; BoardValueTree {
     <span class="kw">if </span>max_depth == <span class="number">0 </span>{
-        <span class="kw">return </span>BoardValueTree::new(board);
+        <span class="kw">return </span>BoardValueTree::new(board, player);
     }
 
-    <span class="kw">let </span><span class="kw-2">mut </span>tree = BoardValueTree::new(board);
+    <span class="kw">let </span><span class="kw-2">mut </span>tree = BoardValueTree::new(board, player);
     tree.value = BoardValue::MIN;
 
     <span class="kw">for </span>(action, next_board, status) <span class="kw">in </span>NextBoardIter::new(board, player, rule) {
@@ -1741,7 +1753,7 @@
     rule: GameRule,
 ) -&gt; (BoardValueTree, Ordering) {
     <span class="kw">use </span>Ordering::<span class="kw-2">*</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>tree = BoardValueTree::new(board);
+    <span class="kw">let </span><span class="kw-2">mut </span>tree = BoardValueTree::new(board, player);
     tree.value = value;
     <span class="kw">let </span><span class="kw-2">mut </span>cmp = Less;
     <span class="comment">// tree.value = value;
