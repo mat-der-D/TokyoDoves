@@ -447,14 +447,16 @@ impl<'a> std::fmt::Debug for Actions<'a> {
 #[derive(Debug, Clone)]
 pub struct BoardValueTree {
     board_raw: u64,
+    player: Color,
     value: BoardValue,
     children: HashMap<Action, BoardValueTree>,
 }
 
 impl BoardValueTree {
-    pub fn new(board: Board) -> Self {
+    pub fn new(board: Board, player: Color) -> Self {
         Self {
             board_raw: board.to_u64(),
+            player,
             value: Default::default(),
             children: Default::default(),
         }
@@ -462,6 +464,10 @@ impl BoardValueTree {
 
     pub fn board(&self) -> Board {
         BoardBuilder::from_u64(self.board_raw).build_unchecked()
+    }
+
+    pub fn player(&self) -> &Color {
+        &self.player
     }
 
     pub fn value(&self) -> &BoardValue {
@@ -630,10 +636,10 @@ fn create_checkmate_tree_unchecked(
     rule: GameRule,
 ) -> BoardValueTree {
     if max_depth == 0 {
-        return BoardValueTree::new(board);
+        return BoardValueTree::new(board, player);
     }
 
-    let mut tree = BoardValueTree::new(board);
+    let mut tree = BoardValueTree::new(board, player);
     tree.value = BoardValue::MIN;
 
     for (action, next_board, status) in NextBoardIter::new(board, player, rule) {
@@ -704,7 +710,7 @@ fn create_checkmate_tree_with_value_unchecked(
     rule: GameRule,
 ) -> (BoardValueTree, Ordering) {
     use Ordering::*;
-    let mut tree = BoardValueTree::new(board);
+    let mut tree = BoardValueTree::new(board, player);
     tree.value = value;
     let mut cmp = Less;
     // tree.value = value;
