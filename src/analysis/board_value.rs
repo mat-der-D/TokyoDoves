@@ -418,28 +418,6 @@ impl Iterator for NextBoardIter {
 // ****************************************************************************
 //  BoardValueTree
 // ****************************************************************************
-#[derive(Clone)]
-pub struct Actions<'a>(hash_map::Keys<'a, Action, BoardValueTree>);
-
-impl<'a> Actions<'a> {
-    fn new(iter: hash_map::Keys<'a, Action, BoardValueTree>) -> Self {
-        Self(iter)
-    }
-}
-
-impl<'a> Iterator for Actions<'a> {
-    type Item = &'a Action;
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.next()
-    }
-}
-
-impl<'a> std::fmt::Debug for Actions<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
 /// A tree structure that contains [`Board`] and [`BoardValue`] on its nodes,
 /// and [`Action`]s on its edges.
 ///
@@ -449,7 +427,7 @@ pub struct BoardValueTree {
     board_raw: u64,
     player: Color,
     value: BoardValue,
-    children: HashMap<Action, BoardValueTree>,
+    actions2children: HashMap<Action, BoardValueTree>,
 }
 
 impl BoardValueTree {
@@ -458,33 +436,63 @@ impl BoardValueTree {
             board_raw: board.to_u64(),
             player,
             value: Default::default(),
-            children: Default::default(),
+            actions2children: Default::default(),
         }
     }
 
+    /// Returns [`Board`] at the root node
     pub fn board(&self) -> Board {
         BoardBuilder::from_u64(self.board_raw).build_unchecked()
     }
 
+    /// Returns a reference to the player [`Color`] at the root node
     pub fn player(&self) -> &Color {
         &self.player
     }
 
+    /// Returns a reference to the [`BoardValue`] at the root node
     pub fn value(&self) -> &BoardValue {
         &self.value
     }
 
+    /// Returns a reference to a child tree associated to the specified [`Action`]
+    ///
+    /// It returns `Some(&child)` if a child exists, otherwise `None`.
     pub fn child(&self, action: &Action) -> Option<&BoardValueTree> {
-        self.children.get(action)
+        self.actions2children.get(action)
     }
 
-    pub fn actions(&self) -> Actions<'_> {
-        Actions::new(self.children.keys())
+    /// Returns an [`Iterator`] that iterates over all [`Action`]s connecting to children
+    pub fn actions(&self) -> hash_map::Keys<'_, Action, BoardValueTree> {
+        self.actions2children.keys()
     }
 
+    /// Returns an [`Iterator`] that iterates over all children
+    pub fn children(&self) -> hash_map::Values<'_, Action, BoardValueTree> {
+        self.actions2children.values()
+    }
+
+    /// Counts the number of children
+    pub fn num_children(&self) -> usize {
+        self.actions2children.len()
+    }
+
+    /// Returns `true` if it is a leaf node, i.e., it has no children.
+    pub fn is_leaf(&self) -> bool {
+        self.actions2children.is_empty()
+    }
+
+    /// Returns an [`Iterator`] that iterates all pairs of [`Action`] and [`BoardValueTree`]
+    pub fn actions_children(&self) -> hash_map::Iter<'_, Action, BoardValueTree> {
+        self.actions2children.iter()
+    }
+
+    /// Returns the depth of the tree
+    ///
+    /// The depth is defined as the longest steps from the root node to leaf node.
     pub fn depth(&self) -> usize {
         1 + self
-            .children
+            .actions2children
             .values()
             .map(|t| t.depth())
             .max()
@@ -495,9 +503,9 @@ impl BoardValueTree {
         if step == 0 {
             true
         } else {
-            self.children.len() == 1
+            self.actions2children.len() == 1
                 && self
-                    .children
+                    .actions2children
                     .values()
                     .all(|c| c.is_good_for_puzzle(step - 1))
         }
@@ -597,7 +605,7 @@ pub fn print_tree(tree: &BoardValueTree) {
 fn print_tree_core(tree: &BoardValueTree, top: &str) {
     let next_top = format!("\t{}", top);
     println!("{}{}", top, tree.value);
-    for (_, t) in tree.children.iter() {
+    for (_, t) in tree.actions2children.iter() {
         print_tree_core(t, &next_top);
     }
 }
@@ -656,13 +664,13 @@ fn create_checkmate_tree_unchecked(
         match status {
             Win => {
                 tree.value = BoardValue::win(1).unwrap();
-                tree.children.clear();
+                tree.actions2children.clear();
                 NextBoardIter::new(board, player, rule)
                     .filter(|(_, _, s)| matches!(s, Win))
                     .for_each(|(action_, next_board_, _)| {
                         let mut child = BoardValueTree::new(next_board_, player);
                         child.value = BoardValue::finished();
-                        tree.children.insert(action_, child);
+                        tree.actions2children.insert(action_, child);
                     });
                 return tree;
             }
@@ -676,9 +684,9 @@ fn create_checkmate_tree_unchecked(
                 }
                 if child_value_increment > tree.value {
                     tree.value = child_value_increment;
-                    tree.children.clear();
+                    tree.actions2children.clear();
                 }
-                tree.children.insert(action, child);
+                tree.actions2children.insert(action, child);
             }
         }
     }
@@ -737,10 +745,10 @@ fn create_checkmate_tree_with_value_unchecked(
                     cmp = Equal;
                     let mut child = BoardValueTree::new(next_board, !player);
                     child.value = BoardValue::finished();
-                    tree.children.insert(action, child);
+                    tree.actions2children.insert(action, child);
                     continue;
                 } else {
-                    tree.children.clear();
+                    tree.actions2children.clear();
                     cmp = Greater;
                     tree.value = BoardValue::unknown();
                     return (tree, cmp);
@@ -757,11 +765,11 @@ fn create_checkmate_tree_with_value_unchecked(
                 );
                 if next_cmp == Less {
                     tree.value = BoardValue::unknown();
-                    tree.children.clear();
+                    tree.actions2children.clear();
                     return (tree, Greater);
                 }
                 if next_cmp == Equal {
-                    tree.children.insert(action, child);
+                    tree.actions2children.insert(action, child);
                 }
                 cmp = cmp.max(next_cmp.reverse());
             }
@@ -769,7 +777,7 @@ fn create_checkmate_tree_with_value_unchecked(
     }
     if cmp != Equal {
         tree.value = BoardValue::unknown();
-        tree.children.clear();
+        tree.actions2children.clear();
     }
     (tree, cmp)
 }
