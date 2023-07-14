@@ -39,7 +39,7 @@ impl std::ops::Add for Capacity {
 
 impl std::ops::AddAssign for Capacity {
     fn add_assign(&mut self, rhs: Self) {
-        for (top, num_bottoms) in rhs.0.into_iter() {
+        for (top, num_bottoms) in rhs.0 {
             *self.0.entry(top).or_default() += num_bottoms;
         }
     }
@@ -48,9 +48,15 @@ impl std::ops::AddAssign for Capacity {
 // ********************************************************************
 //  BoardSet
 // ********************************************************************
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct BoardSet {
     raw: RawBoardSet,
+}
+
+impl<const N: usize> From<[Board; N]> for BoardSet {
+    fn from(value: [Board; N]) -> Self {
+        Self::from_iter(value)
+    }
 }
 
 impl FromIterator<Board> for BoardSet {
@@ -63,7 +69,13 @@ impl FromIterator<Board> for BoardSet {
 
 impl Extend<Board> for BoardSet {
     fn extend<T: IntoIterator<Item = Board>>(&mut self, iter: T) {
-        iter.into_iter().for_each(|b| self.insert(b));
+        self.raw.extend(iter.into_iter().map(|b| b.to_u64()))
+    }
+}
+
+impl<'a> Extend<&'a Board> for BoardSet {
+    fn extend<T: IntoIterator<Item = &'a Board>>(&mut self, iter: T) {
+        self.raw.extend(iter.into_iter().map(|b| b.to_u64()))
     }
 }
 
@@ -72,6 +84,14 @@ impl IntoIterator for BoardSet {
     type IntoIter = IntoIter;
     fn into_iter(self) -> Self::IntoIter {
         IntoIter(RawIntoIter::new(self.raw))
+    }
+}
+
+impl<'a> IntoIterator for &'a BoardSet {
+    type Item = Board;
+    type IntoIter = Iter<'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 
@@ -152,6 +172,10 @@ impl BoardSet {
 
     pub fn reserve(&mut self, additional: Capacity) {
         self.raw.reserve(additional)
+    }
+
+    pub fn shrink_to_fit(&mut self) {
+        self.raw.shrink_to_fit()
     }
 
     pub fn difference<'a>(&'a self, other: &'a BoardSet) -> Difference<'a> {
@@ -252,6 +276,15 @@ impl std::ops::BitXor<&BoardSet> for &BoardSet {
     }
 }
 
+impl std::ops::Sub<&BoardSet> for &BoardSet {
+    type Output = BoardSet;
+    fn sub(self, rhs: &BoardSet) -> Self::Output {
+        Self::Output {
+            raw: self.raw.sub(&rhs.raw),
+        }
+    }
+}
+
 macro_rules! impl_iterators {
     ({$iter:ident => $raw:ident}) => {
         pub struct $iter($raw);
@@ -294,7 +327,7 @@ impl_iterators!(
 // ********************************************************************
 //  BoardSet
 // ********************************************************************
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct RawBoardSet {
     top2bottoms: HashMap<u32, HashSet<u32>>,
 }
@@ -302,6 +335,12 @@ pub struct RawBoardSet {
 impl From<BoardSet> for RawBoardSet {
     fn from(value: BoardSet) -> Self {
         value.into_raw()
+    }
+}
+
+impl<const N: usize> From<[u64; N]> for RawBoardSet {
+    fn from(value: [u64; N]) -> Self {
+        Self::from_iter(value)
     }
 }
 
@@ -321,11 +360,25 @@ impl Extend<u64> for RawBoardSet {
     }
 }
 
+impl<'a> Extend<&'a u64> for RawBoardSet {
+    fn extend<T: IntoIterator<Item = &'a u64>>(&mut self, iter: T) {
+        self.extend(iter.into_iter().cloned())
+    }
+}
+
 impl IntoIterator for RawBoardSet {
     type Item = u64;
     type IntoIter = RawIntoIter;
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter::new(self)
+    }
+}
+
+impl<'a> IntoIterator for &'a RawBoardSet {
+    type Item = u64;
+    type IntoIter = RawIter<'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 
@@ -376,7 +429,7 @@ impl RawBoardSet {
 
     pub fn with_capacity(capacity: Capacity) -> Self {
         let mut top2bottoms = HashMap::with_capacity(capacity.0.len());
-        for (top, num_bottoms) in capacity.0.into_iter() {
+        for (top, num_bottoms) in capacity.0 {
             top2bottoms.insert(top, HashSet::with_capacity(num_bottoms));
         }
         Self { top2bottoms }
@@ -436,7 +489,7 @@ impl RawBoardSet {
     }
 
     pub fn reserve(&mut self, additional: Capacity) {
-        for (top, additional_len) in additional.0.into_iter() {
+        for (top, additional_len) in additional.0 {
             match self.top2bottoms.get_mut(&top) {
                 Some(bottoms) => {
                     bottoms.reserve(additional_len);
@@ -447,6 +500,13 @@ impl RawBoardSet {
                 }
             };
         }
+    }
+
+    pub fn shrink_to_fit(&mut self) {
+        self.top2bottoms.shrink_to_fit();
+        self.top2bottoms
+            .values_mut()
+            .for_each(|b| b.shrink_to_fit());
     }
 
     pub fn difference<'a>(&'a self, other: &'a RawBoardSet) -> RawDifference<'a> {
@@ -521,14 +581,11 @@ impl RawBoardSet {
     }
 
     pub fn absorb(&mut self, set: RawBoardSet) {
-        for (top, bottoms) in set.top2bottoms.into_iter() {
+        for (top, bottoms) in set.top2bottoms {
             if bottoms.is_empty() {
                 continue;
             }
-            self.top2bottoms
-                .entry(top)
-                .or_default()
-                .extend(bottoms.into_iter());
+            self.top2bottoms.entry(top).or_default().extend(bottoms);
         }
     }
 
@@ -635,6 +692,13 @@ impl std::ops::BitXor<&RawBoardSet> for &RawBoardSet {
     type Output = RawBoardSet;
     fn bitxor(self, rhs: &RawBoardSet) -> Self::Output {
         self.symmetric_difference(rhs).collect()
+    }
+}
+
+impl std::ops::Sub<&RawBoardSet> for &RawBoardSet {
+    type Output = RawBoardSet;
+    fn sub(self, rhs: &RawBoardSet) -> Self::Output {
+        self.difference(rhs).collect()
     }
 }
 

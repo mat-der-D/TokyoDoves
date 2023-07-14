@@ -443,7 +443,7 @@ impl BitMask {
             return None;
         }
         let mut idx = 0_usize;
-        for mask in self.for_idx.into_iter() {
+        for mask in self.for_idx {
             idx <<= 1;
             if bit & mask == bit {
                 idx += 1;
@@ -488,7 +488,7 @@ impl BitMask {
         }
 
         let mut idx = 0_usize;
-        for piece in self.pieces.into_iter() {
+        for piece in self.pieces {
             idx <<= 1;
             if target_bit & piece == target_bit {
                 idx += 1;

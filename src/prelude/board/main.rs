@@ -1094,7 +1094,7 @@ impl Board {
     pub fn to_framed_string(&self) -> String {
         let hframe = "+---+---+---+---+".to_string();
         let mut lines = Vec::new();
-        for line in self.to_4x4_matrix().into_iter() {
+        for line in self.to_4x4_matrix() {
             lines.push(hframe.clone());
             let line_str: String = line
                 .into_iter()
@@ -1111,7 +1111,7 @@ impl Board {
 
     pub fn to_simple_string(&self, empty: char, delimiter: &str) -> String {
         let mut lines = Vec::new();
-        for line in self.to_4x4_matrix().into_iter() {
+        for line in self.to_4x4_matrix() {
             let line_str: String = line
                 .into_iter()
                 .map(|x| match x {
