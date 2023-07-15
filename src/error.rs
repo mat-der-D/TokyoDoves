@@ -38,6 +38,29 @@ pub enum Error {
     AnalysisError(#[from] AnalysisError),
 }
 
+impl Error {
+    pub fn as_board_error(&self) -> Option<&BoardError> {
+        match self {
+            Error::BoardError(err) => Some(err),
+            _ => None,
+        }
+    }
+
+    pub fn as_game_error(&self) -> Option<&GameError> {
+        match self {
+            Error::GameError(err) => Some(err),
+            _ => None,
+        }
+    }
+
+    pub fn as_analysis_error(&self) -> Option<&AnalysisError> {
+        match self {
+            Error::AnalysisError(err) => Some(err),
+            _ => None,
+        }
+    }
+}
+
 /// Errors associated to [`Board`](`super::board::main::Board`)
 #[derive(Debug, thiserror::Error)]
 pub enum BoardError {
@@ -55,6 +78,15 @@ pub enum BoardError {
 
     #[error("ActionConvertError::{0}")]
     ActionConvertError(#[from] ActionConvertError),
+}
+
+impl BoardError {
+    pub fn as_action_convert_error(&self) -> Option<&ActionConvertError> {
+        match self {
+            BoardError::ActionConvertError(err) => Some(err),
+            _ => None,
+        }
+    }
 }
 
 /// Error kinds on creating [`Board`](`super::board::main::Board`)
