@@ -174,7 +174,7 @@ pub enum GameStatus {
 ///         let actions = game.legal_actions();
 ///         // Selects one of them by methods of ActionContainer trait
 ///         let action = actions[turn % actions.len()];
-///         println!("  --> {}", action.to_ssn(game.board())?);
+///         println!("  --> {}", action.try_into_ssn(game.board())?);
 ///
 ///         game.perform(action)?; // Performs the selected action
 ///         println!("{}", game);
@@ -198,7 +198,9 @@ pub enum GameStatus {
 /// use tokyodoves::game::{Game, GameRule};
 ///
 /// # fn main() {
-/// let mut rule = GameRule::default().with_is_remove_accepted(false).with_first_player(Color::Green);
+/// let mut rule = GameRule::default()
+///     .with_is_remove_accepted(false)
+///     .with_first_player(Color::Green);
 /// let game = Game::new_with_rule(rule);
 /// println!("{}", game);
 /// # }
@@ -447,7 +449,7 @@ impl Agent for ConsoleAgent {
                 .read_line(&mut buffer)
                 .expect("read line error");
             let ssn = buffer.trim();
-            let Ok(action_tmp) = Action::from_ssn(ssn, game.board()) else {
+            let Ok(action_tmp) = Action::try_from_ssn(ssn, game.board()) else {
                 println!("Invalid Input. Try Again.");
                 continue;
             };
