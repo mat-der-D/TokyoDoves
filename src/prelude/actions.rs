@@ -49,7 +49,7 @@ impl Action {
     }
 
     /// Converts `self` into `String` in Standard Short Notation (SSN)
-    pub fn try_to_ssn(self, board: &Board) -> Result<String, error::Error> {
+    pub fn try_into_ssn(self, board: &Board) -> Result<String, error::Error> {
         fn _shift_to_string(shift: Shift) -> String {
             let (ns, ns_num) = match shift.dv {
                 x if x > 0 => ("S", x.to_string()),

@@ -174,7 +174,7 @@ pub enum GameStatus {
 ///         let actions = game.legal_actions();
 ///         // Selects one of them by methods of ActionContainer trait
 ///         let action = actions[turn % actions.len()];
-///         println!("  --> {}", action.try_to_ssn(game.board())?);
+///         println!("  --> {}", action.try_into_ssn(game.board())?);
 ///
 ///         game.perform(action)?; // Performs the selected action
 ///         println!("{}", game);
