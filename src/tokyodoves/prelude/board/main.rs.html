@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/prelude/board/main.rs`."><title>main.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokyodoves" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0 (90c541806 2023-05-31)" data-search-js="search-e077946657036a58.js" data-settings-js="settings-298e1ea74db45b39.js" data-settings-css="settings-7bfb4c59cc6bc502.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../../static.files/source-script-905937fbbdc8e9ea.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../static.files/main-f61008743c98d196.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../tokyodoves/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/prelude/board/main.rs`."><title>main.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../../../static.files/ayu-be46fdc453a55015.css"><script src="../../../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../tokyodoves/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1392,59 +1392,12 @@
 <a href="#1392" id="1392">1392</a>
 <a href="#1393" id="1393">1393</a>
 <a href="#1394" id="1394">1394</a>
-<a href="#1395" id="1395">1395</a>
-<a href="#1396" id="1396">1396</a>
-<a href="#1397" id="1397">1397</a>
-<a href="#1398" id="1398">1398</a>
-<a href="#1399" id="1399">1399</a>
-<a href="#1400" id="1400">1400</a>
-<a href="#1401" id="1401">1401</a>
-<a href="#1402" id="1402">1402</a>
-<a href="#1403" id="1403">1403</a>
-<a href="#1404" id="1404">1404</a>
-<a href="#1405" id="1405">1405</a>
-<a href="#1406" id="1406">1406</a>
-<a href="#1407" id="1407">1407</a>
-<a href="#1408" id="1408">1408</a>
-<a href="#1409" id="1409">1409</a>
-<a href="#1410" id="1410">1410</a>
-<a href="#1411" id="1411">1411</a>
-<a href="#1412" id="1412">1412</a>
-<a href="#1413" id="1413">1413</a>
-<a href="#1414" id="1414">1414</a>
-<a href="#1415" id="1415">1415</a>
-<a href="#1416" id="1416">1416</a>
-<a href="#1417" id="1417">1417</a>
-<a href="#1418" id="1418">1418</a>
-<a href="#1419" id="1419">1419</a>
-<a href="#1420" id="1420">1420</a>
-<a href="#1421" id="1421">1421</a>
-<a href="#1422" id="1422">1422</a>
-<a href="#1423" id="1423">1423</a>
-<a href="#1424" id="1424">1424</a>
-<a href="#1425" id="1425">1425</a>
-<a href="#1426" id="1426">1426</a>
-<a href="#1427" id="1427">1427</a>
-<a href="#1428" id="1428">1428</a>
-<a href="#1429" id="1429">1429</a>
-<a href="#1430" id="1430">1430</a>
-<a href="#1431" id="1431">1431</a>
-<a href="#1432" id="1432">1432</a>
-<a href="#1433" id="1433">1433</a>
-<a href="#1434" id="1434">1434</a>
-<a href="#1435" id="1435">1435</a>
-<a href="#1436" id="1436">1436</a>
-<a href="#1437" id="1437">1437</a>
-<a href="#1438" id="1438">1438</a>
-<a href="#1439" id="1439">1439</a>
-<a href="#1440" id="1440">1440</a>
-<a href="#1441" id="1441">1441</a>
-<a href="#1442" id="1442">1442</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
+</pre><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
+
+<span class="kw">use </span><span class="kw">crate</span>::error;
 
 <span class="kw">use </span><span class="kw">crate</span>::prelude::{
     actions::Action,
-    error,
     pieces::{color_dove_to_char, color_to_index, dove_to_index, Color, Dove},
     shift::Shift,
 };
@@ -1620,7 +1573,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>perform(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
+    </span><span class="kw">pub fn </span>perform(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Error&gt; {
         <span class="self">self</span>.check_action(action)<span class="question-mark">?</span>;
         <span class="self">self</span>.perform_unchecked_raw(action)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
@@ -1643,7 +1596,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>perform_copied(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::BoardError&gt; {
+    </span><span class="kw">pub fn </span>perform_copied(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>board = <span class="kw-2">*</span><span class="self">self</span>;
         board.perform(action)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(board)
@@ -1666,7 +1619,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>perform_bwd(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
+    </span><span class="kw">pub fn </span>perform_bwd(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Error&gt; {
         <span class="self">self</span>.check_action_bwd(action)<span class="question-mark">?</span>;
         <span class="self">self</span>.perform_unchecked_raw(action)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
@@ -1689,7 +1642,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>perform_bwd_copied(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::BoardError&gt; {
+    </span><span class="kw">pub fn </span>perform_bwd_copied(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>board = <span class="kw-2">*</span><span class="self">self</span>;
         board.perform_bwd(action)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(board)
@@ -1729,7 +1682,7 @@
         <span class="self">self</span>.perform_unchecked_raw(action).unwrap();
     }
 
-    <span class="kw">fn </span>perform_unchecked_raw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
+    <span class="kw">fn </span>perform_unchecked_raw(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Error&gt; {
         <span class="kw">use </span>Action::<span class="kw-2">*</span>;
         <span class="kw">match </span>action {
             Put(c, d, s) =&gt; {
@@ -1798,7 +1751,7 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>check_action(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
+    </span><span class="kw">pub fn </span>check_action(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Error&gt; {
         <span class="self">self</span>.check_action_core(action, <span class="bool-val">true</span>)
     }
 
@@ -1818,11 +1771,11 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>check_action_bwd(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
+    </span><span class="kw">pub fn </span>check_action_bwd(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Error&gt; {
         <span class="self">self</span>.check_action_core(action, <span class="bool-val">false</span>)
     }
 
-    <span class="kw">fn </span>check_action_core(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action, fwd: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
+    <span class="kw">fn </span>check_action_core(<span class="kw-2">&amp;</span><span class="self">self</span>, action: Action, fwd: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Error&gt; {
         <span class="kw">use </span>Action::<span class="kw-2">*</span>;
         <span class="kw">match </span>action {
             Put(c, d, s) =&gt; <span class="self">self</span>.check_put(c, d, s, fwd),
@@ -1832,38 +1785,27 @@
     }
 
     <span class="comment">// Methods for check_action, check_action_bwd
-    </span><span class="kw">fn </span>check_put(<span class="kw-2">&amp;</span><span class="self">self</span>, c: Color, d: Dove, s: Shift, fwd: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
-        <span class="kw">use </span>error::ActionPerformErrorType::<span class="kw-2">*</span>;
-        <span class="kw">use </span>error::BoardError::<span class="kw-2">*</span>;
-
+    </span><span class="kw">fn </span>check_put(<span class="kw-2">&amp;</span><span class="self">self</span>, c: Color, d: Dove, s: Shift, fwd: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Error&gt; {
+        <span class="kw">use </span>error::ActionPerformErrorKind::<span class="kw-2">*</span>;
         <span class="kw">fn </span>_restore_cmd(c_: Color, d_: Dove, s_: Shift) -&gt; Action {
             Action::Put(c_, d_, s_)
         }
 
         <span class="kw">if </span><span class="kw-2">*</span><span class="self">self</span>.positions.position_of(c, d) != <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: AlreadyOnBoard,
-                action: _restore_cmd(c, d, s),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((AlreadyOnBoard, _restore_cmd(c, d, s)).into());
         }
         <span class="kw">if </span>s.dh &lt; -<span class="number">3 </span>|| s.dh &gt; <span class="number">3 </span>|| s.dv &lt; -<span class="number">3 </span>|| s.dv &gt; <span class="number">3 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: InvalidShift,
-                action: _restore_cmd(c, d, s),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((InvalidShift, _restore_cmd(c, d, s)).into());
         }
         <span class="kw">let </span>boss_pos = <span class="self">self</span>.positions.position_of(c, Dove::B);
         <span class="kw">let </span>pos = apply_shift(<span class="kw-2">*</span>boss_pos, s);
         <span class="kw">let </span><span class="prelude-val">Ok</span>(next_mask) = <span class="self">self</span>.viewer.view_mask_at(pos) <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError { error_type: OutOfField, action: _restore_cmd(c, d, s) });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((OutOfField, _restore_cmd(c, d, s)).into());
         };
 
         <span class="kw">let </span>all = <span class="self">self</span>.positions.union();
         <span class="kw">if </span>all &amp; next_mask.core != all {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: OutOfField,
-                action: _restore_cmd(c, d, s),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((OutOfField, _restore_cmd(c, d, s)).into());
         }
 
         <span class="kw">if </span>fwd {
@@ -1871,27 +1813,20 @@
             <span class="kw">let </span>another_boss_sides = sides_of_bit(<span class="kw-2">*</span>another_boss_pos);
             <span class="kw">let </span>adj_ours = calc_adjacents(<span class="self">self</span>.positions.union_in_color(c));
             <span class="kw">if </span>pos &amp; !all &amp; !another_boss_sides &amp; adj_ours != pos {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                    error_type: InvalidPosition,
-                    action: _restore_cmd(c, d, s),
-                });
+                <span class="kw">return </span><span class="prelude-val">Err</span>((InvalidPosition, _restore_cmd(c, d, s)).into());
             }
         } <span class="kw">else </span>{
             <span class="kw">let </span>adj_all = calc_adjacents(all);
             <span class="kw">if </span>pos &amp; !all &amp; adj_all != pos {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                    error_type: InvalidPosition,
-                    action: _restore_cmd(c, d, s),
-                });
+                <span class="kw">return </span><span class="prelude-val">Err</span>((InvalidPosition, _restore_cmd(c, d, s)).into());
             }
         }
 
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>check_move(<span class="kw-2">&amp;</span><span class="self">self</span>, c: Color, d: Dove, s: Shift) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
-        <span class="kw">use </span>error::ActionPerformErrorType::<span class="kw-2">*</span>;
-        <span class="kw">use </span>error::BoardError::<span class="kw-2">*</span>;
+    <span class="kw">fn </span>check_move(<span class="kw-2">&amp;</span><span class="self">self</span>, c: Color, d: Dove, s: Shift) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Error&gt; {
+        <span class="kw">use </span>error::ActionPerformErrorKind::<span class="kw-2">*</span>;
 
         <span class="kw">fn </span>_restore_cmd(c_: Color, d_: Dove, s_: Shift) -&gt; Action {
             Action::Move(c_, d_, s_)
@@ -1899,10 +1834,7 @@
 
         <span class="kw">let </span>pos = <span class="self">self</span>.positions.position_of(c, d);
         <span class="kw">if </span><span class="kw-2">*</span>pos == <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: NotOnBoard,
-                action: _restore_cmd(c, d, s),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((NotOnBoard, _restore_cmd(c, d, s)).into());
         }
         <span class="kw">let </span><span class="kw-2">mut </span>new_pos = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>route = <span class="number">0_u64</span>;
@@ -1916,70 +1848,48 @@
             }
         }
         <span class="kw">if </span>!found {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: InvalidShift,
-                action: _restore_cmd(c, d, s),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((InvalidShift, _restore_cmd(c, d, s)).into());
         }
 
         <span class="kw">let </span>others = <span class="self">self</span>.positions.union_except(c, d);
         <span class="kw">if </span>route &amp; others != <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: ObstacleInRoute,
-                action: _restore_cmd(c, d, s),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((ObstacleInRoute, _restore_cmd(c, d, s)).into());
         }
 
         <span class="kw">let </span>outfield = <span class="self">self</span>.viewer.view_mask().outfield;
         <span class="kw">if </span>route &amp; outfield != <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: ThroughOuterField,
-                action: _restore_cmd(c, d, s),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((ThroughOuterField, _restore_cmd(c, d, s)).into());
         }
 
         <span class="kw">let </span><span class="prelude-val">Ok</span>(new_mask) = <span class="self">self</span>.viewer.view_mask_at(new_pos) <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError { error_type: OutOfField, action: _restore_cmd(c, d, s) })
+            <span class="kw">return </span><span class="prelude-val">Err</span>((OutOfField, _restore_cmd(c, d, s)).into());
         };
         <span class="kw">if </span>others &amp; !new_mask.core != <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: OutOfField,
-                action: _restore_cmd(c, d, s),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((OutOfField, _restore_cmd(c, d, s)).into());
         }
 
         <span class="kw">let </span>adj_others = calc_adjacents(others);
         <span class="kw">let </span>adj_new_pos = adjacents_of_bit(new_pos);
         <span class="kw">if </span>(others | new_pos) &amp; !adj_others &amp; !adj_new_pos != <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: ToBeIsolated,
-                action: _restore_cmd(c, d, s),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((ToBeIsolated, _restore_cmd(c, d, s)).into());
         }
 
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>check_remove(<span class="kw-2">&amp;</span><span class="self">self</span>, c: Color, d: Dove, fwd: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::BoardError&gt; {
-        <span class="kw">use </span>error::ActionPerformErrorType::<span class="kw-2">*</span>;
-        <span class="kw">use </span>error::BoardError::<span class="kw-2">*</span>;
+    <span class="kw">fn </span>check_remove(<span class="kw-2">&amp;</span><span class="self">self</span>, c: Color, d: Dove, fwd: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Error&gt; {
+        <span class="kw">use </span>error::ActionPerformErrorKind::<span class="kw-2">*</span>;
 
         <span class="kw">fn </span>_restore_cmd(c_: Color, d_: Dove) -&gt; Action {
             Action::Remove(c_, d_)
         }
 
         <span class="kw">if </span><span class="macro">matches!</span>(d, Dove::B) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: TriedToRemoveBoss,
-                action: _restore_cmd(c, d),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((TriedToRemoveBoss, _restore_cmd(c, d)).into());
         }
         <span class="kw">let </span>pos = <span class="self">self</span>.positions.position_of(c, d);
         <span class="kw">if </span><span class="kw-2">*</span>pos == <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: NotOnBoard,
-                action: _restore_cmd(c, d),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((NotOnBoard, _restore_cmd(c, d)).into());
         }
 
         <span class="kw">if </span>!fwd {
@@ -1988,19 +1898,13 @@
             <span class="kw">let </span>adj_ours = calc_adjacents(<span class="self">self</span>.positions.union_in_color(c));
 
             <span class="kw">if </span>pos &amp; !another_boss_sides &amp; adj_ours != <span class="kw-2">*</span>pos {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                    error_type: InvalidPosition,
-                    action: _restore_cmd(c, d),
-                });
+                <span class="kw">return </span><span class="prelude-val">Err</span>((InvalidPosition, _restore_cmd(c, d)).into());
             }
         }
 
         <span class="kw">let </span>others = <span class="self">self</span>.positions.union_except(c, d);
         <span class="kw">if </span>others &amp; !calc_adjacents(others) != <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(ActionPerformError {
-                error_type: ToBeIsolated,
-                action: _restore_cmd(c, d),
-            });
+            <span class="kw">return </span><span class="prelude-val">Err</span>((ToBeIsolated, _restore_cmd(c, d)).into());
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -2882,4 +2786,5 @@
         }
     }
 }
-</code></pre></div></section></main></body></html>
+</code></pre></div>
+</section></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokyodoves" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
