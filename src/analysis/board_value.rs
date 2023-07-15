@@ -569,7 +569,7 @@ impl BoardValueTree {
             let sub_body = self
                 .actions_children()
                 .map(|(a, c)| {
-                    let ssn = a.to_ssn(&self.board()).unwrap();
+                    let ssn = a.try_to_ssn(&self.board()).unwrap();
                     c.to_dot_string(&name, &ssn)
                 })
                 .collect::<Vec<String>>()

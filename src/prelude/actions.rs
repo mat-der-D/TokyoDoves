@@ -49,7 +49,7 @@ impl Action {
     }
 
     /// Converts `self` into `String` in Standard Short Notation (SSN)
-    pub fn to_ssn(self, board: &Board) -> Result<String, error::Error> {
+    pub fn try_to_ssn(self, board: &Board) -> Result<String, error::Error> {
         fn _shift_to_string(shift: Shift) -> String {
             let (ns, ns_num) = match shift.dv {
                 x if x > 0 => ("S", x.to_string()),
@@ -93,7 +93,7 @@ impl Action {
     }
 
     /// Creates `Action` from `&str` in Standard Short Notation (SSN)
-    pub fn from_ssn(ssn: &str, board: &Board) -> Result<Action, error::Error> {
+    pub fn try_from_ssn(ssn: &str, board: &Board) -> Result<Action, error::Error> {
         enum ActionType {
             Put,
             Move,
