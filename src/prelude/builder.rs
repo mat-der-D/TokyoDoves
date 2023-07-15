@@ -179,16 +179,10 @@ impl BoardBuilder {
     }
 
     pub fn build(&self) -> Result<Board, error::Error> {
-        // use error::BoardCreateErrorType::*;
-        // use error::BoardError::*;
         use error::BoardCreateErrorKind::*;
 
         if self.positions[0][0] == 0 || self.positions[1][0] == 0 {
             return Err(BossNotFound.into());
-
-            // return Err(BoardCreateError {
-            //     error_type: BossNotFound,
-            // });
         }
         let core = 0x0f0f0f0f;
         let mut bit_sum = 0;

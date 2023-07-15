@@ -103,7 +103,7 @@ impl GameRule {
     ///
     /// # Errors
     /// It returns:
-    /// - `Err(error::GameRuleError::InitialBoardError)`
+    /// - `Err(error::GameRuleCreateErrorKind::InitialBoardError.into())`
     ///     if `initial_board` is that of finished game
     pub fn with_initial_board(self, initial_board: Board) -> Result<Self, error::Error> {
         if !matches!(initial_board.surrounded_status(), SurroundedStatus::None) {
@@ -300,16 +300,23 @@ impl Game {
             .legal_actions(self.player, true, true, self.rule.is_remove_accepted)
     }
 
-    /// Performs `action`.
+    /// Performs specified [`Action`].
+    ///
+    /// If the given action is performed successfully,
+    /// a game end judgement is made.
+    /// If it is determined that the game should continue,
+    /// the turn moves to the next player.
     ///
     /// # Errors
     /// It returns:
-    /// - `Err(GameError::GameFinishedError)` if the game has already been finished.
-    /// - `Err(GameError::PlayerMismatchError)` if the player of `action`
+    /// - `Err(error::PlayingErrorKind::GameFinished(..).into())` if the game has already been finished.
+    /// - `Err(error::PlayingErrorKind::PlayerMismatch(..).into())` if the player of `action`
     ///     is different from the next player.
-    /// - `Err(GameError::BoardError { .. })` if performing `action` is illegal for board.
+    /// - `Err(error::PlayingErrorKind::ProhibitedRemove(..).into())` if the action is `Action::Remove`
+    ///     although `game.rule()` prohibits to remove a piece.
+    /// - `Err(error::Error::BoardError(..).into())` if performing `action` is illegal for board.
     ///
-    /// In any cases, `Game` object is left unchanged.
+    /// In any cases, [`Game`] object is left unchanged.
     pub fn perform(&mut self, action: Action) -> Result<(), error::Error> {
         if !self.is_ongoing() {
             return Err(error::PlayingErrorKind::GameFinished(self.status).into());

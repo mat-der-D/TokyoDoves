@@ -142,7 +142,7 @@ impl From<DecodingErrorKind> for Error {
     }
 }
 
-/// Errors associated to [`Game`]
+/// Errors associated to [`Game`](`crate::game::Game`)
 #[derive(Debug, thiserror::Error)]
 pub enum GameError {
     #[error("GameRuleCreateError: {kind:?}")]
@@ -152,7 +152,7 @@ pub enum GameError {
     PlayingError { kind: PlayingErrorKind },
 }
 
-/// Error kinds on creating [`GameRule`]
+/// Error kinds on creating [`GameRule`](`crate::game::GameRule`)
 #[derive(Debug)]
 pub enum GameRuleCreateErrorKind {
     InitialBoardError,
@@ -160,8 +160,7 @@ pub enum GameRuleCreateErrorKind {
 
 impl From<GameRuleCreateErrorKind> for Error {
     fn from(value: GameRuleCreateErrorKind) -> Self {
-        let err = GameError::GameRuleCreateError { kind: value };
-        Error::from(GameError::from(err))
+        GameError::GameRuleCreateError { kind: value }.into()
     }
 }
 
@@ -207,9 +206,9 @@ impl std::fmt::Display for ArgsValidationErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ArgsValidationErrorKind::*;
         let msg = match self {
-            FinishedGameBoard(_board) => format!("board of finished game"),
+            FinishedGameBoard(_board) => String::from("board of finished game"),
             UnsupportedValue(value) => format!("{} not supported", value),
-            DrawJudge => format!("Judge::Draw not supported"),
+            DrawJudge => String::from("Judge::Draw not supported"),
         };
         write!(f, "{}", msg)
     }

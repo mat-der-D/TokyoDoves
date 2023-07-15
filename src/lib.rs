@@ -10,7 +10,6 @@ pub mod error;
 pub mod game;
 mod prelude;
 
-// pub use prelude::error;
 pub use prelude::*;
 
 #[cfg(test)]
