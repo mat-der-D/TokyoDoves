@@ -1,6 +1,6 @@
+use crate::error;
 use crate::prelude::{
     board::main::Board,
-    error,
     pieces::{color_dove_to_char, try_char_to_color_dove, Color, Dove},
     Shift,
 };
@@ -49,7 +49,7 @@ impl Action {
     }
 
     /// Converts `self` into `String` in Standard Short Notation (SSN)
-    pub fn to_ssn(self, board: &Board) -> Result<String, error::ActionConvertError> {
+    pub fn to_ssn(self, board: &Board) -> Result<String, error::Error> {
         fn _shift_to_string(shift: Shift) -> String {
             let (ns, ns_num) = match shift.dv {
                 x if x > 0 => ("S", x.to_string()),
@@ -64,13 +64,12 @@ impl Action {
             format!("{}{}{}{}", ns, ns_num, ew, ew_num)
         }
 
-        use error::ActionConvertError::SSNEncodingError;
-        use error::SSNEncodingErrorType::*;
+        use error::EncodingErrorKind::*;
         use Action::*;
         match self {
             Put(c, d, s) => {
                 let Some(pos_boss) = board.position_in_rbcc(c, Dove::B) else {
-                    return Err(SSNEncodingError { error_type: BossNotFound(c) });
+                    return Err(BossNotFound(c).into());
                 };
                 let exp = format!(
                     "+{}{}",
@@ -81,7 +80,7 @@ impl Action {
             }
             Move(c, d, s) => {
                 let Some(pos) = board.position_in_rbcc(c, d) else {
-                    return Err(SSNEncodingError { error_type: DoveNotFound(c, d) });
+                    return Err(DoveNotFound(c, d).into());
                 };
                 let exp = format!("{}{}", color_dove_to_char(c, d), _shift_to_string(pos + s));
                 Ok(exp)
@@ -94,7 +93,7 @@ impl Action {
     }
 
     /// Creates `Action` from `&str` in Standard Short Notation (SSN)
-    pub fn from_ssn(ssn: &str, board: &Board) -> Result<Action, error::ActionConvertError> {
+    pub fn from_ssn(ssn: &str, board: &Board) -> Result<Action, error::Error> {
         enum ActionType {
             Put,
             Move,
@@ -155,9 +154,8 @@ impl Action {
                 ['B', 'b', 'A', 'a', 'Y', 'y', 'M', 'm', 'T', 't', 'H', 'h'];
             const NUMBER_CHAR: [char; 9] = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-            fn process(&mut self, c: char) -> Result<(), error::ActionConvertError> {
-                use error::ActionConvertError::SSNDecodingError;
-                use error::SSNDecodingErrorType::*;
+            fn process(&mut self, c: char) -> Result<(), error::Error> {
+                use error::DecodingErrorKind::*;
                 match c {
                     '+' => self.action_type = ActionType::Put,
                     '-' => self.action_type = ActionType::Remove,
@@ -176,20 +174,12 @@ impl Action {
                         let n = x.to_string().parse::<i8>().unwrap();
                         use UpdateHeader::*;
                         match self.update_header {
-                            None => {
-                                return Err(SSNDecodingError {
-                                    error_type: NumberNotFollowAfterNEWS,
-                                })
-                            }
+                            None => return Err(NumberNotFollowAfterNEWS.into()),
                             DV => self.dv_abs = n,
                             DH => self.dh_abs = n,
                         }
                     }
-                    x => {
-                        return Err(SSNDecodingError {
-                            error_type: UnexpectedCharacter(x),
-                        })
-                    }
+                    x => return Err(UnexpectedCharacter(x).into()),
                 }
 
                 use UpdateHeader::*;
@@ -201,12 +191,11 @@ impl Action {
                 Ok(())
             }
 
-            fn try_into_action(self, board: &Board) -> Result<Action, error::ActionConvertError> {
-                use error::ActionConvertError::SSNDecodingError;
-                use error::SSNDecodingErrorType::*;
+            fn try_into_action(self, board: &Board) -> Result<Action, error::Error> {
+                use error::DecodingErrorKind::*;
                 use ActionType::*;
-                let Some(color) = self.color else { return Err(SSNDecodingError { error_type: ColorNotInferred }) };
-                let Some(dove) = self.dove else { return Err(SSNDecodingError { error_type: DoveNotInferred }) };
+                let Some(color) = self.color else { return Err(ColorNotInferred.into()) };
+                let Some(dove) = self.dove else { return Err(DoveNotInferred.into()) };
 
                 match self.action_type {
                     Put => {
@@ -214,7 +203,7 @@ impl Action {
                         let dv = self.dv_sign * self.dv_abs;
                         let shift = Shift { dh, dv };
                         let Some(pos) = board.position_in_rbcc(color, Dove::B) else {
-                            return Err(SSNDecodingError { error_type: BossNotFound });
+                            return Err(BossNotFound(color).into());
                         };
                         Ok(Action::Put(color, dove, -pos + shift))
                     }
@@ -223,7 +212,7 @@ impl Action {
                         let dv = self.dv_sign * self.dv_abs;
                         let shift = Shift { dh, dv };
                         let Some(pos) = board.position_in_rbcc(color, dove) else {
-                            return Err(SSNDecodingError { error_type: DoveNotOnBoard(color, dove) });
+                            return Err(DoveNotOnBoard(color, dove).into());
                         };
                         Ok(Action::Move(color, dove, -pos + shift))
                     }

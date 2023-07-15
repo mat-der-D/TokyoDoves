@@ -5,7 +5,8 @@
 use array_macro::array;
 use strum_macros::EnumIter;
 
-use crate::prelude::{error, macros};
+use crate::error;
+use crate::prelude::macros;
 
 const MASKS: [BitMask; 64] = {
     let mask0 = BitMask::new();

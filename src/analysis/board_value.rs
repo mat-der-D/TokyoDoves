@@ -3,6 +3,7 @@ use std::collections::{hash_map, HashMap};
 use std::io::{BufWriter, Write};
 
 use crate::{
+    error,
     game::{GameRule, Judge},
     Action, ActionsFwdIntoIter, Board, BoardBuilder, Color, SurroundedStatus,
 };
@@ -587,42 +588,16 @@ impl BoardValueTree {
 // ****************************************************************************
 //  Helper Items
 // ****************************************************************************
-/// Error variants on validation of arguments
-#[derive(Debug, thiserror::Error)]
-pub enum ArgsValidationError {
-    #[error("board of finished game")]
-    FinishedBoardError { board: Board },
-
-    #[error("{} is not supported", .boad_value)]
-    UnsupportedValueError { boad_value: BoardValue },
-
-    #[error("Judge::Draw not supported")]
-    DrawJudgeError,
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum CreateCheckmateTreeWithValueError {
-    #[error(transparent)]
-    ArgsValidationError(#[from] ArgsValidationError),
-
-    #[error("value of board differs from value in argument")]
-    ValueMismatchError(Ordering),
-}
-
-fn validate_args(
-    board: Board,
-    value: BoardValue,
-    rule: GameRule,
-) -> Result<(), ArgsValidationError> {
-    use ArgsValidationError::*;
+fn validate_args(board: Board, value: BoardValue, rule: GameRule) -> Result<(), error::Error> {
+    use error::ArgsValidationErrorKind::*;
     if board.surrounded_status() != SurroundedStatus::None {
-        return Err(FinishedBoardError { board });
+        return Err(FinishedGameBoard(board).into());
     }
     if value.is_finished() || value.is_unknown() {
-        return Err(UnsupportedValueError { boad_value: value });
+        return Err(UnsupportedValue(value).into());
     }
     if !matches!(rule.suicide_atk_judge(), Judge::NextWins | Judge::LastWins) {
-        return Err(DrawJudgeError);
+        return Err(DrawJudge.into());
     }
     Ok(())
 }
@@ -711,7 +686,7 @@ pub fn create_checkmate_tree(
     player: Color,
     max_depth: usize,
     rule: GameRule,
-) -> Result<BoardValueTree, ArgsValidationError> {
+) -> Result<BoardValueTree, error::Error> {
     validate_args(board, BoardValue::MAX, rule)?;
     Ok(create_checkmate_tree_unchecked(
         board, player, max_depth, rule,
@@ -788,14 +763,13 @@ pub fn create_checkmate_tree_with_value(
     value: BoardValue,
     player: Color,
     rule: GameRule,
-) -> Result<BoardValueTree, CreateCheckmateTreeWithValueError> {
-    type Error = CreateCheckmateTreeWithValueError;
-    validate_args(board, value, rule).map_err(Error::ArgsValidationError)?;
+) -> Result<BoardValueTree, error::Error> {
+    validate_args(board, value, rule)?;
     let (tree, cmp) = create_checkmate_tree_with_value_unchecked(board, value, player, rule);
     if cmp == Ordering::Equal {
         Ok(tree)
     } else {
-        Err(Error::ValueMismatchError(cmp))
+        Err(error::AnalysisError::BoardValueMismatch(cmp).into())
     }
 }
 
@@ -872,7 +846,7 @@ pub fn compare_board_value(
     value: BoardValue,
     player: Color,
     rule: GameRule,
-) -> Result<Ordering, ArgsValidationError> {
+) -> Result<Ordering, error::Error> {
     validate_args(board, value, rule)?;
     Ok(compare_board_value_unchecked(board, value, player, rule))
 }
@@ -928,7 +902,7 @@ pub fn evaluate_board(
     player: Color,
     search_depth: usize,
     rule: GameRule,
-) -> Result<Interval, ArgsValidationError> {
+) -> Result<Interval, error::Error> {
     validate_args(board, BoardValue::MAX, rule)?;
     Ok(evaluate_board_unchecked(board, player, search_depth, rule))
 }
@@ -970,7 +944,7 @@ pub fn find_best_actions(
     player: Color,
     search_depth: usize,
     rule: GameRule,
-) -> Result<Vec<Action>, ArgsValidationError> {
+) -> Result<Vec<Action>, error::Error> {
     validate_args(board, BoardValue::MAX, rule)?;
     Ok(find_best_actions_unchecked(
         board,

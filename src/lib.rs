@@ -6,10 +6,11 @@ pub use strum_macros;
 pub use thiserror;
 
 pub mod analysis;
+pub mod error;
 pub mod game;
 mod prelude;
 
-pub use prelude::error;
+// pub use prelude::error;
 pub use prelude::*;
 
 #[cfg(test)]
