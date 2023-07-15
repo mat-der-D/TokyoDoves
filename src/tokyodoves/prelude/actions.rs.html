@@ -279,7 +279,7 @@
     }
 
     <span class="doccomment">/// Converts `self` into `String` in Standard Short Notation (SSN)
-    </span><span class="kw">pub fn </span>to_ssn(<span class="self">self</span>, board: <span class="kw-2">&amp;</span>Board) -&gt; <span class="prelude-ty">Result</span>&lt;String, error::Error&gt; {
+    </span><span class="kw">pub fn </span>try_into_ssn(<span class="self">self</span>, board: <span class="kw-2">&amp;</span>Board) -&gt; <span class="prelude-ty">Result</span>&lt;String, error::Error&gt; {
         <span class="kw">fn </span>_shift_to_string(shift: Shift) -&gt; String {
             <span class="kw">let </span>(ns, ns_num) = <span class="kw">match </span>shift.dv {
                 x <span class="kw">if </span>x &gt; <span class="number">0 </span>=&gt; (<span class="string">&quot;S&quot;</span>, x.to_string()),
@@ -323,7 +323,7 @@
     }
 
     <span class="doccomment">/// Creates `Action` from `&amp;str` in Standard Short Notation (SSN)
-    </span><span class="kw">pub fn </span>from_ssn(ssn: <span class="kw-2">&amp;</span>str, board: <span class="kw-2">&amp;</span>Board) -&gt; <span class="prelude-ty">Result</span>&lt;Action, error::Error&gt; {
+    </span><span class="kw">pub fn </span>try_from_ssn(ssn: <span class="kw-2">&amp;</span>str, board: <span class="kw-2">&amp;</span>Board) -&gt; <span class="prelude-ty">Result</span>&lt;Action, error::Error&gt; {
         <span class="kw">enum </span>ActionType {
             Put,
             Move,

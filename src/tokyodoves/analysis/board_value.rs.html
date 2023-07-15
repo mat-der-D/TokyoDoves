@@ -1687,7 +1687,7 @@
             <span class="kw">let </span>sub_body = <span class="self">self
                 </span>.actions_children()
                 .map(|(a, c)| {
-                    <span class="kw">let </span>ssn = a.to_ssn(<span class="kw-2">&amp;</span><span class="self">self</span>.board()).unwrap();
+                    <span class="kw">let </span>ssn = a.try_into_ssn(<span class="kw-2">&amp;</span><span class="self">self</span>.board()).unwrap();
                     c.to_dot_string(<span class="kw-2">&amp;</span>name, <span class="kw-2">&amp;</span>ssn)
                 })
                 .collect::&lt;Vec&lt;String&gt;&gt;()

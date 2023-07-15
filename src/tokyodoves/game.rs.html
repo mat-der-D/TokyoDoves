@@ -513,6 +513,8 @@
 <a href="#513" id="513">513</a>
 <a href="#514" id="514">514</a>
 <a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::{evaluate_board, find_best_actions};
 <span class="kw">use </span><span class="kw">crate</span>::error;
 <span class="kw">use </span><span class="kw">crate</span>::prelude::{
@@ -689,7 +691,7 @@
 ///         let actions = game.legal_actions();
 ///         // Selects one of them by methods of ActionContainer trait
 ///         let action = actions[turn % actions.len()];
-///         println!(&quot;  --&gt; {}&quot;, action.to_ssn(game.board())?);
+///         println!(&quot;  --&gt; {}&quot;, action.try_into_ssn(game.board())?);
 ///
 ///         game.perform(action)?; // Performs the selected action
 ///         println!(&quot;{}&quot;, game);
@@ -713,7 +715,9 @@
 /// use tokyodoves::game::{Game, GameRule};
 ///
 /// # fn main() {
-/// let mut rule = GameRule::default().with_is_remove_accepted(false).with_first_player(Color::Green);
+/// let mut rule = GameRule::default()
+///     .with_is_remove_accepted(false)
+///     .with_first_player(Color::Green);
 /// let game = Game::new_with_rule(rule);
 /// println!(&quot;{}&quot;, game);
 /// # }
@@ -962,7 +966,7 @@
                 .read_line(<span class="kw-2">&amp;mut </span>buffer)
                 .expect(<span class="string">&quot;read line error&quot;</span>);
             <span class="kw">let </span>ssn = buffer.trim();
-            <span class="kw">let </span><span class="prelude-val">Ok</span>(action_tmp) = Action::from_ssn(ssn, game.board()) <span class="kw">else </span>{
+            <span class="kw">let </span><span class="prelude-val">Ok</span>(action_tmp) = Action::try_from_ssn(ssn, game.board()) <span class="kw">else </span>{
                 <span class="macro">println!</span>(<span class="string">&quot;Invalid Input. Try Again.&quot;</span>);
                 <span class="kw">continue</span>;
             };
