@@ -12,7 +12,7 @@ fn u64_to_board(hash: u64) -> Board {
 // ********************************************************************
 //  Capacity
 // ********************************************************************
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Capacity(HashMap<u32, usize>);
 
 impl Capacity {
@@ -919,5 +919,86 @@ impl<'a> Iterator for RawUnion<'a> {
                 None => return self.right_iter.next(),
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use crate::{analysis::*, *};
+
+    fn create_from_strs(strs: &[&str]) -> BoardSet {
+        let mut set = BoardSet::new();
+        for board_str in strs {
+            let board = BoardBuilder::from_str(board_str).unwrap().build_unchecked();
+            set.insert(board);
+        }
+        set
+    }
+
+    #[test]
+    fn test_set_calculation() {
+        let set1 = create_from_strs(&["Bb", "Bbh", "Bba"]);
+        let set2 = create_from_strs(&["Bb", "BbH", "BbA"]);
+        let set1and2 = create_from_strs(&["Bb"]);
+        let set1or2 = create_from_strs(&["Bb", "Bbh", "Bba", "BbH", "BbA"]);
+        let set1xor2 = create_from_strs(&["Bbh", "Bba", "BbH", "BbA"]);
+        let set1minus2 = create_from_strs(&["Bbh", "Bba"]);
+
+        assert_eq!(&set1 & &set2, set1and2);
+        assert_eq!(set1.raw() & set2.raw(), *set1and2.raw());
+
+        assert_eq!(&set1 | &set2, set1or2);
+        assert_eq!(set1.raw() | set2.raw(), *set1or2.raw());
+
+        assert_eq!(&set1 ^ &set2, set1xor2);
+        assert_eq!(set1.raw() ^ set2.raw(), *set1xor2.raw());
+
+        assert_eq!(&set1 - &set2, set1minus2);
+        assert_eq!(set1.raw() - set2.raw(), *set1minus2.raw());
+
+        assert!(set1or2.is_superset(&set1));
+        assert!(set1or2.raw().is_superset(set1.raw()));
+
+        assert!(set1.is_subset(&set1or2));
+        assert!(set1.raw().is_subset(set1or2.raw()));
+
+        assert!(set1xor2.is_disjoint(&set1and2));
+        assert!(set1xor2.raw().is_disjoint(set1and2.raw()));
+    }
+
+    #[test]
+    fn test_absorb_extend() {
+        let set1 = create_from_strs(&["Bb", "Bbh", "Bba"]);
+        let set2 = create_from_strs(&["Bb", "BbH", "BbA"]);
+        let set1or2 = create_from_strs(&["Bb", "Bbh", "Bba", "BbH", "BbA"]);
+
+        let mut set1absorb2 = set1.clone();
+        set1absorb2.absorb(set2.clone());
+        assert_eq!(set1absorb2, set1or2);
+
+        let mut set1absorb2_raw = set1.raw().clone();
+        set1absorb2_raw.absorb(set2.raw().clone());
+        assert_eq!(set1absorb2_raw, *set1or2.raw());
+
+        let mut set1extend2 = set1.clone();
+        set1extend2.extend(set2.iter());
+        assert_eq!(set1absorb2, set1extend2);
+
+        let mut set1extend2_raw = set1.raw().clone();
+        set1extend2_raw.extend(set2.raw().iter());
+        assert_eq!(set1absorb2_raw, set1extend2_raw);
+    }
+
+    #[test]
+    fn test_capacity() {
+        let mut set1 = create_from_strs(&["Bbh", "Bba"]);
+        set1.shrink_to_fit();
+        let mut set2 = create_from_strs(&["BbH", "BbA"]);
+        set2.shrink_to_fit();
+        let mut set1or2 = create_from_strs(&["Bbh", "Bba", "BbH", "BbA"]);
+        set1or2.shrink_to_fit();
+        assert_eq!(set1.capacity() + set2.capacity(), set1or2.capacity());
     }
 }
