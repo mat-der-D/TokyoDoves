@@ -2,13 +2,13 @@ use std::str::FromStr;
 
 use strum::IntoEnumIterator;
 
+use crate::error;
 use crate::prelude::{
     board::{
         main::Board,
         mask::MaskViewer,
         position::{ColorDovePositions, DovePositions},
     },
-    error,
     pieces::{color_to_index, dove_to_index, try_char_to_color_dove, Color, Dove},
 };
 
@@ -108,7 +108,7 @@ impl BoardBuilder {
     /// Alias of [`try_from::<..>`](`Self::try_from`)
     pub fn try_from_4x4_matrix(
         matrix: [[Option<(Color, Dove)>; 4]; 4],
-    ) -> Result<Self, error::BoardError> {
+    ) -> Result<Self, error::Error> {
         Self::try_from(matrix)
     }
 
@@ -178,36 +178,28 @@ impl BoardBuilder {
         Board::new(viewer, positions)
     }
 
-    pub fn build(&self) -> Result<Board, error::BoardError> {
-        use error::BoardCreateErrorType::*;
-        use error::BoardError::*;
+    pub fn build(&self) -> Result<Board, error::Error> {
+        use error::BoardCreateErrorKind::*;
+
         if self.positions[0][0] == 0 || self.positions[1][0] == 0 {
-            return Err(BoardCreateError {
-                error_type: BossNotFound,
-            });
+            return Err(BossNotFound.into());
         }
         let core = 0x0f0f0f0f;
         let mut bit_sum = 0;
         for colored_positions in self.positions {
             for bit in colored_positions {
                 if bit & bit_sum != 0 {
-                    return Err(BoardCreateError {
-                        error_type: PositionDuplicated,
-                    });
+                    return Err(PositionDuplicated.into());
                 }
                 if bit & core != bit {
-                    return Err(BoardCreateError {
-                        error_type: PositionOutOfRange,
-                    });
+                    return Err(PositionOutOfRange.into());
                 }
                 bit_sum |= bit;
             }
         }
         let board = self.build_unchecked();
         if board.positions.isolated() {
-            return Err(BoardCreateError {
-                error_type: DoveIsolated,
-            });
+            return Err(DoveIsolated.into());
         }
         Ok(board)
     }
@@ -241,10 +233,9 @@ impl From<[[u16; 6]; 2]> for BoardBuilder {
 }
 
 impl TryFrom<[[Option<(Color, Dove)>; 4]; 4]> for BoardBuilder {
-    type Error = error::BoardError;
+    type Error = error::Error;
     fn try_from(matrix: [[Option<(Color, Dove)>; 4]; 4]) -> Result<Self, Self::Error> {
-        use error::BoardCreateErrorType::*;
-        use error::BoardError::*;
+        use error::BoardCreateErrorKind::*;
 
         let mut builder = BoardBuilder::empty();
         for (iv, line) in matrix.iter().enumerate() {
@@ -252,9 +243,7 @@ impl TryFrom<[[Option<(Color, Dove)>; 4]; 4]> for BoardBuilder {
                 if let Some((c, d)) = elem {
                     let pos = builder.position(*c, *d);
                     if *pos != 0 {
-                        return Err(BoardCreateError {
-                            error_type: DoveDuplicated,
-                        });
+                        return Err(DoveDuplicated.into());
                     }
                     builder.put_dove(iv, ih, *c, *d);
                 }
@@ -291,10 +280,9 @@ impl From<u64> for BoardBuilder {
 }
 
 impl FromStr for BoardBuilder {
-    type Err = error::BoardError;
+    type Err = error::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use error::BoardCreateErrorType::*;
-        use error::BoardError::*;
+        use error::BoardCreateErrorKind::*;
 
         let mut builder = BoardBuilder::empty();
         let mut pos_v = 0;
@@ -310,9 +298,7 @@ impl FromStr for BoardBuilder {
 
             if let Some((color, dove)) = try_char_to_color_dove(c) {
                 if *builder.position(color, dove) != 0 {
-                    return Err(BoardCreateError {
-                        error_type: DoveDuplicated,
-                    });
+                    return Err(DoveDuplicated.into());
                 }
 
                 builder.put_dove(pos_v, pos_h, color, dove);

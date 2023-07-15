@@ -1,8 +1,9 @@
 use strum::IntoEnumIterator;
 
+use crate::error;
+
 use crate::prelude::{
     actions::Action,
-    error,
     pieces::{color_dove_to_char, color_to_index, dove_to_index, Color, Dove},
     shift::Shift,
 };
@@ -178,7 +179,7 @@ impl Board {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn perform(&mut self, action: Action) -> Result<(), error::BoardError> {
+    pub fn perform(&mut self, action: Action) -> Result<(), error::Error> {
         self.check_action(action)?;
         self.perform_unchecked_raw(action)?;
         Ok(())
@@ -201,7 +202,7 @@ impl Board {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn perform_copied(&self, action: Action) -> Result<Self, error::BoardError> {
+    pub fn perform_copied(&self, action: Action) -> Result<Self, error::Error> {
         let mut board = *self;
         board.perform(action)?;
         Ok(board)
@@ -224,7 +225,7 @@ impl Board {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn perform_bwd(&mut self, action: Action) -> Result<(), error::BoardError> {
+    pub fn perform_bwd(&mut self, action: Action) -> Result<(), error::Error> {
         self.check_action_bwd(action)?;
         self.perform_unchecked_raw(action)?;
         Ok(())
@@ -247,7 +248,7 @@ impl Board {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn perform_bwd_copied(&self, action: Action) -> Result<Self, error::BoardError> {
+    pub fn perform_bwd_copied(&self, action: Action) -> Result<Self, error::Error> {
         let mut board = *self;
         board.perform_bwd(action)?;
         Ok(board)
@@ -287,7 +288,7 @@ impl Board {
         self.perform_unchecked_raw(action).unwrap();
     }
 
-    fn perform_unchecked_raw(&mut self, action: Action) -> Result<(), error::BoardError> {
+    fn perform_unchecked_raw(&mut self, action: Action) -> Result<(), error::Error> {
         use Action::*;
         match action {
             Put(c, d, s) => {
@@ -356,7 +357,7 @@ impl Board {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn check_action(&self, action: Action) -> Result<(), error::BoardError> {
+    pub fn check_action(&self, action: Action) -> Result<(), error::Error> {
         self.check_action_core(action, true)
     }
 
@@ -376,11 +377,11 @@ impl Board {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn check_action_bwd(&self, action: Action) -> Result<(), error::BoardError> {
+    pub fn check_action_bwd(&self, action: Action) -> Result<(), error::Error> {
         self.check_action_core(action, false)
     }
 
-    fn check_action_core(&self, action: Action, fwd: bool) -> Result<(), error::BoardError> {
+    fn check_action_core(&self, action: Action, fwd: bool) -> Result<(), error::Error> {
         use Action::*;
         match action {
             Put(c, d, s) => self.check_put(c, d, s, fwd),
@@ -390,38 +391,27 @@ impl Board {
     }
 
     // Methods for check_action, check_action_bwd
-    fn check_put(&self, c: Color, d: Dove, s: Shift, fwd: bool) -> Result<(), error::BoardError> {
-        use error::ActionPerformErrorType::*;
-        use error::BoardError::*;
-
+    fn check_put(&self, c: Color, d: Dove, s: Shift, fwd: bool) -> Result<(), error::Error> {
+        use error::ActionPerformErrorKind::*;
         fn _restore_cmd(c_: Color, d_: Dove, s_: Shift) -> Action {
             Action::Put(c_, d_, s_)
         }
 
         if *self.positions.position_of(c, d) != 0 {
-            return Err(ActionPerformError {
-                error_type: AlreadyOnBoard,
-                action: _restore_cmd(c, d, s),
-            });
+            return Err((AlreadyOnBoard, _restore_cmd(c, d, s)).into());
         }
         if s.dh < -3 || s.dh > 3 || s.dv < -3 || s.dv > 3 {
-            return Err(ActionPerformError {
-                error_type: InvalidShift,
-                action: _restore_cmd(c, d, s),
-            });
+            return Err((InvalidShift, _restore_cmd(c, d, s)).into());
         }
         let boss_pos = self.positions.position_of(c, Dove::B);
         let pos = apply_shift(*boss_pos, s);
         let Ok(next_mask) = self.viewer.view_mask_at(pos) else {
-            return Err(ActionPerformError { error_type: OutOfField, action: _restore_cmd(c, d, s) });
+            return Err((OutOfField, _restore_cmd(c, d, s)).into());
         };
 
         let all = self.positions.union();
         if all & next_mask.core != all {
-            return Err(ActionPerformError {
-                error_type: OutOfField,
-                action: _restore_cmd(c, d, s),
-            });
+            return Err((OutOfField, _restore_cmd(c, d, s)).into());
         }
 
         if fwd {
@@ -429,27 +419,20 @@ impl Board {
             let another_boss_sides = sides_of_bit(*another_boss_pos);
             let adj_ours = calc_adjacents(self.positions.union_in_color(c));
             if pos & !all & !another_boss_sides & adj_ours != pos {
-                return Err(ActionPerformError {
-                    error_type: InvalidPosition,
-                    action: _restore_cmd(c, d, s),
-                });
+                return Err((InvalidPosition, _restore_cmd(c, d, s)).into());
             }
         } else {
             let adj_all = calc_adjacents(all);
             if pos & !all & adj_all != pos {
-                return Err(ActionPerformError {
-                    error_type: InvalidPosition,
-                    action: _restore_cmd(c, d, s),
-                });
+                return Err((InvalidPosition, _restore_cmd(c, d, s)).into());
             }
         }
 
         Ok(())
     }
 
-    fn check_move(&self, c: Color, d: Dove, s: Shift) -> Result<(), error::BoardError> {
-        use error::ActionPerformErrorType::*;
-        use error::BoardError::*;
+    fn check_move(&self, c: Color, d: Dove, s: Shift) -> Result<(), error::Error> {
+        use error::ActionPerformErrorKind::*;
 
         fn _restore_cmd(c_: Color, d_: Dove, s_: Shift) -> Action {
             Action::Move(c_, d_, s_)
@@ -457,10 +440,7 @@ impl Board {
 
         let pos = self.positions.position_of(c, d);
         if *pos == 0 {
-            return Err(ActionPerformError {
-                error_type: NotOnBoard,
-                action: _restore_cmd(c, d, s),
-            });
+            return Err((NotOnBoard, _restore_cmd(c, d, s)).into());
         }
         let mut new_pos = 0;
         let mut route = 0_u64;
@@ -474,70 +454,48 @@ impl Board {
             }
         }
         if !found {
-            return Err(ActionPerformError {
-                error_type: InvalidShift,
-                action: _restore_cmd(c, d, s),
-            });
+            return Err((InvalidShift, _restore_cmd(c, d, s)).into());
         }
 
         let others = self.positions.union_except(c, d);
         if route & others != 0 {
-            return Err(ActionPerformError {
-                error_type: ObstacleInRoute,
-                action: _restore_cmd(c, d, s),
-            });
+            return Err((ObstacleInRoute, _restore_cmd(c, d, s)).into());
         }
 
         let outfield = self.viewer.view_mask().outfield;
         if route & outfield != 0 {
-            return Err(ActionPerformError {
-                error_type: ThroughOuterField,
-                action: _restore_cmd(c, d, s),
-            });
+            return Err((ThroughOuterField, _restore_cmd(c, d, s)).into());
         }
 
         let Ok(new_mask) = self.viewer.view_mask_at(new_pos) else {
-            return Err(ActionPerformError { error_type: OutOfField, action: _restore_cmd(c, d, s) })
+            return Err((OutOfField, _restore_cmd(c, d, s)).into());
         };
         if others & !new_mask.core != 0 {
-            return Err(ActionPerformError {
-                error_type: OutOfField,
-                action: _restore_cmd(c, d, s),
-            });
+            return Err((OutOfField, _restore_cmd(c, d, s)).into());
         }
 
         let adj_others = calc_adjacents(others);
         let adj_new_pos = adjacents_of_bit(new_pos);
         if (others | new_pos) & !adj_others & !adj_new_pos != 0 {
-            return Err(ActionPerformError {
-                error_type: ToBeIsolated,
-                action: _restore_cmd(c, d, s),
-            });
+            return Err((ToBeIsolated, _restore_cmd(c, d, s)).into());
         }
 
         Ok(())
     }
 
-    fn check_remove(&self, c: Color, d: Dove, fwd: bool) -> Result<(), error::BoardError> {
-        use error::ActionPerformErrorType::*;
-        use error::BoardError::*;
+    fn check_remove(&self, c: Color, d: Dove, fwd: bool) -> Result<(), error::Error> {
+        use error::ActionPerformErrorKind::*;
 
         fn _restore_cmd(c_: Color, d_: Dove) -> Action {
             Action::Remove(c_, d_)
         }
 
         if matches!(d, Dove::B) {
-            return Err(ActionPerformError {
-                error_type: TriedToRemoveBoss,
-                action: _restore_cmd(c, d),
-            });
+            return Err((TriedToRemoveBoss, _restore_cmd(c, d)).into());
         }
         let pos = self.positions.position_of(c, d);
         if *pos == 0 {
-            return Err(ActionPerformError {
-                error_type: NotOnBoard,
-                action: _restore_cmd(c, d),
-            });
+            return Err((NotOnBoard, _restore_cmd(c, d)).into());
         }
 
         if !fwd {
@@ -546,19 +504,13 @@ impl Board {
             let adj_ours = calc_adjacents(self.positions.union_in_color(c));
 
             if pos & !another_boss_sides & adj_ours != *pos {
-                return Err(ActionPerformError {
-                    error_type: InvalidPosition,
-                    action: _restore_cmd(c, d),
-                });
+                return Err((InvalidPosition, _restore_cmd(c, d)).into());
             }
         }
 
         let others = self.positions.union_except(c, d);
         if others & !calc_adjacents(others) != 0 {
-            return Err(ActionPerformError {
-                error_type: ToBeIsolated,
-                action: _restore_cmd(c, d),
-            });
+            return Err((ToBeIsolated, _restore_cmd(c, d)).into());
         }
         Ok(())
     }
