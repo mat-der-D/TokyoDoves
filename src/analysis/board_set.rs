@@ -127,7 +127,7 @@ impl BoardSet {
     /// Creates an empty `BoardSet`.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::analysis::BoardSet;
     /// let set = BoardSet::new();
     /// ```
@@ -175,7 +175,7 @@ impl BoardSet {
     /// without reallocating.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::Board;
     /// use tokyodoves::analysis::BoardSet;
     /// let mut set0 = BoardSet::new();
@@ -192,7 +192,7 @@ impl BoardSet {
     /// Returns the [`Capacity`] of the set.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::analysis::BoardSet;
     /// let set = BoardSet::new();
     /// let capacity = set.capacity();
@@ -205,7 +205,7 @@ impl BoardSet {
     /// The iterator element type is [`Board`].
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::Board;
     /// use tokyodoves::analysis::BoardSet;
     /// let mut set = BoardSet::new();
@@ -221,7 +221,7 @@ impl BoardSet {
     /// Returns the number of elements in the set.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::Board;
     /// use tokyodoves::analysis::BoardSet;
     /// let mut set = BoardSet::new();
@@ -236,7 +236,7 @@ impl BoardSet {
     /// Returns `true` if the set contains no elements.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::Board;
     /// use tokyodoves::analysis::BoardSet;
     /// let mut set = BoardSet::new();
@@ -259,7 +259,7 @@ impl BoardSet {
     /// The elements are visited in unsorted (and unspecified) order.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use std::str::FromStr;
     /// use tokyodoves::{Board, BoardBuilder};
     /// use tokyodoves::analysis::BoardSet;
@@ -550,7 +550,7 @@ impl RawBoardSet {
     /// Creates an empty `BoardSet`.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::analysis::RawBoardSet;
     /// let set = RawBoardSet::new();
     /// ```
@@ -607,7 +607,7 @@ impl RawBoardSet {
     /// without reallocating.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::Board;
     /// use tokyodoves::analysis::RawBoardSet;
     /// let mut set0 = RawBoardSet::new();
@@ -626,7 +626,7 @@ impl RawBoardSet {
     /// Returns the [`Capacity`] of the set.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::analysis::RawBoardSet;
     /// let set = RawBoardSet::new();
     /// let capacity = set.capacity();
@@ -647,7 +647,7 @@ impl RawBoardSet {
     /// The iterator element type is [`Board`].
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::Board;
     /// use tokyodoves::analysis::RawBoardSet;
     /// let mut set = BoardSet::new();
@@ -671,7 +671,7 @@ impl RawBoardSet {
     /// Returns the number of elements in the set.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::Board;
     /// use tokyodoves::analysis::RawBoardSet;
     /// let mut set = RawBoardSet::new();
@@ -686,7 +686,7 @@ impl RawBoardSet {
     /// Returns `true` if the set contains no elements.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::Board;
     /// use tokyodoves::analysis::RawBoardSet;
     /// let mut set = RawBoardSet::new();
@@ -709,7 +709,7 @@ impl RawBoardSet {
     /// The elements are visited in unsorted (and unspecified) order.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use std::str::FromStr;
     /// use tokyodoves::{Board, BoardBuilder};
     /// use tokyodoves::analysis::RawBoardSet;
