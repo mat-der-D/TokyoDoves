@@ -379,10 +379,71 @@ impl BoardSet {
         self.raw.take(&board.to_u64()).map(u64_to_board)
     }
 
-    /// Absorbs all elements in the given set.
-    /// The given set loses its ownership.
+    /// Captures the ownership of the given set and absorb all elements in it.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set1 = BoardSet::new();
+    /// let mut set2 = BoardSet::new();
+    /// set2.insert(Board::new());
+    /// set1.absorb(set2);
+    /// assert_eq!(set1.len(), 1);
+    /// ```
+    /// If the size of the set to be absorbed is large,
+    /// allocating memory in advance may accelerate the process:
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set1 = BoardSet::new();
+    /// let mut set2 = BoardSet::new();
+    /// set2.insert(Board::new());
+    ///
+    /// // Suppose set2 is very large
+    /// set1.reserve(set2.capacity()); // allocate sufficient memory
+    /// set1.absorb(set2);
+    /// assert_eq!(set1.len(), 1);
+    /// ```
     pub fn absorb(&mut self, set: BoardSet) {
         self.raw.absorb(set.raw);
+    }
+
+    /// Absorb all elements drained from the given set.
+    /// The absorbed set will be empty, while it will keep the allocated memory.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set1 = BoardSet::new();
+    /// let mut set2 = BoardSet::new();
+    /// set2.insert(Board::new());
+    /// set1.absorb_from_drained(&mut set2);
+    /// assert_eq!(set1.len(), 1);
+    /// assert!(set2.is_empty());
+    /// ```
+    /// If the size of the set to be absorbed is large,
+    /// allocating memory in advance may accelerate the process:
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set1 = BoardSet::new();
+    /// let mut set2 = BoardSet::new();
+    /// set2.insert(Board::new());
+    ///
+    /// // Suppose set2 is very large
+    /// set1.reserve(set2.capacity()); // allocate sufficient memory
+    /// set1.absorb_from_drained(&mut set2);
+    /// assert_eq!(set1.len(), 1);
+    /// assert!(set2.is_empty());
+    /// ```
+    pub fn absorb_from_drained(&mut self, set: &mut BoardSet) {
+        self.raw.absorb_from_drained(&mut set.raw);
     }
 
     /// Inserts all elements given by `reader` into `self`.
@@ -715,6 +776,7 @@ impl RawBoardSet {
     }
 
     /// Clears the set, returning all elements as an iterator.
+    /// Keeps the allocated memory for reuse.
     ///
     /// If the returned iterator is dropped before being fully consumed,
     /// it drops the remaining elements.
@@ -890,15 +952,83 @@ impl RawBoardSet {
         taken
     }
 
-    /// Absorbs all elements in the given set.
-    /// The given set loses its ownership.
+    /// Captures the ownership of the given set and absorb all elements in it.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set1 = RawBoardSet::new();
+    /// let mut set2 = RawBoardSet::new();
+    /// set2.insert(Board::new().to_u64());
+    /// set1.absorb(set2);
+    /// assert_eq!(set1.len(), 1);
+    /// ```
+    /// If the size of the set to be absorbed is large,
+    /// allocating memory in advance may accelerate the process:
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set1 = RawBoardSet::new();
+    /// let mut set2 = RawBoardSet::new();
+    /// set2.insert(Board::new().to_u64());
+    ///
+    /// // Suppose set2 is very large
+    /// set1.reserve(set2.capacity()); // allocate sufficient memory
+    /// set1.absorb(set2);
+    /// assert_eq!(set1.len(), 1);
+    /// ```
     pub fn absorb(&mut self, set: RawBoardSet) {
-        self.reserve(set.capacity());
         for (top, bottoms) in set.top2bottoms {
             if bottoms.is_empty() {
                 continue;
             }
             self.top2bottoms.entry(top).or_default().extend(bottoms);
+        }
+    }
+
+    /// Absorb all elements drained from the given set.
+    /// The absorbed set will be empty, while it will keep the allocated memory.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set1 = RawBoardSet::new();
+    /// let mut set2 = RawBoardSet::new();
+    /// set2.insert(Board::new().to_u64());
+    /// set1.absorb_from_drained(&mut set2);
+    /// assert_eq!(set1.len(), 1);
+    /// assert!(set2.is_empty());
+    /// ```
+    /// If the size of the set to be absorbed is large,
+    /// allocating memory in advance may accelerate the process:
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set1 = RawBoardSet::new();
+    /// let mut set2 = RawBoardSet::new();
+    /// set2.insert(Board::new().to_u64());
+    ///
+    /// // Suppose set2 is very large
+    /// set1.reserve(set2.capacity()); // allocate sufficient memory
+    /// set1.absorb_from_drained(&mut set2);
+    /// assert_eq!(set1.len(), 1);
+    /// assert!(set2.is_empty());
+    /// ```
+    pub fn absorb_from_drained(&mut self, set: &mut RawBoardSet) {
+        for (top, bottoms) in set.top2bottoms.iter_mut() {
+            if bottoms.is_empty() {
+                continue;
+            }
+            self.top2bottoms
+                .entry(*top)
+                .or_default()
+                .extend(bottoms.drain());
         }
     }
 
