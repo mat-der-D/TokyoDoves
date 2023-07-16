@@ -1379,6 +1379,28 @@
 <a href="#1379" id="1379">1379</a>
 <a href="#1380" id="1380">1380</a>
 <a href="#1381" id="1381">1381</a>
+<a href="#1382" id="1382">1382</a>
+<a href="#1383" id="1383">1383</a>
+<a href="#1384" id="1384">1384</a>
+<a href="#1385" id="1385">1385</a>
+<a href="#1386" id="1386">1386</a>
+<a href="#1387" id="1387">1387</a>
+<a href="#1388" id="1388">1388</a>
+<a href="#1389" id="1389">1389</a>
+<a href="#1390" id="1390">1390</a>
+<a href="#1391" id="1391">1391</a>
+<a href="#1392" id="1392">1392</a>
+<a href="#1393" id="1393">1393</a>
+<a href="#1394" id="1394">1394</a>
+<a href="#1395" id="1395">1395</a>
+<a href="#1396" id="1396">1396</a>
+<a href="#1397" id="1397">1397</a>
+<a href="#1398" id="1398">1398</a>
+<a href="#1399" id="1399">1399</a>
+<a href="#1400" id="1400">1400</a>
+<a href="#1401" id="1401">1401</a>
+<a href="#1402" id="1402">1402</a>
+<a href="#1403" id="1403">1403</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">use </span><span class="kw">crate</span>::error;
@@ -1508,14 +1530,14 @@
 //  Implement Traits
 // *******************************************************************
 </span><span class="doccomment">/// An implementation of Tokyo Doves board based on bitboard techniques
-</span><span class="attr">#[derive(Debug, Clone, Copy, Default)]
+</span><span class="attr">#[derive(Debug, Clone, Copy)]
 </span><span class="kw">pub struct </span>Board {
     <span class="kw">pub</span>(<span class="kw">crate</span>) viewer: MaskViewer,
     <span class="kw">pub</span>(<span class="kw">crate</span>) positions: ColorDovePositions,
 }
 
 <span class="kw">impl </span>Board {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(viewer: MaskViewer, positions: ColorDovePositions) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_components(viewer: MaskViewer, positions: ColorDovePositions) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ viewer, positions }
     }
 }
@@ -1534,6 +1556,12 @@
 
 <span class="kw">impl </span>Eq <span class="kw">for </span>Board {}
 
+<span class="kw">impl </span>Default <span class="kw">for </span>Board {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new()
+    }
+}
+
 <span class="kw">impl </span>std::hash::Hash <span class="kw">for </span>Board {
     <span class="kw">fn </span>hash&lt;H: std::hash::Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
         state.write_u64(<span class="self">self</span>.to_u64());
@@ -1541,6 +1569,22 @@
 }
 
 <span class="kw">impl </span>Board {
+    <span class="doccomment">/// Creates [`Board`] at the beginning of the game.
+    ///
+    /// The following two ways are equivalent:
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder};
+    ///
+    /// let board1 = Board::new();
+    /// let board2 = BoardBuilder::new().build_unchecked();
+    /// assert_eq!(board1, board2);
+    /// ```
+    /// [`BoardBuilder`](`crate::prelude::BoardBuilder`) provides
+    /// a variety of ways to create [`Board`].
+    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="kw">crate</span>::prelude::builder::BoardBuilder::new().build_unchecked()
+    }
+
     <span class="comment">// *******************************************************************
     //  Methods For Peforming Actions
     // *******************************************************************

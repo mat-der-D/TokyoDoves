@@ -491,7 +491,7 @@
             DovePositions::new(<span class="self">self</span>.positions[<span class="number">0</span>]),
             DovePositions::new(<span class="self">self</span>.positions[<span class="number">1</span>]),
         ]);
-        Board::new(viewer, positions)
+        Board::from_components(viewer, positions)
     }
 
     <span class="kw">pub fn </span>build(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Board, error::Error&gt; {
