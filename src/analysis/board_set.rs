@@ -551,7 +551,7 @@ impl RawBoardSet {
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::analysis::RawBoardSet;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
     /// let set = RawBoardSet::new();
     /// ```
     pub fn new() -> Self {
@@ -609,7 +609,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::RawBoardSet;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
     /// let mut set0 = RawBoardSet::new();
     /// set0.insert(Board::new().to_u64());
     /// let capacity = set0.capacity();
@@ -627,7 +627,7 @@ impl RawBoardSet {
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::analysis::RawBoardSet;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
     /// let set = RawBoardSet::new();
     /// let capacity = set.capacity();
     /// ```
@@ -649,8 +649,8 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::RawBoardSet;
-    /// let mut set = BoardSet::new();
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
     /// for x in set.iter() {
     ///     println!("{}", x);
@@ -673,7 +673,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::RawBoardSet;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
     /// let mut set = RawBoardSet::new();
     /// assert_eq!(set.len(), 0);
     /// set.insert(Board::new().to_u64());
@@ -688,7 +688,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::RawBoardSet;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
     /// let mut set = RawBoardSet::new();
     /// assert!(set.is_empty());
     /// set.insert(Board::new().to_u64());
@@ -712,13 +712,13 @@ impl RawBoardSet {
     /// ```rust
     /// use std::str::FromStr;
     /// use tokyodoves::{Board, BoardBuilder};
-    /// use tokyodoves::analysis::RawBoardSet;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
     ///
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
     /// let set1 = set.clone();
     /// set.insert(BoardBuilder::from_str("BbA").unwrap().build_unchecked().to_u64());
-    /// set.retain(|b| b.count_doves_on_field() == 2);
+    /// set.retain(|b| (b & 0xfff << 48).count_ones() == 2);
     /// assert_eq!(set1, set);
     /// ```
     pub fn retain<F>(&mut self, mut f: F)
@@ -739,7 +739,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::RawBoardSet;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
     ///
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
