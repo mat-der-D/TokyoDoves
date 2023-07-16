@@ -249,6 +249,12 @@ impl BoardSet {
     }
 
     /// Clears the set, returning all elements as an iterator.
+    /// Keeps the allocated memory for reuse.
+    ///
+    /// If the returned iterator is dropped before being fully consumed,
+    /// it drops the remaining elements.
+    /// The returned iterator keeps a mutable borrow on the set to optimize
+    /// its implementation.
     pub fn drain(&mut self) -> Drain {
         Drain(RawDrain::new(&mut self.raw))
     }
@@ -478,7 +484,7 @@ macro_rules! impl_iterators {
 
 impl_iterators!(
     { IntoIter => RawIntoIter }
-    { Drain => RawDrain }
+    < Drain => RawDrain >
     < Iter => RawIter >
     < Difference => RawDifference >
     < SymmetricDifference => RawSymmetricDifference >
@@ -489,10 +495,24 @@ impl_iterators!(
 // ********************************************************************
 //  BoardSet
 // ********************************************************************
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default)]
 pub struct RawBoardSet {
     pub(crate) top2bottoms: HashMap<u32, HashSet<u32>>,
 }
+
+impl PartialEq for RawBoardSet {
+    fn eq(&self, other: &Self) -> bool {
+        self.top2bottoms.iter().all(|(t, b)| {
+            other
+                .top2bottoms
+                .get(t)
+                .map(|bb| *b == *bb)
+                .unwrap_or_else(|| b.is_empty())
+        })
+    }
+}
+
+impl Eq for RawBoardSet {}
 
 impl From<BoardSet> for RawBoardSet {
     fn from(value: BoardSet) -> Self {
@@ -639,10 +659,6 @@ impl RawBoardSet {
         Capacity(count)
     }
 
-    fn trim(&mut self) {
-        self.top2bottoms.retain(|_, v| !v.is_empty());
-    }
-
     /// An iterator visiting all elements in arbitrary order.
     /// The iterator element type is [`Board`].
     ///
@@ -699,6 +715,11 @@ impl RawBoardSet {
     }
 
     /// Clears the set, returning all elements as an iterator.
+    ///
+    /// If the returned iterator is dropped before being fully consumed,
+    /// it drops the remaining elements.
+    /// The returned iterator keeps a mutable borrow on the set to optimize
+    /// its implementation.
     pub fn drain(&mut self) -> RawDrain {
         RawDrain::new(self)
     }
@@ -731,7 +752,6 @@ impl RawBoardSet {
                 f(&hash)
             });
         }
-        self.trim();
     }
 
     /// Clears the set, removing all values
@@ -768,6 +788,7 @@ impl RawBoardSet {
 
     /// Shrinks the capacity of the set as much as possible.
     pub fn shrink_to_fit(&mut self) {
+        self.top2bottoms.retain(|_, v| !v.is_empty());
         self.top2bottoms.shrink_to_fit();
         self.top2bottoms
             .values_mut()
@@ -1007,9 +1028,8 @@ type MapIter<'a> = std::collections::hash_map::Iter<'a, u32, HashSet<u32>>;
 type SetIter<'a> = std::collections::hash_set::Iter<'a, u32>;
 
 pub struct RawIter<'a> {
-    set: &'a RawBoardSet,
+    map_iter: MapIter<'a>, // iterator of top2bottoms
     state: Option<(
-        MapIter<'a>, // iterator of top2bottoms
         u32,         // key of top2bottoms
         SetIter<'a>, // iterator of value of top2bottoms
     )>,
@@ -1017,7 +1037,10 @@ pub struct RawIter<'a> {
 
 impl<'a> RawIter<'a> {
     fn new(set: &'a RawBoardSet) -> Self {
-        Self { set, state: None }
+        Self {
+            map_iter: set.top2bottoms.iter(),
+            state: None,
+        }
     }
 }
 
@@ -1025,15 +1048,14 @@ impl<'a> Iterator for RawIter<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let Some((map_iter, top, set_iter)) = self.state.as_mut() else {
-                let mut map_iter_raw = self.set.top2bottoms.iter();
-                let (top, set) = map_iter_raw.next()?;
-                self.state = Some((map_iter_raw, *top, set.iter()));
+            let Some((top, set_iter)) = self.state.as_mut() else {
+                let (top, set) = self.map_iter.next()?;
+                self.state = Some((*top, set.iter()));
                 continue;
             };
 
             let Some(bottom) = set_iter.next() else {
-                let (next_top, next_set) = map_iter.next()?;
+                let (next_top, next_set) = self.map_iter.next()?;
                 *top = *next_top;
                 *set_iter = next_set.iter();
                 continue;
@@ -1047,9 +1069,8 @@ type MapIntoIter = std::collections::hash_map::IntoIter<u32, HashSet<u32>>;
 type SetIntoIter = std::collections::hash_set::IntoIter<u32>;
 
 pub struct RawIntoIter {
-    set: Option<RawBoardSet>,
+    map_iter: MapIntoIter, // iterator of set.top2bottoms
     state: Option<(
-        MapIntoIter, // iterator of set.top2bottoms
         u32,         // key of set.top2bottoms
         SetIntoIter, // iterator of value of set.top2bottoms
     )>,
@@ -1058,7 +1079,7 @@ pub struct RawIntoIter {
 impl RawIntoIter {
     fn new(set: RawBoardSet) -> Self {
         Self {
-            set: Some(set),
+            map_iter: set.top2bottoms.into_iter(),
             state: None,
         }
     }
@@ -1068,16 +1089,14 @@ impl Iterator for RawIntoIter {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let Some((map_iter, top, set_iter)) = self.state.as_mut() else {
-                let set = std::mem::replace(&mut self.set, None)?;
-                let mut map_iter_raw = set.top2bottoms.into_iter();
-                let (top, set) = map_iter_raw.next()?;
-                self.state = Some((map_iter_raw, top, set.into_iter()));
+            let Some((top, set_iter)) = self.state.as_mut() else {
+                let (top, set) = self.map_iter.next()?;
+                self.state = Some((top, set.into_iter()));
                 continue;
             };
 
             let Some(bottom) = set_iter.next() else {
-                let (next_top, next_set) = map_iter.next()?;
+                let (next_top, next_set) = self.map_iter.next()?;
                 *top = next_top;
                 *set_iter = next_set.into_iter();
                 continue;
@@ -1087,19 +1106,67 @@ impl Iterator for RawIntoIter {
     }
 }
 
-pub struct RawDrain(RawIntoIter);
+pub struct RawDrain<'a>(_RawDrain<'a>);
 
-impl RawDrain {
-    fn new(set: &mut RawBoardSet) -> Self {
-        let original = std::mem::replace(set, RawBoardSet::new());
-        Self(original.into_iter())
+impl<'a> RawDrain<'a> {
+    fn new(set: &'a mut RawBoardSet) -> Self {
+        Self(_RawDrain::new(set))
     }
 }
 
-impl Iterator for RawDrain {
+impl<'a> Iterator for RawDrain<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next()
+    }
+}
+
+type MapDrain<'a> = std::collections::hash_map::IterMut<'a, u32, HashSet<u32>>;
+type SetDrain<'a> = std::collections::hash_set::Drain<'a, u32>;
+
+struct _RawDrain<'a> {
+    map_iter: MapDrain<'a>, // iterator of top2bottoms
+    state: Option<(
+        u32,          // key of top2bottoms
+        SetDrain<'a>, // iterator of value of top2bottoms
+    )>,
+}
+
+impl<'a> _RawDrain<'a> {
+    fn new(set: &'a mut RawBoardSet) -> Self {
+        Self {
+            map_iter: set.top2bottoms.iter_mut(),
+            state: None,
+        }
+    }
+}
+
+impl<'a> Iterator for _RawDrain<'a> {
+    type Item = u64;
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let Some((top, set_iter)) = self.state.as_mut() else {
+                let (top, set) = self.map_iter.next()?;
+                self.state = Some((*top, set.drain()));
+                continue;
+            };
+
+            let Some(bottom) = set_iter.next() else {
+                let (next_top, next_set) = self.map_iter.next()?;
+                *top = *next_top;
+                *set_iter = next_set.drain();
+                continue;
+            };
+            return Some(RawBoardSet::u32_u32_to_u64(*top, bottom));
+        }
+    }
+}
+
+impl<'a> Drop for _RawDrain<'a> {
+    fn drop(&mut self) {
+        self.map_iter.by_ref().for_each(|(_, v)| {
+            v.drain();
+        });
     }
 }
 
@@ -1290,5 +1357,25 @@ mod tests {
         let mut set1extend2_raw = set1.raw().clone();
         set1extend2_raw.extend(set2.raw().iter());
         assert_eq!(set1absorb2_raw, set1extend2_raw);
+    }
+
+    #[test]
+    fn test_drain() {
+        let mut set = create_from_strs(&["Bb", "Bbh", "Bba"]);
+        let set1 = set.clone();
+        let set2 = BoardSet::from_iter(set.drain());
+        assert!(set.is_empty());
+        assert_eq!(set1, set2);
+    }
+
+    #[test]
+    fn test_drain_drop() {
+        let mut set = create_from_strs(&["Bb", "Bbh", "Bba"]);
+        let capacity = set.capacity();
+        {
+            set.drain();
+        }
+        assert!(set.is_empty());
+        assert_eq!(capacity, set.capacity());
     }
 }
