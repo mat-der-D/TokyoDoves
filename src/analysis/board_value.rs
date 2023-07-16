@@ -457,6 +457,11 @@ impl BoardValueTree {
         &self.value
     }
 
+    /// Returns `TreeDisplay` to display `self`
+    pub fn display(&self) -> TreeDisplay {
+        TreeDisplay::new(self)
+    }
+
     /// Returns a reference to a child tree associated to the specified [`Action`]
     ///
     /// It returns `Some(&child)` if a child exists, otherwise `None`.
@@ -582,6 +587,77 @@ impl BoardValueTree {
             dot = format!("{}\n{}", dot, sub_graph);
         }
         dot
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum Format {
+    Standard,
+}
+
+impl Format {
+    fn typeset(&self, tree: &BoardValueTree) -> String {
+        use Format::*;
+        match self {
+            Standard => Self::typeset_standard(tree),
+        }
+    }
+
+    fn typeset_standard(tree: &BoardValueTree) -> String {
+        Self::typeset_standard_core(tree, "", "")
+    }
+
+    fn typeset_standard_core(tree: &BoardValueTree, indent: &str, action_ssn: &str) -> String {
+        let edge = if action_ssn.is_empty() {
+            String::new()
+        } else {
+            format!("{} => ", action_ssn)
+        };
+        let node = format!(
+            "({:?}, {}, {})",
+            tree.board().to_simple_string(' ', ";"),
+            tree.player(),
+            tree.value()
+        );
+        let next_indent = format!("    {}", indent);
+        let children = tree
+            .actions_children()
+            .map(|(a, t)| {
+                let ssn = a.try_into_ssn(&tree.board()).unwrap();
+                Self::typeset_standard_core(t, &next_indent, &ssn)
+            })
+            .collect::<Vec<String>>()
+            .join("\n");
+        if children.is_empty() {
+            format!("{}{}{}", indent, edge, node)
+        } else {
+            format!("{}{}{}\n{}", indent, edge, node, children)
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TreeDisplay<'a> {
+    tree: &'a BoardValueTree,
+    format: Format,
+}
+
+impl<'a> std::fmt::Display for TreeDisplay<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.format.typeset(self.tree))
+    }
+}
+
+impl<'a> TreeDisplay<'a> {
+    fn new(tree: &'a BoardValueTree) -> Self {
+        Self {
+            tree,
+            format: Format::Standard,
+        }
+    }
+
+    pub fn with_format(self, format: Format) -> Self {
+        Self { format, ..self }
     }
 }
 
