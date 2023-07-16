@@ -178,7 +178,7 @@ impl BoardBuilder {
             DovePositions::new(self.positions[0]),
             DovePositions::new(self.positions[1]),
         ]);
-        Board::new(viewer, positions)
+        Board::from_components(viewer, positions)
     }
 
     pub fn build(&self) -> Result<Board, error::Error> {

@@ -127,14 +127,14 @@ pub enum SurroundedStatus {
 //  Implement Traits
 // *******************************************************************
 /// An implementation of Tokyo Doves board based on bitboard techniques
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy)]
 pub struct Board {
     pub(crate) viewer: MaskViewer,
     pub(crate) positions: ColorDovePositions,
 }
 
 impl Board {
-    pub(crate) fn new(viewer: MaskViewer, positions: ColorDovePositions) -> Self {
+    pub(crate) fn from_components(viewer: MaskViewer, positions: ColorDovePositions) -> Self {
         Self { viewer, positions }
     }
 }
@@ -153,6 +153,12 @@ impl PartialEq for Board {
 
 impl Eq for Board {}
 
+impl Default for Board {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl std::hash::Hash for Board {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         state.write_u64(self.to_u64());
@@ -160,6 +166,22 @@ impl std::hash::Hash for Board {
 }
 
 impl Board {
+    /// Creates [`Board`] at the beginning of the game.
+    ///
+    /// The following two ways are equivalent:
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder};
+    ///
+    /// let board1 = Board::new();
+    /// let board2 = BoardBuilder::new().build_unchecked();
+    /// assert_eq!(board1, board2);
+    /// ```
+    /// [`BoardBuilder`](`crate::prelude::BoardBuilder`) provides
+    /// a variety of ways to create [`Board`].
+    pub fn new() -> Self {
+        crate::prelude::builder::BoardBuilder::new().build_unchecked()
+    }
+
     // *******************************************************************
     //  Methods For Peforming Actions
     // *******************************************************************
