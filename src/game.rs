@@ -340,17 +340,62 @@ impl Game {
 
         Ok(())
     }
+
+    pub fn display(&self) -> GameDisplay {
+        GameDisplay::new(self)
+    }
 }
 
 impl std::fmt::Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let board_string = self.board.to_string();
-        let next_player_string = if self.is_ongoing() {
-            format!("{:?}", self.player)
+        write!(f, "{}", self.display())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum GameDisplayFormat {
+    Standard,
+}
+
+impl GameDisplayFormat {
+    fn typeset(&self, game: &Game) -> String {
+        use GameDisplayFormat::*;
+        match self {
+            Standard => Self::typeset_standard(game),
+        }
+    }
+
+    fn typeset_standard(game: &Game) -> String {
+        let next_player_string = if game.is_ongoing() {
+            format!("{:?}", game.next_player())
         } else {
             String::from("None")
         };
-        write!(f, "{}\nNext Player: {}", board_string, next_player_string)
+        format!("{}\nNext Player: {}", game.board(), next_player_string)
+    }
+}
+
+pub struct GameDisplay<'a> {
+    game: &'a Game,
+    format: GameDisplayFormat,
+}
+
+impl<'a> GameDisplay<'a> {
+    fn new(game: &'a Game) -> Self {
+        Self {
+            game,
+            format: GameDisplayFormat::Standard,
+        }
+    }
+
+    pub fn with_format(self, format: GameDisplayFormat) -> Self {
+        Self { format, ..self }
+    }
+}
+
+impl<'a> std::fmt::Display for GameDisplay<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.format.typeset(self.game))
     }
 }
 

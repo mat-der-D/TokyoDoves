@@ -67,7 +67,10 @@ use crate::prelude::{
 /// ```ignore
 /// use tokyodoves::BoardBuilder;
 ///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let board = BoardBuilder::new().build_unchecked();
+/// # Ok(())
+/// # }
 /// ```
 #[derive(Debug, Clone, Copy)]
 pub struct BoardBuilder {
