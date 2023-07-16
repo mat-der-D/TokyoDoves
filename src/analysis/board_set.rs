@@ -409,6 +409,7 @@ impl BoardSet {
 
 impl std::ops::BitAnd<&BoardSet> for &BoardSet {
     type Output = BoardSet;
+    /// Returns the intersection of `self` and `rhs` as a new `BoardSet`.
     fn bitand(self, rhs: &BoardSet) -> Self::Output {
         Self::Output {
             raw: self.raw.bitand(&rhs.raw),
@@ -418,6 +419,7 @@ impl std::ops::BitAnd<&BoardSet> for &BoardSet {
 
 impl std::ops::BitOr<&BoardSet> for &BoardSet {
     type Output = BoardSet;
+    /// Returns the union of `self` and `rhs` as a new `BoardSet`.
     fn bitor(self, rhs: &BoardSet) -> Self::Output {
         Self::Output {
             raw: self.raw.bitor(&rhs.raw),
@@ -427,6 +429,7 @@ impl std::ops::BitOr<&BoardSet> for &BoardSet {
 
 impl std::ops::BitXor<&BoardSet> for &BoardSet {
     type Output = BoardSet;
+    /// Returns the symmetric difference of `self` and `rhs` as a new `BoardSet`.
     fn bitxor(self, rhs: &BoardSet) -> Self::Output {
         Self::Output {
             raw: self.raw.bitxor(&rhs.raw),
@@ -436,6 +439,7 @@ impl std::ops::BitXor<&BoardSet> for &BoardSet {
 
 impl std::ops::Sub<&BoardSet> for &BoardSet {
     type Output = BoardSet;
+    /// Returns the difference of `self` and `rhs` as a new `BoardSet`.
     fn sub(self, rhs: &BoardSet) -> Self::Output {
         Self::Output {
             raw: self.raw.sub(&rhs.raw),
@@ -969,6 +973,7 @@ impl RawBoardSet {
 
 impl std::ops::BitAnd<&RawBoardSet> for &RawBoardSet {
     type Output = RawBoardSet;
+    /// Returns the intersection of `self` and `rhs` as a new `RawBoardSet`.
     fn bitand(self, rhs: &RawBoardSet) -> Self::Output {
         self.intersection(rhs).collect()
     }
@@ -976,6 +981,7 @@ impl std::ops::BitAnd<&RawBoardSet> for &RawBoardSet {
 
 impl std::ops::BitOr<&RawBoardSet> for &RawBoardSet {
     type Output = RawBoardSet;
+    /// Returns the union of `self` and `rhs` as a new `RawBoardSet`.
     fn bitor(self, rhs: &RawBoardSet) -> Self::Output {
         self.union(rhs).collect()
     }
@@ -983,6 +989,7 @@ impl std::ops::BitOr<&RawBoardSet> for &RawBoardSet {
 
 impl std::ops::BitXor<&RawBoardSet> for &RawBoardSet {
     type Output = RawBoardSet;
+    /// Returns the symmetric difference of `self` and `rhs` as a new `RawBoardSet`.
     fn bitxor(self, rhs: &RawBoardSet) -> Self::Output {
         self.symmetric_difference(rhs).collect()
     }
@@ -990,6 +997,7 @@ impl std::ops::BitXor<&RawBoardSet> for &RawBoardSet {
 
 impl std::ops::Sub<&RawBoardSet> for &RawBoardSet {
     type Output = RawBoardSet;
+    /// Returns the difference of `self` and `rhs` as a new `RawBoardSet`.
     fn sub(self, rhs: &RawBoardSet) -> Self::Output {
         self.difference(rhs).collect()
     }
