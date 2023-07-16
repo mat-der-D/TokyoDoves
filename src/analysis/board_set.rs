@@ -250,6 +250,11 @@ impl BoardSet {
 
     /// Clears the set, returning all elements as an iterator.
     /// Keeps the allocated memory for reuse.
+    ///
+    /// If the returned iterator is dropped before being fully consumed,
+    /// it drops the remaining elements.
+    /// The returned iterator keeps a mutable borrow on the set to optimize
+    /// its implementation.
     pub fn drain(&mut self) -> Drain {
         Drain(RawDrain::new(&mut self.raw))
     }
@@ -710,6 +715,11 @@ impl RawBoardSet {
     }
 
     /// Clears the set, returning all elements as an iterator.
+    ///
+    /// If the returned iterator is dropped before being fully consumed,
+    /// it drops the remaining elements.
+    /// The returned iterator keeps a mutable borrow on the set to optimize
+    /// its implementation.
     pub fn drain(&mut self) -> RawDrain {
         RawDrain::new(self)
     }
@@ -1139,6 +1149,14 @@ impl<'a> Iterator for RawDrain<'a> {
     }
 }
 
+impl<'a> Drop for RawDrain<'a> {
+    fn drop(&mut self) {
+        self.map_iter.by_ref().for_each(|(_, v)| {
+            v.drain();
+        });
+    }
+}
+
 pub struct RawDifference<'a> {
     left: RawIter<'a>,
     right: &'a RawBoardSet,
@@ -1326,5 +1344,25 @@ mod tests {
         let mut set1extend2_raw = set1.raw().clone();
         set1extend2_raw.extend(set2.raw().iter());
         assert_eq!(set1absorb2_raw, set1extend2_raw);
+    }
+
+    #[test]
+    fn test_drain() {
+        let mut set = create_from_strs(&["Bb", "Bbh", "Bba"]);
+        let set1 = set.clone();
+        let set2 = BoardSet::from_iter(set.drain());
+        assert!(set.is_empty());
+        assert_eq!(set1, set2);
+    }
+
+    #[test]
+    fn test_drain_drop() {
+        let mut set = create_from_strs(&["Bb", "Bbh", "Bba"]);
+        let capacity = set.capacity();
+        {
+            set.drain();
+        }
+        assert!(set.is_empty());
+        assert_eq!(capacity, set.capacity());
     }
 }
