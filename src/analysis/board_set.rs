@@ -249,6 +249,7 @@ impl BoardSet {
     }
 
     /// Clears the set, returning all elements as an iterator.
+    /// Keeps the allocated memory for reuse.
     pub fn drain(&mut self) -> Drain {
         Drain(RawDrain::new(&mut self.raw))
     }
@@ -489,10 +490,24 @@ impl_iterators!(
 // ********************************************************************
 //  BoardSet
 // ********************************************************************
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default)]
 pub struct RawBoardSet {
     pub(crate) top2bottoms: HashMap<u32, HashSet<u32>>,
 }
+
+impl PartialEq for RawBoardSet {
+    fn eq(&self, other: &Self) -> bool {
+        self.top2bottoms.iter().all(|(t, b)| {
+            other
+                .top2bottoms
+                .get(t)
+                .map(|bb| *b == *bb)
+                .unwrap_or_else(|| b.is_empty())
+        })
+    }
+}
+
+impl Eq for RawBoardSet {}
 
 impl From<BoardSet> for RawBoardSet {
     fn from(value: BoardSet) -> Self {
@@ -639,10 +654,6 @@ impl RawBoardSet {
         Capacity(count)
     }
 
-    fn trim(&mut self) {
-        self.top2bottoms.retain(|_, v| !v.is_empty());
-    }
-
     /// An iterator visiting all elements in arbitrary order.
     /// The iterator element type is [`Board`].
     ///
@@ -731,7 +742,6 @@ impl RawBoardSet {
                 f(&hash)
             });
         }
-        self.trim();
     }
 
     /// Clears the set, removing all values
@@ -768,6 +778,7 @@ impl RawBoardSet {
 
     /// Shrinks the capacity of the set as much as possible.
     pub fn shrink_to_fit(&mut self) {
+        self.top2bottoms.retain(|_, v| !v.is_empty());
         self.top2bottoms.shrink_to_fit();
         self.top2bottoms
             .values_mut()
