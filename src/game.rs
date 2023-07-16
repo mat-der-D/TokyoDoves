@@ -10,7 +10,7 @@ use crate::prelude::{
 /// Some kinds of detailed rules
 ///
 /// # Examples
-/// ```ignore
+/// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::{Color, Board, BoardBuilder};
 /// use tokyodoves::game::{GameRule, Judge};
@@ -157,7 +157,7 @@ pub enum GameStatus {
 ///
 /// # Examples
 /// The following is a simple example in which one game is played:
-/// ```ignore
+/// ```rust
 /// use tokyodoves::ActionContainer;
 /// use tokyodoves::game::Game;
 ///
@@ -193,7 +193,7 @@ pub enum GameStatus {
 /// }
 /// ```
 /// To customize the rule more, you can create [`Game`] from [`GameRule`] object:
-/// ```ignore
+/// ```rust
 /// use tokyodoves::Color;
 /// use tokyodoves::game::{Game, GameRule};
 ///
