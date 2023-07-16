@@ -15,7 +15,7 @@ use crate::prelude::{
 /// A builder of [`Board`]
 ///
 /// # Examples
-/// ```ignore
+/// ```rust
 /// use tokyodoves::BoardBuilder;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -24,7 +24,7 @@ use crate::prelude::{
 /// # }
 /// ```
 ///
-/// ```ignore
+/// ```rust
 /// use tokyodoves::{BoardBuilder, Color, Dove};
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -41,7 +41,7 @@ use crate::prelude::{
 /// # }
 /// ```
 ///
-/// ```ignore
+/// ```rust
 /// use tokyodoves::BoardBuilder;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -51,7 +51,7 @@ use crate::prelude::{
 /// # }
 /// ```
 ///
-/// ```ignore
+/// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::BoardBuilder;
 ///
@@ -64,10 +64,13 @@ use crate::prelude::{
 /// # }
 /// ```
 ///
-/// ```ignore
+/// ```rust
 /// use tokyodoves::BoardBuilder;
 ///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let board = BoardBuilder::new().build_unchecked();
+/// # Ok(())
+/// # }
 /// ```
 #[derive(Debug, Clone, Copy)]
 pub struct BoardBuilder {

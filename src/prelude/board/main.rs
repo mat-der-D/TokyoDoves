@@ -168,7 +168,7 @@ impl Board {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -192,7 +192,7 @@ impl Board {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -214,7 +214,7 @@ impl Board {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -238,7 +238,7 @@ impl Board {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -274,7 +274,7 @@ impl Board {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -322,7 +322,7 @@ impl Board {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -347,7 +347,7 @@ impl Board {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -367,7 +367,7 @@ impl Board {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -525,7 +525,7 @@ impl Board {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Color};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -558,7 +558,7 @@ impl Board {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Color};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -978,7 +978,7 @@ impl Board {
     /// Returns 4x4 matrix (array of array) representing the board.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::{BoardBuilder, Color, Dove};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -1023,7 +1023,7 @@ impl Board {
     /// Returns a `String` expression with a frame.
     ///
     /// # Examples
-    /// ```ignore
+    /// ```rust
     /// use tokyodoves::BoardBuilder;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
