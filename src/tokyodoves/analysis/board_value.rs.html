@@ -1116,6 +1116,66 @@
 <a href="#1116" id="1116">1116</a>
 <a href="#1117" id="1117">1117</a>
 <a href="#1118" id="1118">1118</a>
+<a href="#1119" id="1119">1119</a>
+<a href="#1120" id="1120">1120</a>
+<a href="#1121" id="1121">1121</a>
+<a href="#1122" id="1122">1122</a>
+<a href="#1123" id="1123">1123</a>
+<a href="#1124" id="1124">1124</a>
+<a href="#1125" id="1125">1125</a>
+<a href="#1126" id="1126">1126</a>
+<a href="#1127" id="1127">1127</a>
+<a href="#1128" id="1128">1128</a>
+<a href="#1129" id="1129">1129</a>
+<a href="#1130" id="1130">1130</a>
+<a href="#1131" id="1131">1131</a>
+<a href="#1132" id="1132">1132</a>
+<a href="#1133" id="1133">1133</a>
+<a href="#1134" id="1134">1134</a>
+<a href="#1135" id="1135">1135</a>
+<a href="#1136" id="1136">1136</a>
+<a href="#1137" id="1137">1137</a>
+<a href="#1138" id="1138">1138</a>
+<a href="#1139" id="1139">1139</a>
+<a href="#1140" id="1140">1140</a>
+<a href="#1141" id="1141">1141</a>
+<a href="#1142" id="1142">1142</a>
+<a href="#1143" id="1143">1143</a>
+<a href="#1144" id="1144">1144</a>
+<a href="#1145" id="1145">1145</a>
+<a href="#1146" id="1146">1146</a>
+<a href="#1147" id="1147">1147</a>
+<a href="#1148" id="1148">1148</a>
+<a href="#1149" id="1149">1149</a>
+<a href="#1150" id="1150">1150</a>
+<a href="#1151" id="1151">1151</a>
+<a href="#1152" id="1152">1152</a>
+<a href="#1153" id="1153">1153</a>
+<a href="#1154" id="1154">1154</a>
+<a href="#1155" id="1155">1155</a>
+<a href="#1156" id="1156">1156</a>
+<a href="#1157" id="1157">1157</a>
+<a href="#1158" id="1158">1158</a>
+<a href="#1159" id="1159">1159</a>
+<a href="#1160" id="1160">1160</a>
+<a href="#1161" id="1161">1161</a>
+<a href="#1162" id="1162">1162</a>
+<a href="#1163" id="1163">1163</a>
+<a href="#1164" id="1164">1164</a>
+<a href="#1165" id="1165">1165</a>
+<a href="#1166" id="1166">1166</a>
+<a href="#1167" id="1167">1167</a>
+<a href="#1168" id="1168">1168</a>
+<a href="#1169" id="1169">1169</a>
+<a href="#1170" id="1170">1170</a>
+<a href="#1171" id="1171">1171</a>
+<a href="#1172" id="1172">1172</a>
+<a href="#1173" id="1173">1173</a>
+<a href="#1174" id="1174">1174</a>
+<a href="#1175" id="1175">1175</a>
+<a href="#1176" id="1176">1176</a>
+<a href="#1177" id="1177">1177</a>
+<a href="#1178" id="1178">1178</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::{Ord, Ordering, PartialOrd};
 <span class="kw">use </span>std::collections::{hash_map, HashMap};
 <span class="kw">use </span>std::io::{BufWriter, Write};
@@ -1575,6 +1635,11 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.value
     }
 
+    <span class="doccomment">/// Returns `TreeDisplay` to display `self`
+    </span><span class="kw">pub fn </span>display(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TreeDisplay {
+        TreeDisplay::new(<span class="self">self</span>)
+    }
+
     <span class="doccomment">/// Returns a reference to a child tree associated to the specified [`Action`]
     ///
     /// It returns `Some(&amp;child)` if a child exists, otherwise `None`.
@@ -1703,6 +1768,77 @@
     }
 }
 
+<span class="attr">#[derive(Debug, Clone)]
+</span><span class="kw">pub enum </span>TreeDisplayFormat {
+    Standard,
+}
+
+<span class="kw">impl </span>TreeDisplayFormat {
+    <span class="kw">fn </span>typeset(<span class="kw-2">&amp;</span><span class="self">self</span>, tree: <span class="kw-2">&amp;</span>BoardValueTree) -&gt; String {
+        <span class="kw">use </span>TreeDisplayFormat::<span class="kw-2">*</span>;
+        <span class="kw">match </span><span class="self">self </span>{
+            Standard =&gt; <span class="self">Self</span>::typeset_standard(tree),
+        }
+    }
+
+    <span class="kw">fn </span>typeset_standard(tree: <span class="kw-2">&amp;</span>BoardValueTree) -&gt; String {
+        <span class="self">Self</span>::typeset_standard_core(tree, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>)
+    }
+
+    <span class="kw">fn </span>typeset_standard_core(tree: <span class="kw-2">&amp;</span>BoardValueTree, indent: <span class="kw-2">&amp;</span>str, action_ssn: <span class="kw-2">&amp;</span>str) -&gt; String {
+        <span class="kw">let </span>edge = <span class="kw">if </span>action_ssn.is_empty() {
+            String::new()
+        } <span class="kw">else </span>{
+            <span class="macro">format!</span>(<span class="string">&quot;{} =&gt; &quot;</span>, action_ssn)
+        };
+        <span class="kw">let </span>node = <span class="macro">format!</span>(
+            <span class="string">&quot;({:?}, {}, {})&quot;</span>,
+            tree.board().to_simple_string(<span class="string">&#39; &#39;</span>, <span class="string">&quot;;&quot;</span>),
+            tree.player(),
+            tree.value()
+        );
+        <span class="kw">let </span>next_indent = <span class="macro">format!</span>(<span class="string">&quot;    {}&quot;</span>, indent);
+        <span class="kw">let </span>children = tree
+            .actions_children()
+            .map(|(a, t)| {
+                <span class="kw">let </span>ssn = a.try_into_ssn(<span class="kw-2">&amp;</span>tree.board()).unwrap();
+                <span class="self">Self</span>::typeset_standard_core(t, <span class="kw-2">&amp;</span>next_indent, <span class="kw-2">&amp;</span>ssn)
+            })
+            .collect::&lt;Vec&lt;String&gt;&gt;()
+            .join(<span class="string">&quot;\n&quot;</span>);
+        <span class="kw">if </span>children.is_empty() {
+            <span class="macro">format!</span>(<span class="string">&quot;{}{}{}&quot;</span>, indent, edge, node)
+        } <span class="kw">else </span>{
+            <span class="macro">format!</span>(<span class="string">&quot;{}{}{}\n{}&quot;</span>, indent, edge, node, children)
+        }
+    }
+}
+
+<span class="attr">#[derive(Debug, Clone)]
+</span><span class="kw">pub struct </span>TreeDisplay&lt;<span class="lifetime">&#39;a</span>&gt; {
+    tree: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardValueTree,
+    format: TreeDisplayFormat,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Display <span class="kw">for </span>TreeDisplay&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.format.typeset(<span class="self">self</span>.tree))
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TreeDisplay&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>new(tree: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BoardValueTree) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            tree,
+            format: TreeDisplayFormat::Standard,
+        }
+    }
+
+    <span class="kw">pub fn </span>with_format(<span class="self">self</span>, format: TreeDisplayFormat) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ format, ..<span class="self">self </span>}
+    }
+}
+
 <span class="comment">// ****************************************************************************
 //  Helper Items
 // ****************************************************************************
@@ -1756,22 +1892,6 @@
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
-    }
-}
-
-<span class="doccomment">/// Prints contents of [`BoardValueTree`] (experimental api)
-///
-/// Similar functions should be implemented as [`std::fmt::Display`]
-/// for [`BoardValueTree`].
-</span><span class="kw">pub fn </span>print_tree(tree: <span class="kw-2">&amp;</span>BoardValueTree) {
-    print_tree_core(tree, <span class="string">&quot;&quot;</span>);
-}
-
-<span class="kw">fn </span>print_tree_core(tree: <span class="kw-2">&amp;</span>BoardValueTree, top: <span class="kw-2">&amp;</span>str) {
-    <span class="kw">let </span>next_top = <span class="macro">format!</span>(<span class="string">&quot;\t{}&quot;</span>, top);
-    <span class="macro">println!</span>(<span class="string">&quot;{}{}&quot;</span>, top, tree.value);
-    <span class="kw">for </span>(<span class="kw">_</span>, t) <span class="kw">in </span>tree.actions2children.iter() {
-        print_tree_core(t, <span class="kw-2">&amp;</span>next_top);
     }
 }
 
