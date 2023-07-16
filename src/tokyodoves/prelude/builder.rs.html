@@ -308,6 +308,9 @@
 <a href="#308" id="308">308</a>
 <a href="#309" id="309">309</a>
 <a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::str::FromStr;
 
 <span class="kw">use </span>strum::IntoEnumIterator;
@@ -325,7 +328,7 @@
 <span class="doccomment">/// A builder of [`Board`]
 ///
 /// # Examples
-/// ```ignore
+/// ```rust
 /// use tokyodoves::BoardBuilder;
 ///
 /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
@@ -334,7 +337,7 @@
 /// # }
 /// ```
 ///
-/// ```ignore
+/// ```rust
 /// use tokyodoves::{BoardBuilder, Color, Dove};
 ///
 /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
@@ -351,7 +354,7 @@
 /// # }
 /// ```
 ///
-/// ```ignore
+/// ```rust
 /// use tokyodoves::BoardBuilder;
 ///
 /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
@@ -361,7 +364,7 @@
 /// # }
 /// ```
 ///
-/// ```ignore
+/// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::BoardBuilder;
 ///
@@ -374,10 +377,13 @@
 /// # }
 /// ```
 ///
-/// ```ignore
+/// ```rust
 /// use tokyodoves::BoardBuilder;
 ///
+/// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
 /// let board = BoardBuilder::new().build_unchecked();
+/// # Ok(())
+/// # }
 /// ```
 </span><span class="attr">#[derive(Debug, Clone, Copy)]
 </span><span class="kw">pub struct </span>BoardBuilder {
