@@ -35,7 +35,7 @@ pub mod private {
 /// The generic constant `N` is the maximum number of items
 /// it can hold.
 #[derive(Debug, Clone)]
-pub struct FiniteActionContainer<const N: usize> {
+pub(crate) struct FiniteActionContainer<const N: usize> {
     container: [Option<Action>; N],
     cursor: usize,
 }
@@ -73,7 +73,7 @@ impl<'a, const N: usize> FiniteActionContainer<N> {
 ///
 /// The [`ActionContainer`] that implements trait [`MutableActionContainer`]
 /// is no longer read-only; it has methods to construct and modify itself.
-pub trait MutableActionContainer: ActionContainer {
+pub(crate) trait MutableActionContainer: ActionContainer {
     fn new() -> Self;
 
     fn push(&mut self, action: Action);
@@ -119,7 +119,7 @@ impl<const N: usize> ActionContainer for FiniteActionContainer<N> {
 }
 
 /// An [`Iterator`] returned by [`FiniteActionContainer::iter`]
-pub struct FiniteActionContainerIter<'a> {
+pub(crate) struct FiniteActionContainerIter<'a> {
     iter: std::slice::Iter<'a, Option<Action>>,
 }
 
@@ -132,7 +132,7 @@ impl<'a> Iterator for FiniteActionContainerIter<'a> {
 }
 
 /// An [`Iterator`] returned by [`FiniteActionContainer::into_iter`]
-pub struct FiniteActionContainerIntoIter<const N: usize> {
+pub(crate) struct FiniteActionContainerIntoIter<const N: usize> {
     iter: std::array::IntoIter<Option<Action>, N>,
 }
 
@@ -154,7 +154,7 @@ pub struct DoveSet {
 }
 
 impl DoveSet {
-    /// Returns `true` if it is empty.
+    /// Returns `true` if it contains no elements.
     pub fn is_empty(&self) -> bool {
         self.hash == 0
     }
@@ -179,7 +179,7 @@ impl IntoIterator for DoveSet {
     }
 }
 
-/// An [`Iterator`] returned by [`DoveSet::into_iter`]
+/// An owned [`Iterator`] returned by [`DoveSet::into_iter`]
 pub struct DoveSetIntoIter {
     dove_set: DoveSet,
     cursor: u8,
