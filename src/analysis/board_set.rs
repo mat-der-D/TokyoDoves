@@ -422,7 +422,7 @@ impl BoardSet {
     /// let mut set1 = BoardSet::new();
     /// let mut set2 = BoardSet::new();
     /// set2.insert(Board::new());
-    /// set1.absorb_from_drained(&mut set2);
+    /// set1.absorb_drained(&mut set2);
     /// assert_eq!(set1.len(), 1);
     /// assert!(set2.is_empty());
     /// ```
@@ -438,12 +438,12 @@ impl BoardSet {
     ///
     /// // Suppose set2 is very large
     /// set1.reserve(set2.capacity()); // allocate sufficient memory
-    /// set1.absorb_from_drained(&mut set2);
+    /// set1.absorb_drained(&mut set2);
     /// assert_eq!(set1.len(), 1);
     /// assert!(set2.is_empty());
     /// ```
-    pub fn absorb_from_drained(&mut self, set: &mut BoardSet) {
-        self.raw.absorb_from_drained(&mut set.raw);
+    pub fn absorb_drained(&mut self, set: &mut BoardSet) {
+        self.raw.absorb_drained(&mut set.raw);
     }
 
     /// Inserts all elements given by `reader` into `self`.
@@ -1000,7 +1000,7 @@ impl RawBoardSet {
     /// let mut set1 = RawBoardSet::new();
     /// let mut set2 = RawBoardSet::new();
     /// set2.insert(Board::new().to_u64());
-    /// set1.absorb_from_drained(&mut set2);
+    /// set1.absorb_drained(&mut set2);
     /// assert_eq!(set1.len(), 1);
     /// assert!(set2.is_empty());
     /// ```
@@ -1016,11 +1016,11 @@ impl RawBoardSet {
     ///
     /// // Suppose set2 is very large
     /// set1.reserve(set2.capacity()); // allocate sufficient memory
-    /// set1.absorb_from_drained(&mut set2);
+    /// set1.absorb_drained(&mut set2);
     /// assert_eq!(set1.len(), 1);
     /// assert!(set2.is_empty());
     /// ```
-    pub fn absorb_from_drained(&mut self, set: &mut RawBoardSet) {
+    pub fn absorb_drained(&mut self, set: &mut RawBoardSet) {
         for (top, bottoms) in set.top2bottoms.iter_mut() {
             if bottoms.is_empty() {
                 continue;
