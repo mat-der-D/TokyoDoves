@@ -23,6 +23,12 @@ pub enum BoardDisplayFormat {
     Simple { empty: char, delimiter: String },
 }
 
+impl Default for BoardDisplayFormat {
+    fn default() -> Self {
+        Self::Framed
+    }
+}
+
 impl BoardDisplayFormat {
     fn typeset(&self, board: &Board) -> String {
         use BoardDisplayFormat::*;
@@ -76,7 +82,7 @@ impl<'a> BoardDisplay<'a> {
     pub(crate) fn new(board: &'a Board) -> Self {
         Self {
             board,
-            format: BoardDisplayFormat::Framed,
+            format: Default::default(),
         }
     }
 

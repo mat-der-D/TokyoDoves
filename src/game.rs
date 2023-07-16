@@ -357,6 +357,12 @@ pub enum GameDisplayFormat {
     Standard,
 }
 
+impl Default for GameDisplayFormat {
+    fn default() -> Self {
+        Self::Standard
+    }
+}
+
 impl GameDisplayFormat {
     fn typeset(&self, game: &Game) -> String {
         use GameDisplayFormat::*;
@@ -385,7 +391,7 @@ impl<'a> GameDisplay<'a> {
     fn new(game: &'a Game) -> Self {
         Self {
             game,
-            format: GameDisplayFormat::Standard,
+            format: Default::default(),
         }
     }
 

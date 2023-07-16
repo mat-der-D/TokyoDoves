@@ -595,6 +595,12 @@ pub enum TreeDisplayFormat {
     Standard,
 }
 
+impl Default for TreeDisplayFormat {
+    fn default() -> Self {
+        Self::Standard
+    }
+}
+
 impl TreeDisplayFormat {
     fn typeset(&self, tree: &BoardValueTree) -> String {
         use TreeDisplayFormat::*;
@@ -652,7 +658,7 @@ impl<'a> TreeDisplay<'a> {
     fn new(tree: &'a BoardValueTree) -> Self {
         Self {
             tree,
-            format: TreeDisplayFormat::Standard,
+            format: Default::default(),
         }
     }
 
