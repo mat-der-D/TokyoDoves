@@ -1028,9 +1028,8 @@ type MapIter<'a> = std::collections::hash_map::Iter<'a, u32, HashSet<u32>>;
 type SetIter<'a> = std::collections::hash_set::Iter<'a, u32>;
 
 pub struct RawIter<'a> {
-    set: &'a RawBoardSet,
+    map_iter: MapIter<'a>, // iterator of top2bottoms
     state: Option<(
-        MapIter<'a>, // iterator of top2bottoms
         u32,         // key of top2bottoms
         SetIter<'a>, // iterator of value of top2bottoms
     )>,
@@ -1038,7 +1037,10 @@ pub struct RawIter<'a> {
 
 impl<'a> RawIter<'a> {
     fn new(set: &'a RawBoardSet) -> Self {
-        Self { set, state: None }
+        Self {
+            map_iter: set.top2bottoms.iter(),
+            state: None,
+        }
     }
 }
 
@@ -1046,15 +1048,14 @@ impl<'a> Iterator for RawIter<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let Some((map_iter, top, set_iter)) = self.state.as_mut() else {
-                let mut map_iter_raw = self.set.top2bottoms.iter();
-                let (top, set) = map_iter_raw.next()?;
-                self.state = Some((map_iter_raw, *top, set.iter()));
+            let Some((top, set_iter)) = self.state.as_mut() else {
+                let (top, set) = self.map_iter.next()?;
+                self.state = Some((*top, set.iter()));
                 continue;
             };
 
             let Some(bottom) = set_iter.next() else {
-                let (next_top, next_set) = map_iter.next()?;
+                let (next_top, next_set) = self.map_iter.next()?;
                 *top = *next_top;
                 *set_iter = next_set.iter();
                 continue;
@@ -1068,9 +1069,8 @@ type MapIntoIter = std::collections::hash_map::IntoIter<u32, HashSet<u32>>;
 type SetIntoIter = std::collections::hash_set::IntoIter<u32>;
 
 pub struct RawIntoIter {
-    set: Option<RawBoardSet>,
+    map_iter: MapIntoIter, // iterator of set.top2bottoms
     state: Option<(
-        MapIntoIter, // iterator of set.top2bottoms
         u32,         // key of set.top2bottoms
         SetIntoIter, // iterator of value of set.top2bottoms
     )>,
@@ -1079,7 +1079,7 @@ pub struct RawIntoIter {
 impl RawIntoIter {
     fn new(set: RawBoardSet) -> Self {
         Self {
-            set: Some(set),
+            map_iter: set.top2bottoms.into_iter(),
             state: None,
         }
     }
@@ -1089,16 +1089,14 @@ impl Iterator for RawIntoIter {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let Some((map_iter, top, set_iter)) = self.state.as_mut() else {
-                let set = std::mem::replace(&mut self.set, None)?;
-                let mut map_iter_raw = set.top2bottoms.into_iter();
-                let (top, set) = map_iter_raw.next()?;
-                self.state = Some((map_iter_raw, top, set.into_iter()));
+            let Some((top, set_iter)) = self.state.as_mut() else {
+                let (top, set) = self.map_iter.next()?;
+                self.state = Some((top, set.into_iter()));
                 continue;
             };
 
             let Some(bottom) = set_iter.next() else {
-                let (next_top, next_set) = map_iter.next()?;
+                let (next_top, next_set) = self.map_iter.next()?;
                 *top = next_top;
                 *set_iter = next_set.into_iter();
                 continue;
