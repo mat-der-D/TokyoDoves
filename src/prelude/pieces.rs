@@ -7,6 +7,12 @@ pub enum Color {
     Green,
 }
 
+impl std::fmt::Display for Color {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 impl std::ops::Not for Color {
     type Output = Color;
     fn not(self) -> Self::Output {
