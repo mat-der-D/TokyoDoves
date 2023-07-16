@@ -254,7 +254,7 @@
 /// The generic constant `N` is the maximum number of items
 /// it can hold.
 </span><span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub struct </span>FiniteActionContainer&lt;<span class="kw">const </span>N: usize&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FiniteActionContainer&lt;<span class="kw">const </span>N: usize&gt; {
     container: [<span class="prelude-ty">Option</span>&lt;Action&gt;; N],
     cursor: usize,
 }
@@ -292,7 +292,7 @@
 ///
 /// The [`ActionContainer`] that implements trait [`MutableActionContainer`]
 /// is no longer read-only; it has methods to construct and modify itself.
-</span><span class="kw">pub trait </span>MutableActionContainer: ActionContainer {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait </span>MutableActionContainer: ActionContainer {
     <span class="kw">fn </span>new() -&gt; <span class="self">Self</span>;
 
     <span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, action: Action);
@@ -338,7 +338,7 @@
 }
 
 <span class="doccomment">/// An [`Iterator`] returned by [`FiniteActionContainer::iter`]
-</span><span class="kw">pub struct </span>FiniteActionContainerIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FiniteActionContainerIter&lt;<span class="lifetime">&#39;a</span>&gt; {
     iter: std::slice::Iter&lt;<span class="lifetime">&#39;a</span>, <span class="prelude-ty">Option</span>&lt;Action&gt;&gt;,
 }
 
@@ -351,7 +351,7 @@
 }
 
 <span class="doccomment">/// An [`Iterator`] returned by [`FiniteActionContainer::into_iter`]
-</span><span class="kw">pub struct </span>FiniteActionContainerIntoIter&lt;<span class="kw">const </span>N: usize&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FiniteActionContainerIntoIter&lt;<span class="kw">const </span>N: usize&gt; {
     iter: std::array::IntoIter&lt;<span class="prelude-ty">Option</span>&lt;Action&gt;, N&gt;,
 }
 
@@ -373,7 +373,7 @@
 }
 
 <span class="kw">impl </span>DoveSet {
-    <span class="doccomment">/// Returns `true` if it is empty.
+    <span class="doccomment">/// Returns `true` if it contains no elements.
     </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.hash == <span class="number">0
     </span>}
@@ -398,7 +398,7 @@
     }
 }
 
-<span class="doccomment">/// An [`Iterator`] returned by [`DoveSet::into_iter`]
+<span class="doccomment">/// An owned [`Iterator`] returned by [`DoveSet::into_iter`]
 </span><span class="kw">pub struct </span>DoveSetIntoIter {
     dove_set: DoveSet,
     cursor: u8,
