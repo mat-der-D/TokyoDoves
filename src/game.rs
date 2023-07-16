@@ -375,6 +375,7 @@ impl GameDisplayFormat {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct GameDisplay<'a> {
     game: &'a Game,
     format: GameDisplayFormat,

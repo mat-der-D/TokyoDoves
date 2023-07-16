@@ -4,7 +4,7 @@ use crate::error;
 
 use crate::prelude::{
     actions::Action,
-    pieces::{color_dove_to_char, color_to_index, dove_to_index, Color, Dove},
+    pieces::{color_to_index, dove_to_index, Color, Dove},
     shift::Shift,
 };
 
@@ -14,6 +14,7 @@ use crate::prelude::board::{
 
 pub use crate::prelude::board::{
     container::{ActionContainer, DoveSet, DoveSetIntoIter},
+    display::{BoardDisplay, BoardDisplayFormat},
     mask::Rectangle,
 };
 
@@ -1020,6 +1021,10 @@ impl Board {
         matrix
     }
 
+    pub fn display(&self) -> BoardDisplay {
+        BoardDisplay::new(self)
+    }
+
     /// Returns a `String` expression with a frame.
     ///
     /// # Examples
@@ -1044,36 +1049,18 @@ impl Board {
     /// # }
     /// ```
     pub fn to_framed_string(&self) -> String {
-        let hframe = "+---+---+---+---+".to_string();
-        let mut lines = Vec::new();
-        for line in self.to_4x4_matrix() {
-            lines.push(hframe.clone());
-            let line_str: String = line
-                .into_iter()
-                .map(|x| match x {
-                    Some((c, d)) => format!("| {} ", color_dove_to_char(c, d)),
-                    None => "|   ".to_string(),
-                })
-                .collect();
-            lines.push(line_str + "|");
-        }
-        lines.push(hframe);
-        lines.join("\n")
+        self.display()
+            .with_format(BoardDisplayFormat::Framed)
+            .to_string()
     }
 
     pub fn to_simple_string(&self, empty: char, delimiter: &str) -> String {
-        let mut lines = Vec::new();
-        for line in self.to_4x4_matrix() {
-            let line_str: String = line
-                .into_iter()
-                .map(|x| match x {
-                    Some((c, d)) => color_dove_to_char(c, d),
-                    None => empty,
-                })
-                .collect();
-            lines.push(line_str);
-        }
-        lines.join(delimiter)
+        self.display()
+            .with_format(BoardDisplayFormat::Simple {
+                empty,
+                delimiter: delimiter.to_owned(),
+            })
+            .to_string()
     }
 }
 
