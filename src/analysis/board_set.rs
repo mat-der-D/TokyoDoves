@@ -478,7 +478,7 @@ macro_rules! impl_iterators {
 
 impl_iterators!(
     { IntoIter => RawIntoIter }
-    { Drain => RawDrain }
+    < Drain => RawDrain >
     < Iter => RawIter >
     < Difference => RawDifference >
     < SymmetricDifference => RawSymmetricDifference >
@@ -1087,19 +1087,44 @@ impl Iterator for RawIntoIter {
     }
 }
 
-pub struct RawDrain(RawIntoIter);
+type MapDrain<'a> = std::collections::hash_map::IterMut<'a, u32, HashSet<u32>>;
+type SetDrain<'a> = std::collections::hash_set::Drain<'a, u32>;
 
-impl RawDrain {
-    fn new(set: &mut RawBoardSet) -> Self {
-        let original = std::mem::replace(set, RawBoardSet::new());
-        Self(original.into_iter())
+pub struct RawDrain<'a> {
+    map_iter: MapDrain<'a>, // iterator of top2bottoms
+    state: Option<(
+        u32,          // key of top2bottoms
+        SetDrain<'a>, // iterator of value of top2bottoms
+    )>,
+}
+
+impl<'a> RawDrain<'a> {
+    fn new(set: &'a mut RawBoardSet) -> Self {
+        Self {
+            map_iter: set.top2bottoms.iter_mut(),
+            state: None,
+        }
     }
 }
 
-impl Iterator for RawDrain {
+impl<'a> Iterator for RawDrain<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next()
+        loop {
+            let Some((top, set_iter)) = self.state.as_mut() else {
+                let (top, set) = self.map_iter.next()?;
+                self.state = Some((*top, set.drain()));
+                continue;
+            };
+
+            let Some(bottom) = set_iter.next() else {
+                let (next_top, next_set) = self.map_iter.next()?;
+                *top = *next_top;
+                *set_iter = next_set.drain();
+                continue;
+            };
+            return Some(RawBoardSet::u32_u32_to_u64(*top, bottom));
+        }
     }
 }
 
