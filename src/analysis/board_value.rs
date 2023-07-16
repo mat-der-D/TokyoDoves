@@ -591,13 +591,13 @@ impl BoardValueTree {
 }
 
 #[derive(Debug, Clone)]
-pub enum Format {
+pub enum TreeDisplayFormat {
     Standard,
 }
 
-impl Format {
+impl TreeDisplayFormat {
     fn typeset(&self, tree: &BoardValueTree) -> String {
-        use Format::*;
+        use TreeDisplayFormat::*;
         match self {
             Standard => Self::typeset_standard(tree),
         }
@@ -639,7 +639,7 @@ impl Format {
 #[derive(Debug, Clone)]
 pub struct TreeDisplay<'a> {
     tree: &'a BoardValueTree,
-    format: Format,
+    format: TreeDisplayFormat,
 }
 
 impl<'a> std::fmt::Display for TreeDisplay<'a> {
@@ -652,11 +652,11 @@ impl<'a> TreeDisplay<'a> {
     fn new(tree: &'a BoardValueTree) -> Self {
         Self {
             tree,
-            format: Format::Standard,
+            format: TreeDisplayFormat::Standard,
         }
     }
 
-    pub fn with_format(self, format: Format) -> Self {
+    pub fn with_format(self, format: TreeDisplayFormat) -> Self {
         Self { format, ..self }
     }
 }
@@ -714,22 +714,6 @@ impl Interval {
         } else {
             None
         }
-    }
-}
-
-/// Prints contents of [`BoardValueTree`] (experimental api)
-///
-/// Similar functions should be implemented as [`std::fmt::Display`]
-/// for [`BoardValueTree`].
-pub fn print_tree(tree: &BoardValueTree) {
-    print_tree_core(tree, "");
-}
-
-fn print_tree_core(tree: &BoardValueTree, top: &str) {
-    let next_top = format!("\t{}", top);
-    println!("{}{}", top, tree.value);
-    for (_, t) in tree.actions2children.iter() {
-        print_tree_core(t, &next_top);
     }
 }
 
