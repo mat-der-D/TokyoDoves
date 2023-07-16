@@ -1108,10 +1108,25 @@ impl Iterator for RawIntoIter {
     }
 }
 
+pub struct RawDrain<'a>(_RawDrain<'a>);
+
+impl<'a> RawDrain<'a> {
+    fn new(set: &'a mut RawBoardSet) -> Self {
+        Self(_RawDrain::new(set))
+    }
+}
+
+impl<'a> Iterator for RawDrain<'a> {
+    type Item = u64;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next()
+    }
+}
+
 type MapDrain<'a> = std::collections::hash_map::IterMut<'a, u32, HashSet<u32>>;
 type SetDrain<'a> = std::collections::hash_set::Drain<'a, u32>;
 
-pub struct RawDrain<'a> {
+struct _RawDrain<'a> {
     map_iter: MapDrain<'a>, // iterator of top2bottoms
     state: Option<(
         u32,          // key of top2bottoms
@@ -1119,7 +1134,7 @@ pub struct RawDrain<'a> {
     )>,
 }
 
-impl<'a> RawDrain<'a> {
+impl<'a> _RawDrain<'a> {
     fn new(set: &'a mut RawBoardSet) -> Self {
         Self {
             map_iter: set.top2bottoms.iter_mut(),
@@ -1128,7 +1143,7 @@ impl<'a> RawDrain<'a> {
     }
 }
 
-impl<'a> Iterator for RawDrain<'a> {
+impl<'a> Iterator for _RawDrain<'a> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -1149,7 +1164,7 @@ impl<'a> Iterator for RawDrain<'a> {
     }
 }
 
-impl<'a> Drop for RawDrain<'a> {
+impl<'a> Drop for _RawDrain<'a> {
     fn drop(&mut self) {
         self.map_iter.by_ref().for_each(|(_, v)| {
             v.drain();
