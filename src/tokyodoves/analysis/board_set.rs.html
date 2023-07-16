@@ -1292,6 +1292,93 @@
 <a href="#1292" id="1292">1292</a>
 <a href="#1293" id="1293">1293</a>
 <a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
+<a href="#1296" id="1296">1296</a>
+<a href="#1297" id="1297">1297</a>
+<a href="#1298" id="1298">1298</a>
+<a href="#1299" id="1299">1299</a>
+<a href="#1300" id="1300">1300</a>
+<a href="#1301" id="1301">1301</a>
+<a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
+<a href="#1311" id="1311">1311</a>
+<a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
+<a href="#1316" id="1316">1316</a>
+<a href="#1317" id="1317">1317</a>
+<a href="#1318" id="1318">1318</a>
+<a href="#1319" id="1319">1319</a>
+<a href="#1320" id="1320">1320</a>
+<a href="#1321" id="1321">1321</a>
+<a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
+<a href="#1331" id="1331">1331</a>
+<a href="#1332" id="1332">1332</a>
+<a href="#1333" id="1333">1333</a>
+<a href="#1334" id="1334">1334</a>
+<a href="#1335" id="1335">1335</a>
+<a href="#1336" id="1336">1336</a>
+<a href="#1337" id="1337">1337</a>
+<a href="#1338" id="1338">1338</a>
+<a href="#1339" id="1339">1339</a>
+<a href="#1340" id="1340">1340</a>
+<a href="#1341" id="1341">1341</a>
+<a href="#1342" id="1342">1342</a>
+<a href="#1343" id="1343">1343</a>
+<a href="#1344" id="1344">1344</a>
+<a href="#1345" id="1345">1345</a>
+<a href="#1346" id="1346">1346</a>
+<a href="#1347" id="1347">1347</a>
+<a href="#1348" id="1348">1348</a>
+<a href="#1349" id="1349">1349</a>
+<a href="#1350" id="1350">1350</a>
+<a href="#1351" id="1351">1351</a>
+<a href="#1352" id="1352">1352</a>
+<a href="#1353" id="1353">1353</a>
+<a href="#1354" id="1354">1354</a>
+<a href="#1355" id="1355">1355</a>
+<a href="#1356" id="1356">1356</a>
+<a href="#1357" id="1357">1357</a>
+<a href="#1358" id="1358">1358</a>
+<a href="#1359" id="1359">1359</a>
+<a href="#1360" id="1360">1360</a>
+<a href="#1361" id="1361">1361</a>
+<a href="#1362" id="1362">1362</a>
+<a href="#1363" id="1363">1363</a>
+<a href="#1364" id="1364">1364</a>
+<a href="#1365" id="1365">1365</a>
+<a href="#1366" id="1366">1366</a>
+<a href="#1367" id="1367">1367</a>
+<a href="#1368" id="1368">1368</a>
+<a href="#1369" id="1369">1369</a>
+<a href="#1370" id="1370">1370</a>
+<a href="#1371" id="1371">1371</a>
+<a href="#1372" id="1372">1372</a>
+<a href="#1373" id="1373">1373</a>
+<a href="#1374" id="1374">1374</a>
+<a href="#1375" id="1375">1375</a>
+<a href="#1376" id="1376">1376</a>
+<a href="#1377" id="1377">1377</a>
+<a href="#1378" id="1378">1378</a>
+<a href="#1379" id="1379">1379</a>
+<a href="#1380" id="1380">1380</a>
+<a href="#1381" id="1381">1381</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::analysis::io::{Fragment, FragmentIter};
 <span class="kw">use </span><span class="kw">crate</span>::prelude::{Board, BoardBuilder};
 <span class="kw">use </span>std::{
@@ -1543,6 +1630,12 @@
     }
 
     <span class="doccomment">/// Clears the set, returning all elements as an iterator.
+    /// Keeps the allocated memory for reuse.
+    ///
+    /// If the returned iterator is dropped before being fully consumed,
+    /// it drops the remaining elements.
+    /// The returned iterator keeps a mutable borrow on the set to optimize
+    /// its implementation.
     </span><span class="kw">pub fn </span>drain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Drain {
         Drain(RawDrain::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.raw))
     }
@@ -1772,7 +1865,7 @@
 
 <span class="macro">impl_iterators!</span>(
     { IntoIter =&gt; RawIntoIter }
-    { Drain =&gt; RawDrain }
+    &lt; Drain =&gt; RawDrain &gt;
     &lt; Iter =&gt; RawIter &gt;
     &lt; Difference =&gt; RawDifference &gt;
     &lt; SymmetricDifference =&gt; RawSymmetricDifference &gt;
@@ -1783,10 +1876,24 @@
 <span class="comment">// ********************************************************************
 //  BoardSet
 // ********************************************************************
-</span><span class="attr">#[derive(Debug, Clone, Default, PartialEq, Eq)]
+</span><span class="attr">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub struct </span>RawBoardSet {
     <span class="kw">pub</span>(<span class="kw">crate</span>) top2bottoms: HashMap&lt;u32, HashSet&lt;u32&gt;&gt;,
 }
+
+<span class="kw">impl </span>PartialEq <span class="kw">for </span>RawBoardSet {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
+        <span class="self">self</span>.top2bottoms.iter().all(|(t, b)| {
+            other
+                .top2bottoms
+                .get(t)
+                .map(|bb| <span class="kw-2">*</span>b == <span class="kw-2">*</span>bb)
+                .unwrap_or_else(|| b.is_empty())
+        })
+    }
+}
+
+<span class="kw">impl </span>Eq <span class="kw">for </span>RawBoardSet {}
 
 <span class="kw">impl </span>From&lt;BoardSet&gt; <span class="kw">for </span>RawBoardSet {
     <span class="kw">fn </span>from(value: BoardSet) -&gt; <span class="self">Self </span>{
@@ -1933,10 +2040,6 @@
         Capacity(count)
     }
 
-    <span class="kw">fn </span>trim(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.top2bottoms.retain(|<span class="kw">_</span>, v| !v.is_empty());
-    }
-
     <span class="doccomment">/// An iterator visiting all elements in arbitrary order.
     /// The iterator element type is [`Board`].
     ///
@@ -1993,6 +2096,11 @@
     }
 
     <span class="doccomment">/// Clears the set, returning all elements as an iterator.
+    ///
+    /// If the returned iterator is dropped before being fully consumed,
+    /// it drops the remaining elements.
+    /// The returned iterator keeps a mutable borrow on the set to optimize
+    /// its implementation.
     </span><span class="kw">pub fn </span>drain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; RawDrain {
         RawDrain::new(<span class="self">self</span>)
     }
@@ -2025,7 +2133,6 @@
                 f(<span class="kw-2">&amp;</span>hash)
             });
         }
-        <span class="self">self</span>.trim();
     }
 
     <span class="doccomment">/// Clears the set, removing all values
@@ -2062,6 +2169,7 @@
 
     <span class="doccomment">/// Shrinks the capacity of the set as much as possible.
     </span><span class="kw">pub fn </span>shrink_to_fit(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.top2bottoms.retain(|<span class="kw">_</span>, v| !v.is_empty());
         <span class="self">self</span>.top2bottoms.shrink_to_fit();
         <span class="self">self</span>.top2bottoms
             .values_mut()
@@ -2301,17 +2409,19 @@
 <span class="kw">type </span>SetIter&lt;<span class="lifetime">&#39;a</span>&gt; = std::collections::hash_set::Iter&lt;<span class="lifetime">&#39;a</span>, u32&gt;;
 
 <span class="kw">pub struct </span>RawIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet,
-    state: <span class="prelude-ty">Option</span>&lt;(
-        MapIter&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="comment">// iterator of top2bottoms
-        </span>u32,         <span class="comment">// key of top2bottoms
+    map_iter: MapIter&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="comment">// iterator of top2bottoms
+    </span>state: <span class="prelude-ty">Option</span>&lt;(
+        u32,         <span class="comment">// key of top2bottoms
         </span>SetIter&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="comment">// iterator of value of top2bottoms
     </span>)&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RawIter&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>new(set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>RawBoardSet) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ set, state: <span class="prelude-val">None </span>}
+        <span class="self">Self </span>{
+            map_iter: set.top2bottoms.iter(),
+            state: <span class="prelude-val">None</span>,
+        }
     }
 }
 
@@ -2319,15 +2429,14 @@
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">loop </span>{
-            <span class="kw">let </span><span class="prelude-val">Some</span>((map_iter, top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
-                <span class="kw">let </span><span class="kw-2">mut </span>map_iter_raw = <span class="self">self</span>.set.top2bottoms.iter();
-                <span class="kw">let </span>(top, set) = map_iter_raw.next()<span class="question-mark">?</span>;
-                <span class="self">self</span>.state = <span class="prelude-val">Some</span>((map_iter_raw, <span class="kw-2">*</span>top, set.iter()));
+            <span class="kw">let </span><span class="prelude-val">Some</span>((top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
+                <span class="kw">let </span>(top, set) = <span class="self">self</span>.map_iter.next()<span class="question-mark">?</span>;
+                <span class="self">self</span>.state = <span class="prelude-val">Some</span>((<span class="kw-2">*</span>top, set.iter()));
                 <span class="kw">continue</span>;
             };
 
             <span class="kw">let </span><span class="prelude-val">Some</span>(bottom) = set_iter.next() <span class="kw">else </span>{
-                <span class="kw">let </span>(next_top, next_set) = map_iter.next()<span class="question-mark">?</span>;
+                <span class="kw">let </span>(next_top, next_set) = <span class="self">self</span>.map_iter.next()<span class="question-mark">?</span>;
                 <span class="kw-2">*</span>top = <span class="kw-2">*</span>next_top;
                 <span class="kw-2">*</span>set_iter = next_set.iter();
                 <span class="kw">continue</span>;
@@ -2341,10 +2450,9 @@
 <span class="kw">type </span>SetIntoIter = std::collections::hash_set::IntoIter&lt;u32&gt;;
 
 <span class="kw">pub struct </span>RawIntoIter {
-    set: <span class="prelude-ty">Option</span>&lt;RawBoardSet&gt;,
-    state: <span class="prelude-ty">Option</span>&lt;(
-        MapIntoIter, <span class="comment">// iterator of set.top2bottoms
-        </span>u32,         <span class="comment">// key of set.top2bottoms
+    map_iter: MapIntoIter, <span class="comment">// iterator of set.top2bottoms
+    </span>state: <span class="prelude-ty">Option</span>&lt;(
+        u32,         <span class="comment">// key of set.top2bottoms
         </span>SetIntoIter, <span class="comment">// iterator of value of set.top2bottoms
     </span>)&gt;,
 }
@@ -2352,7 +2460,7 @@
 <span class="kw">impl </span>RawIntoIter {
     <span class="kw">fn </span>new(set: RawBoardSet) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            set: <span class="prelude-val">Some</span>(set),
+            map_iter: set.top2bottoms.into_iter(),
             state: <span class="prelude-val">None</span>,
         }
     }
@@ -2362,16 +2470,14 @@
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">loop </span>{
-            <span class="kw">let </span><span class="prelude-val">Some</span>((map_iter, top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
-                <span class="kw">let </span>set = std::mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.set, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
-                <span class="kw">let </span><span class="kw-2">mut </span>map_iter_raw = set.top2bottoms.into_iter();
-                <span class="kw">let </span>(top, set) = map_iter_raw.next()<span class="question-mark">?</span>;
-                <span class="self">self</span>.state = <span class="prelude-val">Some</span>((map_iter_raw, top, set.into_iter()));
+            <span class="kw">let </span><span class="prelude-val">Some</span>((top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
+                <span class="kw">let </span>(top, set) = <span class="self">self</span>.map_iter.next()<span class="question-mark">?</span>;
+                <span class="self">self</span>.state = <span class="prelude-val">Some</span>((top, set.into_iter()));
                 <span class="kw">continue</span>;
             };
 
             <span class="kw">let </span><span class="prelude-val">Some</span>(bottom) = set_iter.next() <span class="kw">else </span>{
-                <span class="kw">let </span>(next_top, next_set) = map_iter.next()<span class="question-mark">?</span>;
+                <span class="kw">let </span>(next_top, next_set) = <span class="self">self</span>.map_iter.next()<span class="question-mark">?</span>;
                 <span class="kw-2">*</span>top = next_top;
                 <span class="kw-2">*</span>set_iter = next_set.into_iter();
                 <span class="kw">continue</span>;
@@ -2381,19 +2487,67 @@
     }
 }
 
-<span class="kw">pub struct </span>RawDrain(RawIntoIter);
+<span class="kw">pub struct </span>RawDrain&lt;<span class="lifetime">&#39;a</span>&gt;(_RawDrain&lt;<span class="lifetime">&#39;a</span>&gt;);
 
-<span class="kw">impl </span>RawDrain {
-    <span class="kw">fn </span>new(set: <span class="kw-2">&amp;mut </span>RawBoardSet) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>original = std::mem::replace(set, RawBoardSet::new());
-        <span class="self">Self</span>(original.into_iter())
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RawDrain&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>new(set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>RawBoardSet) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(_RawDrain::new(set))
     }
 }
 
-<span class="kw">impl </span>Iterator <span class="kw">for </span>RawDrain {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RawDrain&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Item = u64;
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.<span class="number">0</span>.next()
+    }
+}
+
+<span class="kw">type </span>MapDrain&lt;<span class="lifetime">&#39;a</span>&gt; = std::collections::hash_map::IterMut&lt;<span class="lifetime">&#39;a</span>, u32, HashSet&lt;u32&gt;&gt;;
+<span class="kw">type </span>SetDrain&lt;<span class="lifetime">&#39;a</span>&gt; = std::collections::hash_set::Drain&lt;<span class="lifetime">&#39;a</span>, u32&gt;;
+
+<span class="kw">struct </span>_RawDrain&lt;<span class="lifetime">&#39;a</span>&gt; {
+    map_iter: MapDrain&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="comment">// iterator of top2bottoms
+    </span>state: <span class="prelude-ty">Option</span>&lt;(
+        u32,          <span class="comment">// key of top2bottoms
+        </span>SetDrain&lt;<span class="lifetime">&#39;a</span>&gt;, <span class="comment">// iterator of value of top2bottoms
+    </span>)&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; _RawDrain&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>new(set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>RawBoardSet) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            map_iter: set.top2bottoms.iter_mut(),
+            state: <span class="prelude-val">None</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>_RawDrain&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">type </span>Item = u64;
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">loop </span>{
+            <span class="kw">let </span><span class="prelude-val">Some</span>((top, set_iter)) = <span class="self">self</span>.state.as_mut() <span class="kw">else </span>{
+                <span class="kw">let </span>(top, set) = <span class="self">self</span>.map_iter.next()<span class="question-mark">?</span>;
+                <span class="self">self</span>.state = <span class="prelude-val">Some</span>((<span class="kw-2">*</span>top, set.drain()));
+                <span class="kw">continue</span>;
+            };
+
+            <span class="kw">let </span><span class="prelude-val">Some</span>(bottom) = set_iter.next() <span class="kw">else </span>{
+                <span class="kw">let </span>(next_top, next_set) = <span class="self">self</span>.map_iter.next()<span class="question-mark">?</span>;
+                <span class="kw-2">*</span>top = <span class="kw-2">*</span>next_top;
+                <span class="kw-2">*</span>set_iter = next_set.drain();
+                <span class="kw">continue</span>;
+            };
+            <span class="kw">return </span><span class="prelude-val">Some</span>(RawBoardSet::u32_u32_to_u64(<span class="kw-2">*</span>top, bottom));
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Drop <span class="kw">for </span>_RawDrain&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.map_iter.by_ref().for_each(|(<span class="kw">_</span>, v)| {
+            v.drain();
+        });
     }
 }
 
@@ -2584,6 +2738,26 @@
         <span class="kw">let </span><span class="kw-2">mut </span>set1extend2_raw = set1.raw().clone();
         set1extend2_raw.extend(set2.raw().iter());
         <span class="macro">assert_eq!</span>(set1absorb2_raw, set1extend2_raw);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_drain() {
+        <span class="kw">let </span><span class="kw-2">mut </span>set = create_from_strs(<span class="kw-2">&amp;</span>[<span class="string">&quot;Bb&quot;</span>, <span class="string">&quot;Bbh&quot;</span>, <span class="string">&quot;Bba&quot;</span>]);
+        <span class="kw">let </span>set1 = set.clone();
+        <span class="kw">let </span>set2 = BoardSet::from_iter(set.drain());
+        <span class="macro">assert!</span>(set.is_empty());
+        <span class="macro">assert_eq!</span>(set1, set2);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_drain_drop() {
+        <span class="kw">let </span><span class="kw-2">mut </span>set = create_from_strs(<span class="kw-2">&amp;</span>[<span class="string">&quot;Bb&quot;</span>, <span class="string">&quot;Bbh&quot;</span>, <span class="string">&quot;Bba&quot;</span>]);
+        <span class="kw">let </span>capacity = set.capacity();
+        {
+            set.drain();
+        }
+        <span class="macro">assert!</span>(set.is_empty());
+        <span class="macro">assert_eq!</span>(capacity, set.capacity());
     }
 }
 </code></pre></div></section></main></body></html>
