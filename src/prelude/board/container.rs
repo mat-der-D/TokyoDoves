@@ -1,7 +1,9 @@
 //! Container structs of some objects
 
+use crate::error;
 use crate::prelude::{
     actions::Action,
+    board::main::Board,
     pieces::{dove_to_index, try_index_to_dove, Dove},
 };
 
@@ -34,10 +36,23 @@ pub mod private {
 ///
 /// The generic constant `N` is the maximum number of items
 /// it can hold.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub(crate) struct FiniteActionContainer<const N: usize> {
     container: [Option<Action>; N],
     cursor: usize,
+}
+
+impl<const N: usize> std::fmt::Debug for FiniteActionContainer<N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[{}]",
+            self.iter()
+                .map(|x| format!("{x:?}"))
+                .collect::<Vec<String>>()
+                .join(", ")
+        )
+    }
 }
 
 impl<const N: usize> private::Sealed for FiniteActionContainer<N> {}
@@ -66,6 +81,14 @@ impl<'a, const N: usize> FiniteActionContainer<N> {
         FiniteActionContainerIter {
             iter: self.container.iter(),
         }
+    }
+
+    pub fn display_as_ssn(&self, board: &Board) -> Result<String, error::Error> {
+        let mut vec = Vec::with_capacity(self.len());
+        for a in self.iter() {
+            vec.push(a.try_into_ssn(board)?);
+        }
+        Ok(format!("[{}]", vec.join(", ")))
     }
 }
 
