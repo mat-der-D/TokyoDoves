@@ -61,7 +61,7 @@ impl Action {
                 x if x < 0 => ("W", (-x).to_string()),
                 _ => ("", "".to_string()),
             };
-            format!("{}{}{}{}", ns, ns_num, ew, ew_num)
+            format!("{ns}{ns_num}{ew}{ew_num}")
         }
 
         use error::EncodingErrorKind::*;
@@ -72,7 +72,7 @@ impl Action {
                     return Err(BossNotFound(c).into());
                 };
                 let exp = format!(
-                    "+{}{}",
+                    "+{0}{1}",
                     color_dove_to_char(c, d),
                     _shift_to_string(s + pos_boss)
                 );
@@ -82,7 +82,11 @@ impl Action {
                 let Some(pos) = board.position_in_rbcc(c, d) else {
                     return Err(DoveNotFound(c, d).into());
                 };
-                let exp = format!("{}{}", color_dove_to_char(c, d), _shift_to_string(pos + s));
+                let exp = format!(
+                    "{0}{1}",
+                    color_dove_to_char(c, d),
+                    _shift_to_string(pos + s)
+                );
                 Ok(exp)
             }
             Remove(c, d) => {

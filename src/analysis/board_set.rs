@@ -211,7 +211,7 @@ impl BoardSet {
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
     /// for x in set.iter() {
-    ///     println!("{}", x);
+    ///     println!("{x}");
     /// }
     /// ```
     pub fn iter(&self) -> Iter {
@@ -730,7 +730,7 @@ impl RawBoardSet {
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
     /// for x in set.iter() {
-    ///     println!("{}", x);
+    ///     println!("{x}");
     /// }
     /// ```
     pub fn iter(&self) -> RawIter {

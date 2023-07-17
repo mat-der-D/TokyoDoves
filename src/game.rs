@@ -165,7 +165,7 @@ pub enum GameStatus {
 ///     // Create a [`Game`] object allowing `Remove` action
 ///     let mut game = Game::new(true);
 ///     // Displays the status of the game
-///     println!("{}", game);
+///     println!("{game}");
 ///
 ///     let mut turn = 0;
 ///     loop {
@@ -177,7 +177,7 @@ pub enum GameStatus {
 ///         println!("  --> {}", action.try_into_ssn(game.board())?);
 ///
 ///         game.perform(action)?; // Performs the selected action
-///         println!("{}", game);
+///         println!("{game}");
 ///
 ///         if !game.is_ongoing() { // If the game is not ongoing...
 ///             break; // breaks the loop!
@@ -185,7 +185,7 @@ pub enum GameStatus {
 ///     }
 ///
 ///     match game.winner() { // Who won the game?
-///         Some(player) => println!("*** {:?} win! ***", player), // A player won the game
+///         Some(player) => println!("*** {player} win! ***"), // A player won the game
 ///         None => println!("*** Draw! ***"), // It was a draw game
 ///     }
 ///
@@ -202,7 +202,7 @@ pub enum GameStatus {
 ///     .with_is_remove_accepted(false)
 ///     .with_first_player(Color::Green);
 /// let game = Game::new_with_rule(rule);
-/// println!("{}", game);
+/// println!("{game}");
 /// # }
 /// ```
 /// For more information about the default value of [`GameRule`],
@@ -377,7 +377,7 @@ impl GameDisplayFormat {
         } else {
             String::from("None")
         };
-        format!("{}\nNext Player: {}", game.board(), next_player_string)
+        format!("{}\nNext Player: {next_player_string}", game.board())
     }
 }
 
@@ -471,7 +471,7 @@ impl Agent for AnalystAgent {
                 .unwrap()
                 .single()
             {
-                println!("!!! This game is about to end: value={}", val);
+                println!("!!! This game is about to end: value={val}");
             }
         }
 
@@ -505,7 +505,7 @@ impl Agent for ConsoleAgent {
                 println!("Invalid Input. Try Again.");
                 continue;
             };
-            println!("---> Infered Action: {:?}", action_tmp);
+            println!("---> Infered Action: {action_tmp:?}");
             if !legal_actions.contains(action_tmp) {
                 println!("Illegal Action. Try Again.");
                 continue;
@@ -559,10 +559,10 @@ where
         }
 
         println!("~~~~~~ Game Finished! ~~~~~~");
-        println!("Total {} turns", num_turns);
+        println!("Total {num_turns} turns");
         println!("{}", self.game);
         match self.game.winner() {
-            Some(player) => println!("---> {:?} win!", player),
+            Some(player) => println!("---> {player} win!"),
             None => println!("---> Draw!"),
         }
     }

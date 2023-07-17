@@ -239,10 +239,10 @@ impl std::fmt::Display for ArgsValidationErrorKind {
         use ArgsValidationErrorKind::*;
         let msg = match self {
             FinishedGameBoard(_board) => String::from("board of finished game"),
-            UnsupportedValue(value) => format!("{} not supported", value),
+            UnsupportedValue(value) => format!("{value} not supported"),
             DrawJudge => String::from("Judge::Draw not supported"),
         };
-        write!(f, "{}", msg)
+        write!(f, "{msg}")
     }
 }
 
