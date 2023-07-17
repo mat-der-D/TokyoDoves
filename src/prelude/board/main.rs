@@ -147,10 +147,16 @@ pub enum SurroundedStatus {
 //  Implement Traits
 // *******************************************************************
 /// An implementation of Tokyo Doves board based on bitboard techniques
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct Board {
     pub(crate) viewer: MaskViewer,
     pub(crate) positions: ColorDovePositions,
+}
+
+impl std::fmt::Debug for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Board({:?})", self.to_simple_string(' ', ";"))
+    }
 }
 
 impl Board {
