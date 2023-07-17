@@ -226,9 +226,17 @@ impl IntoIterator for DoveSet {
 }
 
 /// An owned [`Iterator`] returned by [`DoveSet::into_iter`]
+#[derive(Clone)]
 pub struct DoveSetIntoIter {
     dove_set: DoveSet,
     cursor: u8,
+}
+
+impl std::fmt::Debug for DoveSetIntoIter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let vec: Vec<String> = self.clone().map(|d| format!("{d:?}")).collect();
+        write!(f, "DoveSetIntoIter[{}]", vec.join(", "))
+    }
 }
 
 impl DoveSetIntoIter {
