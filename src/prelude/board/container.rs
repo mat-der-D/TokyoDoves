@@ -150,6 +150,7 @@ impl<'a, const N: usize> IntoIterator for &'a FiniteActionContainer<N> {
 }
 
 /// An [`Iterator`] returned by [`FiniteActionContainer::iter`]
+#[derive(Clone)]
 pub(crate) struct FiniteActionContainerIter<'a> {
     iter: std::slice::Iter<'a, Option<Action>>,
 }
@@ -162,6 +163,7 @@ impl<'a> Iterator for FiniteActionContainerIter<'a> {
     }
 }
 
+#[derive(Clone)]
 /// An [`Iterator`] returned by [`FiniteActionContainer::into_iter`]
 pub(crate) struct FiniteActionContainerIntoIter<const N: usize> {
     iter: std::array::IntoIter<Option<Action>, N>,
