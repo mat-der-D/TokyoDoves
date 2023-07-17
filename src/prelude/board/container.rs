@@ -1,7 +1,9 @@
 //! Container structs of some objects
 
+use crate::error;
 use crate::prelude::{
     actions::Action,
+    board::main::Board,
     pieces::{dove_to_index, try_index_to_dove, Dove},
 };
 
@@ -79,6 +81,14 @@ impl<'a, const N: usize> FiniteActionContainer<N> {
         FiniteActionContainerIter {
             iter: self.container.iter(),
         }
+    }
+
+    pub fn display_as_ssn(&self, board: &Board) -> Result<String, error::Error> {
+        let mut vec = Vec::with_capacity(self.len());
+        for a in self.iter() {
+            vec.push(a.try_into_ssn(board)?);
+        }
+        Ok(format!("[{}]", vec.join(", ")))
     }
 }
 

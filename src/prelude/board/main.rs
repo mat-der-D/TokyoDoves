@@ -80,6 +80,10 @@ macro_rules! impl_mutable_action_container {
                 pub fn iter(&'a self) -> $iter<'a> {
                     $iter(self.0.iter())
                 }
+
+                pub fn display_as_ssn(&self, board: &Board) -> Result<String, error::Error> {
+                    self.0.display_as_ssn(board)
+                }
             }
 
             impl<'a> IntoIterator for &'a $target {
