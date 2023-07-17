@@ -108,7 +108,8 @@ macro_rules! impl_mutable_action_container {
     };
 }
 
-/// An [`ActionContainer`] returned by [`Board::legal_actions`]
+/// An [`ActionContainer`] returned by [`Board::legal_actions`].
+/// Its contents are in the stack memory.
 #[derive(Clone)]
 pub struct ActionsFwd(FiniteActionContainer<64>);
 
@@ -118,7 +119,8 @@ pub struct ActionsFwdIter<'a>(FiniteActionContainerIter<'a>);
 /// An [`Iterator`] returned by [`ActionsFwd::into_iter`]
 pub struct ActionsFwdIntoIter(FiniteActionContainerIntoIter<64>);
 
-/// An [`ActionContainer`] returned by [`Board::legal_actions_bwd`]
+/// An [`ActionContainer`] returned by [`Board::legal_actions_bwd`].
+/// Its contents are in the stack memory.
 #[derive(Clone)]
 pub struct ActionsBwd(FiniteActionContainer<100>);
 
