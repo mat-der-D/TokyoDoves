@@ -585,7 +585,7 @@ pub struct BoardValueTree {
 }
 
 impl BoardValueTree {
-    pub fn new(board: Board, player: Color) -> Self {
+    fn new(board: Board, player: Color) -> Self {
         Self {
             board_raw: board.to_u64(),
             player,
@@ -594,44 +594,44 @@ impl BoardValueTree {
         }
     }
 
-    /// Returns [`Board`] at the root node
+    /// Returns [`Board`] at the root node.
     pub fn board(&self) -> Board {
         BoardBuilder::from_u64(self.board_raw).build_unchecked()
     }
 
-    /// Returns a reference to the player [`Color`] at the root node
+    /// Returns a reference to the player [`Color`] at the root node.
     pub fn player(&self) -> &Color {
         &self.player
     }
 
-    /// Returns a reference to the [`BoardValue`] at the root node
+    /// Returns a reference to the [`BoardValue`] at the root node.
     pub fn value(&self) -> &BoardValue {
         &self.value
     }
 
-    /// Returns `TreeDisplay` to display `self`
+    /// Returns [`TreeDisplay`] to display `self`.
     pub fn display(&self) -> TreeDisplay {
         TreeDisplay::new(self)
     }
 
-    /// Returns a reference to a child tree associated to the specified [`Action`]
+    /// Returns a reference to a child tree associated to the specified [`Action`].
     ///
     /// It returns `Some(&child)` if a child exists, otherwise `None`.
     pub fn child(&self, action: &Action) -> Option<&BoardValueTree> {
         self.actions2children.get(action)
     }
 
-    /// Returns an [`Iterator`] that iterates over all [`Action`]s connecting to children
+    /// Returns an [`Iterator`] that iterates over all [`Action`]s connecting to children.
     pub fn actions(&self) -> hash_map::Keys<'_, Action, BoardValueTree> {
         self.actions2children.keys()
     }
 
-    /// Returns an [`Iterator`] that iterates over all children
+    /// Returns an [`Iterator`] that iterates over all children.
     pub fn children(&self) -> hash_map::Values<'_, Action, BoardValueTree> {
         self.actions2children.values()
     }
 
-    /// Counts the number of children
+    /// Counts the number of children.
     pub fn num_children(&self) -> usize {
         self.actions2children.len()
     }
@@ -641,14 +641,13 @@ impl BoardValueTree {
         self.actions2children.is_empty()
     }
 
-    /// Returns an [`Iterator`] that iterates all pairs of [`Action`] and [`BoardValueTree`]
+    /// Returns an [`Iterator`] that iterates all pairs of [`Action`] and [`BoardValueTree`].
     pub fn actions_children(&self) -> hash_map::Iter<'_, Action, BoardValueTree> {
         self.actions2children.iter()
     }
 
-    /// Returns the depth of the tree
-    ///
-    /// The depth is defined as the longest steps from the root node to leaf node.
+    /// Returns the depth of the tree, i.e.,
+    /// the longest steps from the root node to leaf node.
     pub fn depth(&self) -> usize {
         1 + self
             .actions2children
@@ -658,6 +657,8 @@ impl BoardValueTree {
             .unwrap_or_default()
     }
 
+    /// Returns `true` if the tree is a single road
+    /// during the first `step` steps.
     pub fn is_good_for_puzzle(&self, step: usize) -> bool {
         if step == 0 {
             true
@@ -686,6 +687,17 @@ impl BoardValueTree {
         }
     }
 
+    /// Saves the tree as a file in DOT language.
+    ///
+    /// DOT language is a graph description language,
+    /// used in a graph visualization software [Graphviz](https://graphviz.org/).
+    ///
+    /// # Examples
+    /// The saved file can be converted to colorful graph by the following command:
+    /// ```text
+    /// graphviz.exe -Tsvg tree.dot -o output.svg
+    /// ```
+    /// See the documentation of Graphviz for more.
     pub fn save_as_dot<W>(&self, writer: W) -> std::io::Result<()>
     where
         W: Write,
