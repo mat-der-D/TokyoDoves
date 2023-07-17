@@ -217,6 +217,14 @@
 <a href="#217" id="217">217</a>
 <a href="#218" id="218">218</a>
 <a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Container structs of some objects
 
 </span><span class="kw">use </span><span class="kw">crate</span>::prelude::{
@@ -335,6 +343,14 @@
         }
         <span class="bool-val">false
     </span>}
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="kw">const </span>N: usize&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FiniteActionContainer&lt;N&gt; {
+    <span class="kw">type </span>Item = &lt;&lt;<span class="self">Self </span><span class="kw">as </span>IntoIterator&gt;::IntoIter <span class="kw">as </span>Iterator&gt;::Item;
+    <span class="kw">type </span>IntoIter = FiniteActionContainerIter&lt;<span class="lifetime">&#39;a</span>&gt;;
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
+        <span class="self">self</span>.iter()
+    }
 }
 
 <span class="doccomment">/// An [`Iterator`] returned by [`FiniteActionContainer::iter`]
