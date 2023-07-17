@@ -11,7 +11,7 @@ use crate::{
 // ****************************************************************************
 //  BoardValue
 // ****************************************************************************
-/// Three kinds of [`BoardValue`]
+/// Kinds of [`BoardValue`]
 ///
 /// This type is returned by [`BoardValue::kind`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -97,10 +97,31 @@ impl std::fmt::Display for BoardValue {
 
 impl BoardValue {
     /// Win(1)
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    /// assert_eq!(BoardValue::MAX, BoardValue::win(1).unwrap());
+    /// ```
     pub const MAX: BoardValue = BoardValue { value: Some(1) };
     /// Lose(2)
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    /// assert_eq!(BoardValue::MIN, BoardValue::lose(2).unwrap());
+    /// ```
     pub const MIN: BoardValue = BoardValue { value: Some(2) };
 
+    /// Returns the kind of the value.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardValue, BoardValueKind};
+    ///
+    /// let value = BoardValue::default();
+    /// assert_eq!(value.kind(), BoardValueKind::Unknown);
+    /// ```
     pub fn kind(&self) -> BoardValueKind {
         use BoardValueKind::*;
         match self.value {
@@ -114,6 +135,17 @@ impl BoardValue {
         }
     }
 
+    /// Creates win value.
+    ///
+    /// The argument `num` must be odd, otherwise it returns `None`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardValue, BoardValueKind};
+    ///
+    /// let value = BoardValue::win(3).unwrap();
+    /// assert_eq!(value.kind(), BoardValueKind::Win);
+    /// ```
     pub fn win(num: usize) -> Option<Self> {
         if num % 2 == 1 {
             Some(BoardValue { value: Some(num) })
@@ -122,6 +154,18 @@ impl BoardValue {
         }
     }
 
+    /// Creates lose value.
+    ///
+    /// The argument `num` must be positive and even,
+    /// otherwise it returns `None`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardValue, BoardValueKind};
+    ///
+    /// let value = BoardValue::lose(4).unwrap();
+    /// assert_eq!(value.kind(), BoardValueKind::Lose);
+    /// ```
     pub fn lose(num: usize) -> Option<Self> {
         if num != 0 && num % 2 == 0 {
             Some(BoardValue { value: Some(num) })
@@ -130,14 +174,45 @@ impl BoardValue {
         }
     }
 
+    /// Creates unknown value.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardValue, BoardValueKind};
+    ///
+    /// let value = BoardValue::unknown();
+    /// assert_eq!(value.kind(), BoardValueKind::Unknown);
+    /// ```
     pub fn unknown() -> Self {
         BoardValue { value: None }
     }
 
+    /// Creates finished value.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardValue, BoardValueKind};
+    ///
+    /// let value = BoardValue::finished();
+    /// assert_eq!(value.kind(), BoardValueKind::Finished);
+    /// ```
     pub fn finished() -> Self {
         BoardValue { value: Some(0) }
     }
 
+    /// Tries to get the number in win or lose.
+    ///
+    /// If `self` is not win or lose, it returns `None`.
+    ///
+    /// # Examples
+    /// ```
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let win = BoardValue::win(3).unwrap();
+    /// assert_eq!(Some(3), win.try_unwrap());
+    /// let unknown = BoardValue::unknown();
+    /// assert_eq!(None, unknown.try_unwrap());
+    /// ```
     pub fn try_unwrap(&self) -> Option<usize> {
         match self.value {
             Some(num) if num >= 1 => self.value,
@@ -145,30 +220,97 @@ impl BoardValue {
         }
     }
 
+    /// Get the number in win or lose.
+    ///
+    /// # Panics
+    /// Panics if `self` is not win or lose.
+    ///
+    /// # Examples
+    /// ```
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let win = BoardValue::win(3).unwrap();
+    /// assert_eq!(3, win.unwrap());
+    /// ```
     pub fn unwrap(&self) -> usize {
         self.try_unwrap().unwrap()
     }
 
+    /// Returns `true` if `self` is win.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let win = BoardValue::win(3).unwrap();
+    /// assert!(win.is_win());
+    /// let unknown = BoardValue::unknown();
+    /// assert!(!unknown.is_win());
+    /// ```
     pub fn is_win(&self) -> bool {
         matches!(self.kind(), BoardValueKind::Win)
     }
 
+    /// Returns `true` if `self` is lose.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let lose = BoardValue::lose(4).unwrap();
+    /// assert!(lose.is_lose());
+    /// let unknown = BoardValue::unknown();
+    /// assert!(!unknown.is_lose());
+    /// ```
     pub fn is_lose(&self) -> bool {
         matches!(self.kind(), BoardValueKind::Lose)
     }
 
+    /// Returns `true` if `self` is unknown.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let unknown = BoardValue::unknown();
+    /// assert!(unknown.is_unknown());
+    /// let win = BoardValue::win(3).unwrap();
+    /// assert!(!win.is_unknown());
+    /// ```
     pub fn is_unknown(&self) -> bool {
         matches!(self.kind(), BoardValueKind::Unknown)
     }
 
+    /// Returns `true` if `self` is finished.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let finished = BoardValue::finished();
+    /// assert!(finished.is_finished());
+    /// let unknown = BoardValue::unknown();
+    /// assert!(!unknown.is_finished());
+    /// ```
     pub fn is_finished(&self) -> bool {
         matches!(self.kind(), BoardValueKind::Finished)
     }
 
-    /// Returns "next" value of a series below:
+    /// Returns the next value of a series below:
     /// ```text
     /// Unknown -> Unknown
     /// Finished -> Win(1) -> Lose(2) -> Win(3) -> Lose(4) -> ...
+    /// ```
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let value = BoardValue::win(3).unwrap();
+    /// let next = BoardValue::lose(4).unwrap();
+    /// assert_eq!(next, value.increment());
+    /// let unknown = BoardValue::unknown();
+    /// assert_eq!(unknown, unknown.increment());
     /// ```
     pub fn increment(&self) -> Self {
         Self {
@@ -179,9 +321,19 @@ impl BoardValue {
     /// Returns "next" values of a series below:
     /// ```text
     /// Unknown -> Unknown
-    /// ... -> Lose(4) -> Win(3) -> Lose(2) -> Win(1) -> Finish
+    /// ... -> Lose(4) -> Win(3) -> Lose(2) -> Win(1) -> Finished
     /// ```
-    /// It returns `None` if self is `Finish`, otherwise `Some(next_value)`.
+    /// It returns `None` if self is `Finished`, otherwise `Some(next_value)`.
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let value = BoardValue::win(3).unwrap();
+    /// let next = BoardValue::lose(2).unwrap();
+    /// assert_eq!(Some(next), value.try_decrement());
+    /// let unknown = BoardValue::unknown();
+    /// assert_eq!(Some(unknown), unknown.try_decrement());
+    /// ```
     pub fn try_decrement(&self) -> Option<Self> {
         let value = match self.value {
             Some(0) => return None,
