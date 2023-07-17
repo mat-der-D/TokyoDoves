@@ -1,6 +1,8 @@
 use strum_macros::EnumIter;
 
-/// Two colors of player, just like black and white in chess.
+/// Two colors of players.
+///
+/// It is just like black and white in chess.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
 pub enum Color {
     Red,
@@ -170,6 +172,18 @@ pub(crate) fn try_index_to_dove(index: usize) -> Option<Dove> {
     Some(dove)
 }
 
+/// Converts a pair of [`Color`] and [`Dove`] to [`char`].
+///
+/// The mapping rule is shown in the table below:
+///
+/// | `Dove` \ `Color` | `Red` | `Green` |
+/// | :-:              | :-:   | :-:     |
+/// | `B`              | 'B'   | 'b'     |
+/// | `A`              | 'A'   | 'a'     |
+/// | `Y`              | 'Y'   | 'y'     |
+/// | `M`              | 'M'   | 'm'     |
+/// | `T`              | 'T'   | 't'     |
+/// | `H`              | 'H'   | 'h'     |
 #[inline]
 pub fn color_dove_to_char(color: Color, dove: Dove) -> char {
     use Color::*;
@@ -190,6 +204,21 @@ pub fn color_dove_to_char(color: Color, dove: Dove) -> char {
     }
 }
 
+/// Converts [`char`] to a pair of [`Color`] and [`Dove`].
+///
+/// The mapping rule is shown in the table below:
+///
+/// | `Dove` \ `Color` | `Red` | `Green` |
+/// | :-:              | :-:   | :-:     |
+/// | `B`              | 'B'   | 'b'     |
+/// | `A`              | 'A'   | 'a'     |
+/// | `Y`              | 'Y'   | 'y'     |
+/// | `M`              | 'M'   | 'm'     |
+/// | `T`              | 'T'   | 't'     |
+/// | `H`              | 'H'   | 'h'     |
+///
+/// It returns `Some((Color, Dove))` when an appropreate pair is found,
+/// otherwise returns `None`.
 #[inline]
 pub fn try_char_to_color_dove(c: char) -> Option<(Color, Dove)> {
     use Color::*;
@@ -210,4 +239,48 @@ pub fn try_char_to_color_dove(c: char) -> Option<(Color, Dove)> {
         _ => return None,
     };
     Some(color_dove)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::strum::IntoEnumIterator;
+    use crate::*;
+
+    #[test]
+    fn test_color_dove_char() {
+        for color in Color::iter() {
+            for dove in Dove::iter() {
+                let ch = color_dove_to_char(color, dove);
+                assert_eq!(Some((color, dove)), try_char_to_color_dove(ch));
+            }
+        }
+    }
+
+    #[test]
+    fn test_color_dove_char_irregular() {
+        for ch in 'a'..='Z' {
+            let Some((color, dove)) = try_char_to_color_dove(ch) else {
+                continue;
+            };
+            assert_eq!(ch, color_dove_to_char(color, dove));
+        }
+    }
+
+    #[test]
+    fn test_dove_index() {
+        for dove in Dove::iter() {
+            let idx = dove_to_index(dove);
+            assert_eq!(Some(dove), try_index_to_dove(idx));
+        }
+    }
+
+    #[test]
+    fn test_dove_index_irregular() {
+        for idx in 0..1_000_000 {
+            let Some(dove) = try_index_to_dove(idx) else {
+                continue;
+            };
+            assert_eq!(idx, dove_to_index(dove));
+        }
+    }
 }

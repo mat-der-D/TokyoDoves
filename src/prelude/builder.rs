@@ -12,7 +12,7 @@ use crate::prelude::{
     pieces::{color_to_index, dove_to_index, try_char_to_color_dove, Color, Dove},
 };
 
-/// A builder of [`Board`]
+/// A builder of [`Board`].
 ///
 /// # Examples
 /// ```rust
