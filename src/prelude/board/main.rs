@@ -27,14 +27,7 @@ macro_rules! impl_mutable_action_container {
         $(
             impl std::fmt::Debug for $target {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    write!(
-                        f,
-                        "[{}]",
-                        self.iter()
-                            .map(|x| format!("{x:?}"))
-                            .collect::<Vec<String>>()
-                            .join(", ")
-                    )
+                    write!(f, "{:?}", self.0)
                 }
             }
 
