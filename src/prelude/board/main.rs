@@ -122,29 +122,43 @@ macro_rules! impl_mutable_action_container {
     };
 }
 
-/// An [`ActionContainer`] returned by [`Board::legal_actions`].
+/// A read-only [`ActionContainer`] returned by
+/// the [`legal_actions`](`Board::legal_actions`) method
+/// on [`Board`].
+///
 /// Its contents are in the stack memory.
 #[derive(Clone)]
 pub struct ActionsFwd(FiniteActionContainer<64>);
 
-/// An [`Iterator`] returned by [`ActionsFwd::iter`]
+/// An [`Iterator`] returned by
+/// the [`iter`](`ActionsFwd::iter`) method
+/// on [`ActionsFwd`].
 #[derive(Clone)]
 pub struct ActionsFwdIter<'a>(FiniteActionContainerIter<'a>);
 
-/// An [`Iterator`] returned by [`ActionsFwd::into_iter`]
+/// An [`Iterator`] returned by
+/// the [`into_iter`](`ActionsFwd::into_iter`) method
+/// on [`ActionsFwd`].
 #[derive(Clone)]
 pub struct ActionsFwdIntoIter(FiniteActionContainerIntoIter<64>);
 
-/// An [`ActionContainer`] returned by [`Board::legal_actions_bwd`].
+/// A read-only [`ActionContainer`] returned by
+/// the [`legal_actions_bwd`](`Board::legal_actions_bwd`) method
+/// on [`Board`].
+///
 /// Its contents are in the stack memory.
 #[derive(Clone)]
 pub struct ActionsBwd(FiniteActionContainer<100>);
 
-/// An [`Iterator`] returned by [`ActionsBwd::iter`]
+/// An [`Iterator`] returned by
+/// [`iter`](`ActionsBwd::iter`) method
+/// on [`ActionsBwd`].
 #[derive(Clone)]
 pub struct ActionsBwdIter<'a>(FiniteActionContainerIter<'a>);
 
-/// An [`Iterator`] returned by [`ActionsBwd::into_iter`]
+/// An [`Iterator`] returned by
+/// the [`into_iter`](`ActionsBwd::into_iter`) method
+/// on [`ActionsBwd`].
 #[derive(Clone)]
 pub struct ActionsBwdIntoIter(FiniteActionContainerIntoIter<100>);
 
@@ -161,7 +175,9 @@ impl_mutable_action_container! {
     }
 }
 
-/// An enum returned by [`Board::surrounded_status`]
+/// An enum returned by
+/// the [`surrounded_status`](`Board::surrounded_status`) method
+/// on [`Board`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SurroundedStatus {
     Both,
@@ -172,7 +188,7 @@ pub enum SurroundedStatus {
 // *******************************************************************
 //  Implement Traits
 // *******************************************************************
-/// An implementation of Tokyo Doves board based on bitboard techniques
+/// A board of Tokyo Doves based on bitboard techniques.
 #[derive(Clone, Copy)]
 pub struct Board {
     pub(crate) viewer: MaskViewer,

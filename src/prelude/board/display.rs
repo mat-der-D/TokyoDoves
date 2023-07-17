@@ -1,6 +1,7 @@
 use crate::prelude::board::main::Board;
 use crate::prelude::pieces::color_dove_to_char;
 
+/// Formats of display used by [`BoardDisplay`].
 #[derive(Debug, Clone)]
 pub enum BoardDisplayFormat {
     /// The first board will be displayed as below:
@@ -72,6 +73,7 @@ impl BoardDisplayFormat {
     }
 }
 
+/// A struct to configure display styles of [`Board`]
 #[derive(Debug, Clone)]
 pub struct BoardDisplay<'a> {
     board: &'a Board,

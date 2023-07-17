@@ -548,7 +548,7 @@ impl BitMask {
     }
 }
 
-/// Rectangle with edges of [`usize`] coordinates.
+/// A rectangle with edges of [`usize`] coordinates.
 ///
 /// This struct is used to describe the minimum rectangle
 /// that contains all doves on the field.

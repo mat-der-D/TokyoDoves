@@ -10,7 +10,7 @@ use crate::prelude::{
 // *******************************************************************
 //  Action Container
 // *******************************************************************
-/// Read-only container of [`Action`]s.
+/// A trait to be implemented to readable containers of [`Action`]s.
 ///
 /// This trait is sealed, i.e. it forces implementers to implement `Sealed` trait,
 /// to prevent crate users from implementing this trait.
@@ -180,7 +180,9 @@ impl<const N: usize> Iterator for FiniteActionContainerIntoIter<N> {
 // *******************************************************************
 //  Dove Container
 // *******************************************************************
-/// Read-only set of [`Dove`]s. It allocates memory in the stack.
+/// A read-only set of [`Dove`]s.
+///
+/// It allocates memory in the stack.
 #[derive(Clone, Copy)]
 pub struct DoveSet {
     pub(crate) hash: u8,
@@ -225,7 +227,9 @@ impl IntoIterator for DoveSet {
     }
 }
 
-/// An owned [`Iterator`] returned by [`DoveSet::into_iter`]
+/// An [`Iterator`] returned by
+/// the [`into_iter`](`DoveSet::into_iter`) method
+/// on [`DoveSet`].
 #[derive(Clone)]
 pub struct DoveSetIntoIter {
     dove_set: DoveSet,

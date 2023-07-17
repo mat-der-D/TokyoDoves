@@ -1,3 +1,5 @@
+//! Convenient tools for playing games
+
 use crate::analysis::{evaluate_board, find_best_actions};
 use crate::error;
 use crate::prelude::{

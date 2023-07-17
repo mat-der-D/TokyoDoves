@@ -11,7 +11,7 @@ use crate::{
 // ****************************************************************************
 //  BoardValue
 // ****************************************************************************
-/// Three kinds of [`BoardValue`]
+/// Kinds of [`BoardValue`]
 ///
 /// This type is returned by [`BoardValue::kind`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -59,7 +59,7 @@ impl PartialOrd for BoardValueKind {
     }
 }
 
-/// Value of board
+/// Value of [`Board`].
 ///
 /// The order of the values is as follows:
 /// ```text
@@ -97,10 +97,31 @@ impl std::fmt::Display for BoardValue {
 
 impl BoardValue {
     /// Win(1)
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    /// assert_eq!(BoardValue::MAX, BoardValue::win(1).unwrap());
+    /// ```
     pub const MAX: BoardValue = BoardValue { value: Some(1) };
     /// Lose(2)
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    /// assert_eq!(BoardValue::MIN, BoardValue::lose(2).unwrap());
+    /// ```
     pub const MIN: BoardValue = BoardValue { value: Some(2) };
 
+    /// Returns the kind of the value.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardValue, BoardValueKind};
+    ///
+    /// let value = BoardValue::default();
+    /// assert_eq!(value.kind(), BoardValueKind::Unknown);
+    /// ```
     pub fn kind(&self) -> BoardValueKind {
         use BoardValueKind::*;
         match self.value {
@@ -114,6 +135,17 @@ impl BoardValue {
         }
     }
 
+    /// Creates win value.
+    ///
+    /// The argument `num` must be odd, otherwise it returns `None`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardValue, BoardValueKind};
+    ///
+    /// let value = BoardValue::win(3).unwrap();
+    /// assert_eq!(value.kind(), BoardValueKind::Win);
+    /// ```
     pub fn win(num: usize) -> Option<Self> {
         if num % 2 == 1 {
             Some(BoardValue { value: Some(num) })
@@ -122,6 +154,18 @@ impl BoardValue {
         }
     }
 
+    /// Creates lose value.
+    ///
+    /// The argument `num` must be positive and even,
+    /// otherwise it returns `None`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardValue, BoardValueKind};
+    ///
+    /// let value = BoardValue::lose(4).unwrap();
+    /// assert_eq!(value.kind(), BoardValueKind::Lose);
+    /// ```
     pub fn lose(num: usize) -> Option<Self> {
         if num != 0 && num % 2 == 0 {
             Some(BoardValue { value: Some(num) })
@@ -130,14 +174,45 @@ impl BoardValue {
         }
     }
 
+    /// Creates unknown value.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardValue, BoardValueKind};
+    ///
+    /// let value = BoardValue::unknown();
+    /// assert_eq!(value.kind(), BoardValueKind::Unknown);
+    /// ```
     pub fn unknown() -> Self {
         BoardValue { value: None }
     }
 
+    /// Creates finished value.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardValue, BoardValueKind};
+    ///
+    /// let value = BoardValue::finished();
+    /// assert_eq!(value.kind(), BoardValueKind::Finished);
+    /// ```
     pub fn finished() -> Self {
         BoardValue { value: Some(0) }
     }
 
+    /// Tries to get the number in win or lose.
+    ///
+    /// If `self` is not win or lose, it returns `None`.
+    ///
+    /// # Examples
+    /// ```
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let win = BoardValue::win(3).unwrap();
+    /// assert_eq!(Some(3), win.try_unwrap());
+    /// let unknown = BoardValue::unknown();
+    /// assert_eq!(None, unknown.try_unwrap());
+    /// ```
     pub fn try_unwrap(&self) -> Option<usize> {
         match self.value {
             Some(num) if num >= 1 => self.value,
@@ -145,30 +220,97 @@ impl BoardValue {
         }
     }
 
+    /// Get the number in win or lose.
+    ///
+    /// # Panics
+    /// Panics if `self` is not win or lose.
+    ///
+    /// # Examples
+    /// ```
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let win = BoardValue::win(3).unwrap();
+    /// assert_eq!(3, win.unwrap());
+    /// ```
     pub fn unwrap(&self) -> usize {
         self.try_unwrap().unwrap()
     }
 
+    /// Returns `true` if `self` is win.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let win = BoardValue::win(3).unwrap();
+    /// assert!(win.is_win());
+    /// let unknown = BoardValue::unknown();
+    /// assert!(!unknown.is_win());
+    /// ```
     pub fn is_win(&self) -> bool {
         matches!(self.kind(), BoardValueKind::Win)
     }
 
+    /// Returns `true` if `self` is lose.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let lose = BoardValue::lose(4).unwrap();
+    /// assert!(lose.is_lose());
+    /// let unknown = BoardValue::unknown();
+    /// assert!(!unknown.is_lose());
+    /// ```
     pub fn is_lose(&self) -> bool {
         matches!(self.kind(), BoardValueKind::Lose)
     }
 
+    /// Returns `true` if `self` is unknown.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let unknown = BoardValue::unknown();
+    /// assert!(unknown.is_unknown());
+    /// let win = BoardValue::win(3).unwrap();
+    /// assert!(!win.is_unknown());
+    /// ```
     pub fn is_unknown(&self) -> bool {
         matches!(self.kind(), BoardValueKind::Unknown)
     }
 
+    /// Returns `true` if `self` is finished.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let finished = BoardValue::finished();
+    /// assert!(finished.is_finished());
+    /// let unknown = BoardValue::unknown();
+    /// assert!(!unknown.is_finished());
+    /// ```
     pub fn is_finished(&self) -> bool {
         matches!(self.kind(), BoardValueKind::Finished)
     }
 
-    /// Returns "next" value of a series below:
+    /// Returns the next value of a series below:
     /// ```text
     /// Unknown -> Unknown
     /// Finished -> Win(1) -> Lose(2) -> Win(3) -> Lose(4) -> ...
+    /// ```
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let value = BoardValue::win(3).unwrap();
+    /// let next = BoardValue::lose(4).unwrap();
+    /// assert_eq!(next, value.increment());
+    /// let unknown = BoardValue::unknown();
+    /// assert_eq!(unknown, unknown.increment());
     /// ```
     pub fn increment(&self) -> Self {
         Self {
@@ -179,9 +321,19 @@ impl BoardValue {
     /// Returns "next" values of a series below:
     /// ```text
     /// Unknown -> Unknown
-    /// ... -> Lose(4) -> Win(3) -> Lose(2) -> Win(1) -> Finish
+    /// ... -> Lose(4) -> Win(3) -> Lose(2) -> Win(1) -> Finished
     /// ```
-    /// It returns `None` if self is `Finish`, otherwise `Some(next_value)`.
+    /// It returns `None` if self is `Finished`, otherwise `Some(next_value)`.
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::BoardValue;
+    ///
+    /// let value = BoardValue::win(3).unwrap();
+    /// let next = BoardValue::lose(2).unwrap();
+    /// assert_eq!(Some(next), value.try_decrement());
+    /// let unknown = BoardValue::unknown();
+    /// assert_eq!(Some(unknown), unknown.try_decrement());
+    /// ```
     pub fn try_decrement(&self) -> Option<Self> {
         let value = match self.value {
             Some(0) => return None,
@@ -433,7 +585,7 @@ pub struct BoardValueTree {
 }
 
 impl BoardValueTree {
-    pub fn new(board: Board, player: Color) -> Self {
+    fn new(board: Board, player: Color) -> Self {
         Self {
             board_raw: board.to_u64(),
             player,
@@ -442,44 +594,44 @@ impl BoardValueTree {
         }
     }
 
-    /// Returns [`Board`] at the root node
+    /// Returns [`Board`] at the root node.
     pub fn board(&self) -> Board {
         BoardBuilder::from_u64(self.board_raw).build_unchecked()
     }
 
-    /// Returns a reference to the player [`Color`] at the root node
+    /// Returns a reference to the player [`Color`] at the root node.
     pub fn player(&self) -> &Color {
         &self.player
     }
 
-    /// Returns a reference to the [`BoardValue`] at the root node
+    /// Returns a reference to the [`BoardValue`] at the root node.
     pub fn value(&self) -> &BoardValue {
         &self.value
     }
 
-    /// Returns `TreeDisplay` to display `self`
+    /// Returns [`TreeDisplay`] to display `self`.
     pub fn display(&self) -> TreeDisplay {
         TreeDisplay::new(self)
     }
 
-    /// Returns a reference to a child tree associated to the specified [`Action`]
+    /// Returns a reference to a child tree associated to the specified [`Action`].
     ///
     /// It returns `Some(&child)` if a child exists, otherwise `None`.
     pub fn child(&self, action: &Action) -> Option<&BoardValueTree> {
         self.actions2children.get(action)
     }
 
-    /// Returns an [`Iterator`] that iterates over all [`Action`]s connecting to children
+    /// Returns an [`Iterator`] that iterates over all [`Action`]s connecting to children.
     pub fn actions(&self) -> hash_map::Keys<'_, Action, BoardValueTree> {
         self.actions2children.keys()
     }
 
-    /// Returns an [`Iterator`] that iterates over all children
+    /// Returns an [`Iterator`] that iterates over all children.
     pub fn children(&self) -> hash_map::Values<'_, Action, BoardValueTree> {
         self.actions2children.values()
     }
 
-    /// Counts the number of children
+    /// Counts the number of children.
     pub fn num_children(&self) -> usize {
         self.actions2children.len()
     }
@@ -489,14 +641,13 @@ impl BoardValueTree {
         self.actions2children.is_empty()
     }
 
-    /// Returns an [`Iterator`] that iterates all pairs of [`Action`] and [`BoardValueTree`]
+    /// Returns an [`Iterator`] that iterates all pairs of [`Action`] and [`BoardValueTree`].
     pub fn actions_children(&self) -> hash_map::Iter<'_, Action, BoardValueTree> {
         self.actions2children.iter()
     }
 
-    /// Returns the depth of the tree
-    ///
-    /// The depth is defined as the longest steps from the root node to leaf node.
+    /// Returns the depth of the tree, i.e.,
+    /// the longest steps from the root node to leaf node.
     pub fn depth(&self) -> usize {
         1 + self
             .actions2children
@@ -506,6 +657,8 @@ impl BoardValueTree {
             .unwrap_or_default()
     }
 
+    /// Returns `true` if the tree is a single road
+    /// during the first `step` steps.
     pub fn is_good_for_puzzle(&self, step: usize) -> bool {
         if step == 0 {
             true
@@ -534,6 +687,17 @@ impl BoardValueTree {
         }
     }
 
+    /// Saves the tree as a file in DOT language.
+    ///
+    /// DOT language is a graph description language,
+    /// used in a graph visualization software [Graphviz](https://graphviz.org/).
+    ///
+    /// # Examples
+    /// The saved file can be converted to colorful graph by the following command:
+    /// ```text
+    /// graphviz.exe -Tsvg tree.dot -o output.svg
+    /// ```
+    /// See the documentation of Graphviz for more.
     pub fn save_as_dot<W>(&self, writer: W) -> std::io::Result<()>
     where
         W: Write,
@@ -591,6 +755,7 @@ impl BoardValueTree {
     }
 }
 
+/// Formats of display used by [`TreeDisplay`].
 #[derive(Debug, Clone)]
 pub enum TreeDisplayFormat {
     Standard,
@@ -643,6 +808,7 @@ impl TreeDisplayFormat {
     }
 }
 
+/// A struct to configure display styles of [`BoardValueTree`].
 #[derive(Debug, Clone)]
 pub struct TreeDisplay<'a> {
     tree: &'a BoardValueTree,
@@ -685,7 +851,9 @@ fn validate_args(board: Board, value: BoardValue, rule: GameRule) -> Result<(), 
     Ok(())
 }
 
-/// Represents closed interval between two [`BoardValue`]s
+/// A struct representing closed interval between two [`BoardValue`]s.
+///
+/// An interval is returned by [`evaluate_board`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Interval {
     left: BoardValue,
@@ -699,22 +867,39 @@ impl std::fmt::Display for Interval {
 }
 
 impl Interval {
+    /// Creates new object.
     pub fn new(left: BoardValue, right: BoardValue) -> Self {
         Self { left, right }
     }
 
+    /// Returns a reference to the left end value.
     pub fn left(&self) -> &BoardValue {
         &self.left
     }
 
+    /// Returns a reference to the right end value.
     pub fn right(&self) -> &BoardValue {
         &self.right
     }
 
+    /// Returns if a given value is between left and right.
     pub fn contains(&self, item: &BoardValue) -> bool {
         self.left <= *item && *item <= self.right
     }
 
+    /// Returns one value in the interval if left and right values are the same.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{Interval, BoardValue};
+    ///
+    /// let win = BoardValue::win(3).unwrap();
+    /// let interval1 = Interval::new(win, win);
+    /// assert_eq!(Some(win), interval1.single());
+    /// let lose = BoardValue::lose(4).unwrap();
+    /// let interval2 = Interval::new(lose, win);
+    /// assert_eq!(None, interval2.single());
+    /// ```
     pub fn single(&self) -> Option<BoardValue> {
         if self.left == self.right {
             Some(self.left)
@@ -898,9 +1083,9 @@ fn create_checkmate_tree_with_value_unchecked(
 /// Compares the value of specified [`Board`] to a given [`BoardValue`].
 ///
 /// It returns:
-/// - `Ok(Greater)` if the value of `board` is greater than `value`
-/// - `Ok(Equal)` if the value of `board` equals to `value`
-/// - `Ok(Less)` if the value of `board` is less than `value
+/// - `Ok(Greater)` if the value of `board` is greater than `value`,
+/// - `Ok(Equal)` if the value of `board` equals to `value`,
+/// - `Ok(Less)` if the value of `board` is less than `value`.
 ///
 /// # Errors
 /// Returns `Err` only when the argument is invalid. Specifically,
@@ -953,11 +1138,11 @@ fn compare_board_value_unchecked(
     cmp
 }
 
-/// Calculates [`BoardValue`] of specified [`Board`].
+/// Calculates a possible range of [`BoardValue`] of specified [`Board`].
 ///
 /// It searches the value of `board` by pursuing `search_depth` turns forward.
 /// The result is returned in [`Interval`], which is a closed interval
-/// between two [`BoardValue`]s.
+/// between two [`BoardValue`]s. It means that the value of the board is in the interval.
 ///
 /// # Errors
 /// Returns `Err` only when the argument is invalid. Specifically,
@@ -999,7 +1184,7 @@ fn evaluate_board_unchecked(
     Interval::new(left, right)
 }
 
-/// Collects the best [`Action`]s by [`BoardValue`]
+/// Collects the best [`Action`]s by [`BoardValue`].
 ///
 /// # Errors
 /// Returns `Err` only when the argument is invalid. Specifically,
