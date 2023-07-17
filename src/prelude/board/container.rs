@@ -10,7 +10,7 @@ use crate::prelude::{
 // *******************************************************************
 //  Action Container
 // *******************************************************************
-/// Read-only [`Sized`] container of [`Action`]s.
+/// Read-only container of [`Action`]s.
 ///
 /// This trait is sealed, i.e. it forces implementers to implement `Sealed` trait,
 /// to prevent crate users from implementing this trait.
@@ -35,7 +35,7 @@ pub mod private {
 /// An [`ActionContainer`] with a finite capacity.
 ///
 /// The generic constant `N` is the maximum number of items
-/// it can hold.
+/// it can hold. It allocates memory in the stack.
 #[derive(Clone)]
 pub(crate) struct FiniteActionContainer<const N: usize> {
     container: [Option<Action>; N],
@@ -178,24 +178,37 @@ impl<const N: usize> Iterator for FiniteActionContainerIntoIter<N> {
 // *******************************************************************
 //  Dove Container
 // *******************************************************************
-/// Read-only [`Sized`] container of [`Dove`]s without duplication.
-#[derive(Debug, Clone, Copy)]
+/// Read-only set of [`Dove`]s. It allocates memory in the stack.
+#[derive(Clone, Copy)]
 pub struct DoveSet {
     pub(crate) hash: u8,
 }
 
+impl std::fmt::Debug for DoveSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{{{}}}",
+            self.into_iter()
+                .map(|d| format!("{d:?}"))
+                .collect::<Vec<String>>()
+                .join(", ")
+        )
+    }
+}
+
 impl DoveSet {
-    /// Returns `true` if it contains no elements.
+    /// Returns `true` if the set contains no elements.
     pub fn is_empty(&self) -> bool {
         self.hash == 0
     }
 
-    /// Returns the number of elements.
+    /// Returns the number of elements in the set.
     pub fn len(&self) -> usize {
         self.hash.count_ones() as usize
     }
 
-    /// Returns `true` if it contains the specified [`Dove`].
+    /// Returns `true` if the set contains a dove.
     pub fn contains(&self, dove: Dove) -> bool {
         let bit = 1 << dove_to_index(dove);
         self.hash & bit != 0
