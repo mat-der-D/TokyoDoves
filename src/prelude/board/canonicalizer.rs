@@ -168,7 +168,7 @@ const fn compose(a: [usize; 16], b: [usize; 16]) -> [usize; 16] {
 /// let mapper = PositionMapper::try_create(3, 2).unwrap();
 /// ```
 /// The [`map`](`PositionMapper::map`) method maps the position number.
-/// The first argument `index` indicates the kind of mapping (from 0 to 8),
+/// The first argument `index` indicates the kind of mapping (from 0 to 7),
 /// and the second argument `pos` is the position number (from 0 to 15).
 /// Formaly,
 /// ```text
