@@ -25,6 +25,19 @@ pub use crate::prelude::board::{
 macro_rules! impl_mutable_action_container {
     ( $($target: ident { $internal: ty, $iter: ident, $into_iter: ident })* ) => {
         $(
+            impl std::fmt::Debug for $target {
+                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    write!(
+                        f,
+                        "[{}]",
+                        self.iter()
+                            .map(|x| format!("{x:?}"))
+                            .collect::<Vec<String>>()
+                            .join(", ")
+                    )
+                }
+            }
+
             impl<'a> Iterator for $iter<'a> {
                 type Item = &'a Action;
                 fn next(&mut self) -> Option<Self::Item> {
@@ -99,7 +112,7 @@ macro_rules! impl_mutable_action_container {
 }
 
 /// An [`ActionContainer`] returned by [`Board::legal_actions`]
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ActionsFwd(FiniteActionContainer<64>);
 
 /// An [`Iterator`] returned by [`ActionsFwd::iter`]
@@ -109,7 +122,7 @@ pub struct ActionsFwdIter<'a>(FiniteActionContainerIter<'a>);
 pub struct ActionsFwdIntoIter(FiniteActionContainerIntoIter<64>);
 
 /// An [`ActionContainer`] returned by [`Board::legal_actions_bwd`]
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ActionsBwd(FiniteActionContainer<100>);
 
 /// An [`Iterator`] returned by [`ActionsBwd::iter`]

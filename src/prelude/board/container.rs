@@ -34,10 +34,23 @@ pub mod private {
 ///
 /// The generic constant `N` is the maximum number of items
 /// it can hold.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub(crate) struct FiniteActionContainer<const N: usize> {
     container: [Option<Action>; N],
     cursor: usize,
+}
+
+impl<const N: usize> std::fmt::Debug for FiniteActionContainer<N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[{}]",
+            self.iter()
+                .map(|x| format!("{x:?}"))
+                .collect::<Vec<String>>()
+                .join(", ")
+        )
+    }
 }
 
 impl<const N: usize> private::Sealed for FiniteActionContainer<N> {}

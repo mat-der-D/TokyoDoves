@@ -1,10 +1,16 @@
 /// Difference between two squares.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Shift {
     /// Horizontal shift. Positive (or negative) direction is on right (or left).
     pub(crate) dh: i8,
     /// Vertical shift. Positive (or negative) direction is on downwards (or upwards).
     pub(crate) dv: i8,
+}
+
+impl std::fmt::Debug for Shift {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Shift {{ dv: {0}, dh: {1} }}", self.dv, self.dh)
+    }
 }
 
 impl Shift {
