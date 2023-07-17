@@ -59,7 +59,7 @@ impl PartialOrd for BoardValueKind {
     }
 }
 
-/// Value of board
+/// Value of [`Board`].
 ///
 /// The order of the values is as follows:
 /// ```text
@@ -591,6 +591,7 @@ impl BoardValueTree {
     }
 }
 
+/// Formats of display used by [`TreeDisplay`].
 #[derive(Debug, Clone)]
 pub enum TreeDisplayFormat {
     Standard,
@@ -643,6 +644,7 @@ impl TreeDisplayFormat {
     }
 }
 
+/// A struct to configure display styles of [`BoardValueTree`].
 #[derive(Debug, Clone)]
 pub struct TreeDisplay<'a> {
     tree: &'a BoardValueTree,
@@ -685,7 +687,7 @@ fn validate_args(board: Board, value: BoardValue, rule: GameRule) -> Result<(), 
     Ok(())
 }
 
-/// Represents closed interval between two [`BoardValue`]s
+/// A struct representing closed interval between two [`BoardValue`]s.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Interval {
     left: BoardValue,
@@ -898,9 +900,9 @@ fn create_checkmate_tree_with_value_unchecked(
 /// Compares the value of specified [`Board`] to a given [`BoardValue`].
 ///
 /// It returns:
-/// - `Ok(Greater)` if the value of `board` is greater than `value`
-/// - `Ok(Equal)` if the value of `board` equals to `value`
-/// - `Ok(Less)` if the value of `board` is less than `value
+/// - `Ok(Greater)` if the value of `board` is greater than `value`,
+/// - `Ok(Equal)` if the value of `board` equals to `value`,
+/// - `Ok(Less)` if the value of `board` is less than `value`.
 ///
 /// # Errors
 /// Returns `Err` only when the argument is invalid. Specifically,
@@ -953,11 +955,11 @@ fn compare_board_value_unchecked(
     cmp
 }
 
-/// Calculates [`BoardValue`] of specified [`Board`].
+/// Calculates a possible range of [`BoardValue`] of specified [`Board`].
 ///
 /// It searches the value of `board` by pursuing `search_depth` turns forward.
 /// The result is returned in [`Interval`], which is a closed interval
-/// between two [`BoardValue`]s.
+/// between two [`BoardValue`]s. It means that the value of the board is in the interval.
 ///
 /// # Errors
 /// Returns `Err` only when the argument is invalid. Specifically,
@@ -999,7 +1001,7 @@ fn evaluate_board_unchecked(
     Interval::new(left, right)
 }
 
-/// Collects the best [`Action`]s by [`BoardValue`]
+/// Collects the best [`Action`]s by [`BoardValue`].
 ///
 /// # Errors
 /// Returns `Err` only when the argument is invalid. Specifically,

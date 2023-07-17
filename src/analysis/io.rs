@@ -70,6 +70,8 @@ where
 // ***********************************************************************
 //  LazyLoader for Board
 // ***********************************************************************
+/// A utility to load [`Board`]s in a lazy way from the binary file
+/// saved by the [`save`](`BoardSet::save`) method of [`BoardSet`].
 #[derive(Debug)]
 pub struct LazyBoardLoader<R>
 where
@@ -137,6 +139,8 @@ where
 // ***********************************************************************
 //  LazyLoader for u64
 // ***********************************************************************
+/// A struct almost the same as [`LazyBoardLoader`],
+/// except that it loads `u64` expressions of [`Board`]s instead.
 #[derive(Debug)]
 pub struct LazyRawBoardLoader<R>
 where
