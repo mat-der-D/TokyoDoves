@@ -1421,6 +1421,12 @@
 <a href="#1421" id="1421">1421</a>
 <a href="#1422" id="1422">1422</a>
 <a href="#1423" id="1423">1423</a>
+<a href="#1424" id="1424">1424</a>
+<a href="#1425" id="1425">1425</a>
+<a href="#1426" id="1426">1426</a>
+<a href="#1427" id="1427">1427</a>
+<a href="#1428" id="1428">1428</a>
+<a href="#1429" id="1429">1429</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">use </span><span class="kw">crate</span>::error;
@@ -1570,10 +1576,16 @@
 //  Implement Traits
 // *******************************************************************
 </span><span class="doccomment">/// An implementation of Tokyo Doves board based on bitboard techniques
-</span><span class="attr">#[derive(Debug, Clone, Copy)]
+</span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub struct </span>Board {
     <span class="kw">pub</span>(<span class="kw">crate</span>) viewer: MaskViewer,
     <span class="kw">pub</span>(<span class="kw">crate</span>) positions: ColorDovePositions,
+}
+
+<span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>Board {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">&quot;Board({:?})&quot;</span>, <span class="self">self</span>.to_simple_string(<span class="string">&#39; &#39;</span>, <span class="string">&quot;;&quot;</span>))
+    }
 }
 
 <span class="kw">impl </span>Board {
