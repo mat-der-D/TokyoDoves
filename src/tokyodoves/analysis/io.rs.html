@@ -251,6 +251,10 @@
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
     analysis::board_set::{BoardSet, RawBoardSet},
     prelude::{Board, BoardBuilder},
@@ -323,6 +327,8 @@
 <span class="comment">// ***********************************************************************
 //  LazyLoader for Board
 // ***********************************************************************
+</span><span class="doccomment">/// A utility to load [`Board`]s in a lazy way from the binary file
+/// saved by the [`save`](`BoardSet::save`) method of [`BoardSet`].
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>LazyBoardLoader&lt;R&gt;
 <span class="kw">where
@@ -390,6 +396,8 @@
 <span class="comment">// ***********************************************************************
 //  LazyLoader for u64
 // ***********************************************************************
+</span><span class="doccomment">/// A struct almost the same as [`LazyBoardLoader`],
+/// except that it loads `u64` expressions of [`Board`]s instead.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>LazyRawBoardLoader&lt;R&gt;
 <span class="kw">where

@@ -1453,6 +1453,22 @@
 <a href="#1453" id="1453">1453</a>
 <a href="#1454" id="1454">1454</a>
 <a href="#1455" id="1455">1455</a>
+<a href="#1456" id="1456">1456</a>
+<a href="#1457" id="1457">1457</a>
+<a href="#1458" id="1458">1458</a>
+<a href="#1459" id="1459">1459</a>
+<a href="#1460" id="1460">1460</a>
+<a href="#1461" id="1461">1461</a>
+<a href="#1462" id="1462">1462</a>
+<a href="#1463" id="1463">1463</a>
+<a href="#1464" id="1464">1464</a>
+<a href="#1465" id="1465">1465</a>
+<a href="#1466" id="1466">1466</a>
+<a href="#1467" id="1467">1467</a>
+<a href="#1468" id="1468">1468</a>
+<a href="#1469" id="1469">1469</a>
+<a href="#1470" id="1470">1470</a>
+<a href="#1471" id="1471">1471</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">use </span><span class="kw">crate</span>::error;
@@ -1577,29 +1593,43 @@
     };
 }
 
-<span class="doccomment">/// An [`ActionContainer`] returned by [`Board::legal_actions`].
+<span class="doccomment">/// A read-only [`ActionContainer`] returned by
+/// the [`legal_actions`](`Board::legal_actions`) method
+/// on [`Board`].
+///
 /// Its contents are in the stack memory.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsFwd(FiniteActionContainer&lt;<span class="number">64</span>&gt;);
 
-<span class="doccomment">/// An [`Iterator`] returned by [`ActionsFwd::iter`]
+<span class="doccomment">/// An [`Iterator`] returned by
+/// the [`iter`](`ActionsFwd::iter`) method
+/// on [`ActionsFwd`].
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsFwdIter&lt;<span class="lifetime">&#39;a</span>&gt;(FiniteActionContainerIter&lt;<span class="lifetime">&#39;a</span>&gt;);
 
-<span class="doccomment">/// An [`Iterator`] returned by [`ActionsFwd::into_iter`]
+<span class="doccomment">/// An [`Iterator`] returned by
+/// the [`into_iter`](`ActionsFwd::into_iter`) method
+/// on [`ActionsFwd`].
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsFwdIntoIter(FiniteActionContainerIntoIter&lt;<span class="number">64</span>&gt;);
 
-<span class="doccomment">/// An [`ActionContainer`] returned by [`Board::legal_actions_bwd`].
+<span class="doccomment">/// A read-only [`ActionContainer`] returned by
+/// the [`legal_actions_bwd`](`Board::legal_actions_bwd`) method
+/// on [`Board`].
+///
 /// Its contents are in the stack memory.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsBwd(FiniteActionContainer&lt;<span class="number">100</span>&gt;);
 
-<span class="doccomment">/// An [`Iterator`] returned by [`ActionsBwd::iter`]
+<span class="doccomment">/// An [`Iterator`] returned by
+/// [`iter`](`ActionsBwd::iter`) method
+/// on [`ActionsBwd`].
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsBwdIter&lt;<span class="lifetime">&#39;a</span>&gt;(FiniteActionContainerIter&lt;<span class="lifetime">&#39;a</span>&gt;);
 
-<span class="doccomment">/// An [`Iterator`] returned by [`ActionsBwd::into_iter`]
+<span class="doccomment">/// An [`Iterator`] returned by
+/// the [`into_iter`](`ActionsBwd::into_iter`) method
+/// on [`ActionsBwd`].
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsBwdIntoIter(FiniteActionContainerIntoIter&lt;<span class="number">100</span>&gt;);
 
@@ -1616,7 +1646,9 @@
     </span>}
 }
 
-<span class="doccomment">/// An enum returned by [`Board::surrounded_status`]
+<span class="doccomment">/// An enum returned by
+/// the [`surrounded_status`](`Board::surrounded_status`) method
+/// on [`Board`].
 </span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 </span><span class="kw">pub enum </span>SurroundedStatus {
     Both,
@@ -1627,7 +1659,7 @@
 <span class="comment">// *******************************************************************
 //  Implement Traits
 // *******************************************************************
-</span><span class="doccomment">/// An implementation of Tokyo Doves board based on bitboard techniques
+</span><span class="doccomment">/// A board of Tokyo Doves based on bitboard techniques.
 </span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub struct </span>Board {
     <span class="kw">pub</span>(<span class="kw">crate</span>) viewer: MaskViewer,

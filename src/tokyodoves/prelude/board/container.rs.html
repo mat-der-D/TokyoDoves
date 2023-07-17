@@ -271,6 +271,10 @@
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
 <a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Container structs of some objects
 
 </span><span class="kw">use </span><span class="kw">crate</span>::error;
@@ -283,7 +287,7 @@
 <span class="comment">// *******************************************************************
 //  Action Container
 // *******************************************************************
-</span><span class="doccomment">/// Read-only container of [`Action`]s.
+</span><span class="doccomment">/// A trait to be implemented to readable containers of [`Action`]s.
 ///
 /// This trait is sealed, i.e. it forces implementers to implement `Sealed` trait,
 /// to prevent crate users from implementing this trait.
@@ -453,7 +457,9 @@
 <span class="comment">// *******************************************************************
 //  Dove Container
 // *******************************************************************
-</span><span class="doccomment">/// Read-only set of [`Dove`]s. It allocates memory in the stack.
+</span><span class="doccomment">/// A read-only set of [`Dove`]s.
+///
+/// It allocates memory in the stack.
 </span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub struct </span>DoveSet {
     <span class="kw">pub</span>(<span class="kw">crate</span>) hash: u8,
@@ -498,7 +504,9 @@
     }
 }
 
-<span class="doccomment">/// An owned [`Iterator`] returned by [`DoveSet::into_iter`]
+<span class="doccomment">/// An [`Iterator`] returned by
+/// the [`into_iter`](`DoveSet::into_iter`) method
+/// on [`DoveSet`].
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>DoveSetIntoIter {
     dove_set: DoveSet,
