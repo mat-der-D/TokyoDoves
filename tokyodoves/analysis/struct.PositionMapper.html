@@ -105,7 +105,7 @@ The mapper that matches the situation is constructed by the following:</p>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokyodoves::analysis::PositionMapper;
 <span class="kw">let </span>mapper = PositionMapper::try_create(<span class="number">3</span>, <span class="number">2</span>).unwrap();</code></pre></div>
 <p>The <a href="struct.PositionMapper.html#method.map" title="method tokyodoves::analysis::PositionMapper::map"><code>map</code></a> method maps the position number.
-The first argument <code>index</code> indicates the kind of mapping (from 0 to 8),
+The first argument <code>index</code> indicates the kind of mapping (from 0 to 7),
 and the second argument <code>pos</code> is the position number (from 0 to 15).
 Formaly,</p>
 <div class="example-wrap"><pre class="language-text"><code>y = mapper.map(i, x)
