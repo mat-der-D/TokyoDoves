@@ -1427,6 +1427,32 @@
 <a href="#1427" id="1427">1427</a>
 <a href="#1428" id="1428">1428</a>
 <a href="#1429" id="1429">1429</a>
+<a href="#1430" id="1430">1430</a>
+<a href="#1431" id="1431">1431</a>
+<a href="#1432" id="1432">1432</a>
+<a href="#1433" id="1433">1433</a>
+<a href="#1434" id="1434">1434</a>
+<a href="#1435" id="1435">1435</a>
+<a href="#1436" id="1436">1436</a>
+<a href="#1437" id="1437">1437</a>
+<a href="#1438" id="1438">1438</a>
+<a href="#1439" id="1439">1439</a>
+<a href="#1440" id="1440">1440</a>
+<a href="#1441" id="1441">1441</a>
+<a href="#1442" id="1442">1442</a>
+<a href="#1443" id="1443">1443</a>
+<a href="#1444" id="1444">1444</a>
+<a href="#1445" id="1445">1445</a>
+<a href="#1446" id="1446">1446</a>
+<a href="#1447" id="1447">1447</a>
+<a href="#1448" id="1448">1448</a>
+<a href="#1449" id="1449">1449</a>
+<a href="#1450" id="1450">1450</a>
+<a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
+<a href="#1453" id="1453">1453</a>
+<a href="#1454" id="1454">1454</a>
+<a href="#1455" id="1455">1455</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">use </span><span class="kw">crate</span>::error;
@@ -1452,11 +1478,25 @@
 // *******************************************************************
 </span><span class="doccomment">/// Inherited implementation for capsuling
 </span><span class="macro">macro_rules! </span>impl_mutable_action_container {
-    ( $(<span class="macro-nonterminal">$target</span>: ident { <span class="macro-nonterminal">$internal</span>: ty, <span class="macro-nonterminal">$iter</span>: ident, <span class="macro-nonterminal">$into_iter</span>: ident })* ) =&gt; {
+    ( $(<span class="macro-nonterminal">$target</span>:ident { <span class="macro-nonterminal">$internal</span>:ty, <span class="macro-nonterminal">$iter</span>:ident, <span class="macro-nonterminal">$iter_name</span>:expr, <span class="macro-nonterminal">$into_iter</span>:ident, <span class="macro-nonterminal">$into_iter_name</span>:expr })* ) =&gt; {
         $(
             <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span><span class="macro-nonterminal">$target </span>{
                 <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
                     <span class="macro">write!</span>(f, <span class="string">&quot;{:?}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
+                }
+            }
+
+            <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span><span class="macro-nonterminal">$iter</span>&lt;<span class="lifetime">&#39;a</span>&gt; {
+                <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+                    <span class="kw">let </span>vec: Vec&lt;String&gt; = <span class="self">self</span>.<span class="number">0</span>.clone().map(|a| <span class="macro">format!</span>(<span class="string">&quot;{a:?}&quot;</span>)).collect();
+                    <span class="macro">write!</span>(f, <span class="string">&quot;{}([{}])&quot;</span>, <span class="macro-nonterminal">$iter_name</span>, vec.join(<span class="string">&quot;, &quot;</span>))
+                }
+            }
+
+            <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span><span class="macro-nonterminal">$into_iter </span>{
+                <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+                    <span class="kw">let </span>vec: Vec&lt;String&gt; = <span class="self">self</span>.<span class="number">0</span>.clone().map(|a| <span class="macro">format!</span>(<span class="string">&quot;{a:?}&quot;</span>)).collect();
+                    <span class="macro">write!</span>(f, <span class="string">&quot;{}([{}])&quot;</span>, <span class="macro-nonterminal">$into_iter_name</span>, vec.join(<span class="string">&quot;, &quot;</span>))
                 }
             }
 
@@ -1543,9 +1583,11 @@
 </span><span class="kw">pub struct </span>ActionsFwd(FiniteActionContainer&lt;<span class="number">64</span>&gt;);
 
 <span class="doccomment">/// An [`Iterator`] returned by [`ActionsFwd::iter`]
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsFwdIter&lt;<span class="lifetime">&#39;a</span>&gt;(FiniteActionContainerIter&lt;<span class="lifetime">&#39;a</span>&gt;);
 
 <span class="doccomment">/// An [`Iterator`] returned by [`ActionsFwd::into_iter`]
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsFwdIntoIter(FiniteActionContainerIntoIter&lt;<span class="number">64</span>&gt;);
 
 <span class="doccomment">/// An [`ActionContainer`] returned by [`Board::legal_actions_bwd`].
@@ -1554,14 +1596,24 @@
 </span><span class="kw">pub struct </span>ActionsBwd(FiniteActionContainer&lt;<span class="number">100</span>&gt;);
 
 <span class="doccomment">/// An [`Iterator`] returned by [`ActionsBwd::iter`]
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsBwdIter&lt;<span class="lifetime">&#39;a</span>&gt;(FiniteActionContainerIter&lt;<span class="lifetime">&#39;a</span>&gt;);
 
 <span class="doccomment">/// An [`Iterator`] returned by [`ActionsBwd::into_iter`]
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsBwdIntoIter(FiniteActionContainerIntoIter&lt;<span class="number">100</span>&gt;);
 
 <span class="macro">impl_mutable_action_container! </span>{
-    ActionsFwd { FiniteActionContainer&lt;<span class="number">64</span>&gt;, ActionsFwdIter, ActionsFwdIntoIter }
-    ActionsBwd { FiniteActionContainer&lt;<span class="number">100</span>&gt;, ActionsBwdIter, ActionsBwdIntoIter }
+    ActionsFwd {
+        FiniteActionContainer&lt;<span class="number">64</span>&gt;,
+        ActionsFwdIter, <span class="string">&quot;ActionsFwdIter&quot;</span>,
+        ActionsFwdIntoIter, <span class="string">&quot;ActionsFwdIntoIter&quot;
+    </span>}
+    ActionsBwd {
+        FiniteActionContainer&lt;<span class="number">100</span>&gt;,
+        ActionsBwdIter, <span class="string">&quot;ActionsBwdIter&quot;</span>,
+        ActionsBwdIntoIter, <span class="string">&quot;ActionsBwdIntoIter&quot;
+    </span>}
 }
 
 <span class="doccomment">/// An enum returned by [`Board::surrounded_status`]

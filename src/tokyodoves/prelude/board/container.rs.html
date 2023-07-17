@@ -261,6 +261,16 @@
 <a href="#261" id="261">261</a>
 <a href="#262" id="262">262</a>
 <a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Container structs of some objects
 
 </span><span class="kw">use </span><span class="kw">crate</span>::error;
@@ -413,6 +423,7 @@
 }
 
 <span class="doccomment">/// An [`Iterator`] returned by [`FiniteActionContainer::iter`]
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FiniteActionContainerIter&lt;<span class="lifetime">&#39;a</span>&gt; {
     iter: std::slice::Iter&lt;<span class="lifetime">&#39;a</span>, <span class="prelude-ty">Option</span>&lt;Action&gt;&gt;,
 }
@@ -425,7 +436,8 @@
     }
 }
 
-<span class="doccomment">/// An [`Iterator`] returned by [`FiniteActionContainer::into_iter`]
+<span class="attr">#[derive(Clone)]
+</span><span class="doccomment">/// An [`Iterator`] returned by [`FiniteActionContainer::into_iter`]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FiniteActionContainerIntoIter&lt;<span class="kw">const </span>N: usize&gt; {
     iter: std::array::IntoIter&lt;<span class="prelude-ty">Option</span>&lt;Action&gt;, N&gt;,
 }
@@ -487,9 +499,17 @@
 }
 
 <span class="doccomment">/// An owned [`Iterator`] returned by [`DoveSet::into_iter`]
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>DoveSetIntoIter {
     dove_set: DoveSet,
     cursor: u8,
+}
+
+<span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>DoveSetIntoIter {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span>vec: Vec&lt;String&gt; = <span class="self">self</span>.clone().map(|d| <span class="macro">format!</span>(<span class="string">&quot;{d:?}&quot;</span>)).collect();
+        <span class="macro">write!</span>(f, <span class="string">&quot;DoveSetIntoIter[{}]&quot;</span>, vec.join(<span class="string">&quot;, &quot;</span>))
+    }
 }
 
 <span class="kw">impl </span>DoveSetIntoIter {
