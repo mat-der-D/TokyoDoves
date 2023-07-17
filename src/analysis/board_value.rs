@@ -30,7 +30,7 @@ impl Default for BoardValueKind {
 
 impl std::fmt::Display for BoardValueKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -85,13 +85,13 @@ impl std::fmt::Display for BoardValue {
         use BoardValueKind::*;
         let kind = self.kind();
         let s = match kind {
-            Unknown | Finished => format!("{}", kind),
+            Unknown | Finished => kind.to_string(),
             _ => {
                 let num = self.value.unwrap();
-                format!("{}({})", kind, num)
+                format!("{kind}({num})")
             }
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 
@@ -538,35 +538,37 @@ impl BoardValueTree {
     where
         W: Write,
     {
-        let body = self.to_dot_string("", "");
+        let mut fs = BufWriter::new(writer);
+        write!(fs, "{}", self.to_dot_string())
+    }
+
+    fn to_dot_string(&self) -> String {
         let dot = vec![
             "digraph {".to_string(),
             format!(
-                "node[style=\"{}\" fontname=\"Courier New\" shape=\"box\"]",
+                "node[style={:?} fontname=\"Courier New\" shape=\"box\"]",
                 Self::value_to_style(self.value())
             ),
-            format!("node[fillcolor=\"{}\"]", Self::color_to_code(self.player)),
-            body,
+            format!("node[fillcolor={:?}]", Self::color_to_code(self.player)),
+            self.to_dot_string_body("", ""),
             "}".to_string(),
         ]
         .join("\n");
-        let mut fs = BufWriter::new(writer);
-        write!(fs, "{}", dot)
+        dot
     }
 
-    fn to_dot_string(&self, parent: &str, action: &str) -> String {
+    fn to_dot_string_body(&self, parent: &str, action: &str) -> String {
         let mut dot: String;
         let board = self.board().to_simple_string('-', "\\n");
         let style = Self::value_to_style(self.value());
         let name: String;
         if parent.is_empty() {
             name = String::from("Root");
-            dot = format!("{0}[label=\"{1}\", style=\"{2}\"]", name, board, style);
+            dot = format!("{name}[label=\"{board}\", style=\"{style}\"]");
         } else {
-            name = format!("{}_{}", parent, action.replace('+', "p").replace('-', "m"));
+            name = format!("{parent}_{}", action.replace('+', "p").replace('-', "m"));
             dot = format!(
-                "{0}[label=\"{1}\", style=\"{4}\"]\n{2} -> {0}[label=\"{3}\"]",
-                name, board, parent, action, style,
+                "{name}[label={board:?}, style={style:?}]\n{parent} -> {name}[label={action:?}]"
             );
         }
 
@@ -575,16 +577,15 @@ impl BoardValueTree {
                 .actions_children()
                 .map(|(a, c)| {
                     let ssn = a.try_into_ssn(&self.board()).unwrap();
-                    c.to_dot_string(&name, &ssn)
+                    c.to_dot_string_body(&name, &ssn)
                 })
                 .collect::<Vec<String>>()
                 .join("\n");
             let sub_graph = format!(
-                "subgraph {{\nnode[fillcolor=\"{0}\"]\n{1}\n}}",
+                "subgraph {{\nnode[fillcolor={:?}]\n{sub_body}\n}}",
                 Self::color_to_code(!self.player),
-                sub_body
             );
-            dot = format!("{}\n{}", dot, sub_graph);
+            dot = format!("{dot}\n{sub_graph}");
         }
         dot
     }
@@ -617,15 +618,15 @@ impl TreeDisplayFormat {
         let edge = if action_ssn.is_empty() {
             String::new()
         } else {
-            format!("{} => ", action_ssn)
+            format!("{action_ssn} => ")
         };
         let node = format!(
-            "({:?}, {}, {})",
+            "({0:?}, {1}, {2})",
             tree.board().to_simple_string(' ', ";"),
             tree.player(),
             tree.value()
         );
-        let next_indent = format!("    {}", indent);
+        let next_indent = format!("    {indent}");
         let children = tree
             .actions_children()
             .map(|(a, t)| {
@@ -635,9 +636,9 @@ impl TreeDisplayFormat {
             .collect::<Vec<String>>()
             .join("\n");
         if children.is_empty() {
-            format!("{}{}{}", indent, edge, node)
+            format!("{indent}{edge}{node}")
         } else {
-            format!("{}{}{}\n{}", indent, edge, node, children)
+            format!("{indent}{edge}{node}\n{children}")
         }
     }
 }
@@ -693,7 +694,7 @@ pub struct Interval {
 
 impl std::fmt::Display for Interval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{}, {}]", self.left, self.right)
+        write!(f, "[{0}, {1}]", self.left, self.right)
     }
 }
 
