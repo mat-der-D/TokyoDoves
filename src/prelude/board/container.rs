@@ -150,6 +150,7 @@ impl<'a, const N: usize> IntoIterator for &'a FiniteActionContainer<N> {
 }
 
 /// An [`Iterator`] returned by [`FiniteActionContainer::iter`]
+#[derive(Clone)]
 pub(crate) struct FiniteActionContainerIter<'a> {
     iter: std::slice::Iter<'a, Option<Action>>,
 }
@@ -162,6 +163,7 @@ impl<'a> Iterator for FiniteActionContainerIter<'a> {
     }
 }
 
+#[derive(Clone)]
 /// An [`Iterator`] returned by [`FiniteActionContainer::into_iter`]
 pub(crate) struct FiniteActionContainerIntoIter<const N: usize> {
     iter: std::array::IntoIter<Option<Action>, N>,
@@ -224,9 +226,17 @@ impl IntoIterator for DoveSet {
 }
 
 /// An owned [`Iterator`] returned by [`DoveSet::into_iter`]
+#[derive(Clone)]
 pub struct DoveSetIntoIter {
     dove_set: DoveSet,
     cursor: u8,
+}
+
+impl std::fmt::Debug for DoveSetIntoIter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let vec: Vec<String> = self.clone().map(|d| format!("{d:?}")).collect();
+        write!(f, "DoveSetIntoIter[{}]", vec.join(", "))
+    }
 }
 
 impl DoveSetIntoIter {

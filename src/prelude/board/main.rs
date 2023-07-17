@@ -23,11 +23,25 @@ pub use crate::prelude::board::{
 // *******************************************************************
 /// Inherited implementation for capsuling
 macro_rules! impl_mutable_action_container {
-    ( $($target: ident { $internal: ty, $iter: ident, $into_iter: ident })* ) => {
+    ( $($target:ident { $internal:ty, $iter:ident, $iter_name:expr, $into_iter:ident, $into_iter_name:expr })* ) => {
         $(
             impl std::fmt::Debug for $target {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                     write!(f, "{:?}", self.0)
+                }
+            }
+
+            impl<'a> std::fmt::Debug for $iter<'a> {
+                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    let vec: Vec<String> = self.0.clone().map(|a| format!("{a:?}")).collect();
+                    write!(f, "{}([{}])", $iter_name, vec.join(", "))
+                }
+            }
+
+            impl std::fmt::Debug for $into_iter {
+                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    let vec: Vec<String> = self.0.clone().map(|a| format!("{a:?}")).collect();
+                    write!(f, "{}([{}])", $into_iter_name, vec.join(", "))
                 }
             }
 
@@ -114,9 +128,11 @@ macro_rules! impl_mutable_action_container {
 pub struct ActionsFwd(FiniteActionContainer<64>);
 
 /// An [`Iterator`] returned by [`ActionsFwd::iter`]
+#[derive(Clone)]
 pub struct ActionsFwdIter<'a>(FiniteActionContainerIter<'a>);
 
 /// An [`Iterator`] returned by [`ActionsFwd::into_iter`]
+#[derive(Clone)]
 pub struct ActionsFwdIntoIter(FiniteActionContainerIntoIter<64>);
 
 /// An [`ActionContainer`] returned by [`Board::legal_actions_bwd`].
@@ -125,14 +141,24 @@ pub struct ActionsFwdIntoIter(FiniteActionContainerIntoIter<64>);
 pub struct ActionsBwd(FiniteActionContainer<100>);
 
 /// An [`Iterator`] returned by [`ActionsBwd::iter`]
+#[derive(Clone)]
 pub struct ActionsBwdIter<'a>(FiniteActionContainerIter<'a>);
 
 /// An [`Iterator`] returned by [`ActionsBwd::into_iter`]
+#[derive(Clone)]
 pub struct ActionsBwdIntoIter(FiniteActionContainerIntoIter<100>);
 
 impl_mutable_action_container! {
-    ActionsFwd { FiniteActionContainer<64>, ActionsFwdIter, ActionsFwdIntoIter }
-    ActionsBwd { FiniteActionContainer<100>, ActionsBwdIter, ActionsBwdIntoIter }
+    ActionsFwd {
+        FiniteActionContainer<64>,
+        ActionsFwdIter, "ActionsFwdIter",
+        ActionsFwdIntoIter, "ActionsFwdIntoIter"
+    }
+    ActionsBwd {
+        FiniteActionContainer<100>,
+        ActionsBwdIter, "ActionsBwdIter",
+        ActionsBwdIntoIter, "ActionsBwdIntoIter"
+    }
 }
 
 /// An enum returned by [`Board::surrounded_status`]
