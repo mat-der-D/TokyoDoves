@@ -1419,6 +1419,8 @@
 <a href="#1419" id="1419">1419</a>
 <a href="#1420" id="1420">1420</a>
 <a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>strum::IntoEnumIterator;
 
 <span class="kw">use </span><span class="kw">crate</span>::error;
@@ -1529,7 +1531,8 @@
     };
 }
 
-<span class="doccomment">/// An [`ActionContainer`] returned by [`Board::legal_actions`]
+<span class="doccomment">/// An [`ActionContainer`] returned by [`Board::legal_actions`].
+/// Its contents are in the stack memory.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsFwd(FiniteActionContainer&lt;<span class="number">64</span>&gt;);
 
@@ -1539,7 +1542,8 @@
 <span class="doccomment">/// An [`Iterator`] returned by [`ActionsFwd::into_iter`]
 </span><span class="kw">pub struct </span>ActionsFwdIntoIter(FiniteActionContainerIntoIter&lt;<span class="number">64</span>&gt;);
 
-<span class="doccomment">/// An [`ActionContainer`] returned by [`Board::legal_actions_bwd`]
+<span class="doccomment">/// An [`ActionContainer`] returned by [`Board::legal_actions_bwd`].
+/// Its contents are in the stack memory.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ActionsBwd(FiniteActionContainer&lt;<span class="number">100</span>&gt;);
 

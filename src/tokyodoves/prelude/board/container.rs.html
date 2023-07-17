@@ -248,6 +248,19 @@
 <a href="#248" id="248">248</a>
 <a href="#249" id="249">249</a>
 <a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Container structs of some objects
 
 </span><span class="kw">use </span><span class="kw">crate</span>::error;
@@ -260,7 +273,7 @@
 <span class="comment">// *******************************************************************
 //  Action Container
 // *******************************************************************
-</span><span class="doccomment">/// Read-only [`Sized`] container of [`Action`]s.
+</span><span class="doccomment">/// Read-only container of [`Action`]s.
 ///
 /// This trait is sealed, i.e. it forces implementers to implement `Sealed` trait,
 /// to prevent crate users from implementing this trait.
@@ -285,7 +298,7 @@
 <span class="doccomment">/// An [`ActionContainer`] with a finite capacity.
 ///
 /// The generic constant `N` is the maximum number of items
-/// it can hold.
+/// it can hold. It allocates memory in the stack.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FiniteActionContainer&lt;<span class="kw">const </span>N: usize&gt; {
     container: [<span class="prelude-ty">Option</span>&lt;Action&gt;; N],
@@ -428,24 +441,37 @@
 <span class="comment">// *******************************************************************
 //  Dove Container
 // *******************************************************************
-</span><span class="doccomment">/// Read-only [`Sized`] container of [`Dove`]s without duplication.
-</span><span class="attr">#[derive(Debug, Clone, Copy)]
+</span><span class="doccomment">/// Read-only set of [`Dove`]s. It allocates memory in the stack.
+</span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub struct </span>DoveSet {
     <span class="kw">pub</span>(<span class="kw">crate</span>) hash: u8,
 }
 
+<span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>DoveSet {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="macro">write!</span>(
+            f,
+            <span class="string">&quot;{{{}}}&quot;</span>,
+            <span class="self">self</span>.into_iter()
+                .map(|d| <span class="macro">format!</span>(<span class="string">&quot;{d:?}&quot;</span>))
+                .collect::&lt;Vec&lt;String&gt;&gt;()
+                .join(<span class="string">&quot;, &quot;</span>)
+        )
+    }
+}
+
 <span class="kw">impl </span>DoveSet {
-    <span class="doccomment">/// Returns `true` if it contains no elements.
+    <span class="doccomment">/// Returns `true` if the set contains no elements.
     </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.hash == <span class="number">0
     </span>}
 
-    <span class="doccomment">/// Returns the number of elements.
+    <span class="doccomment">/// Returns the number of elements in the set.
     </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.hash.count_ones() <span class="kw">as </span>usize
     }
 
-    <span class="doccomment">/// Returns `true` if it contains the specified [`Dove`].
+    <span class="doccomment">/// Returns `true` if the set contains a dove.
     </span><span class="kw">pub fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, dove: Dove) -&gt; bool {
         <span class="kw">let </span>bit = <span class="number">1 </span>&lt;&lt; dove_to_index(dove);
         <span class="self">self</span>.hash &amp; bit != <span class="number">0
