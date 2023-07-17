@@ -118,6 +118,14 @@ impl<const N: usize> ActionContainer for FiniteActionContainer<N> {
     }
 }
 
+impl<'a, const N: usize> IntoIterator for &'a FiniteActionContainer<N> {
+    type Item = <<Self as IntoIterator>::IntoIter as Iterator>::Item;
+    type IntoIter = FiniteActionContainerIter<'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
 /// An [`Iterator`] returned by [`FiniteActionContainer::iter`]
 pub(crate) struct FiniteActionContainerIter<'a> {
     iter: std::slice::Iter<'a, Option<Action>>,
