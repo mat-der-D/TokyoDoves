@@ -76,6 +76,14 @@ macro_rules! impl_mutable_action_container {
                 }
             }
 
+            impl<'a> IntoIterator for &'a $target {
+                type Item = <<Self as IntoIterator>::IntoIter as Iterator>::Item;
+                type IntoIter = $iter<'a>;
+                fn into_iter(self) -> Self::IntoIter {
+                    self.iter()
+                }
+            }
+
             impl MutableActionContainer for $target {
                 fn new() -> Self {
                     Self(<$internal as MutableActionContainer>::new())
