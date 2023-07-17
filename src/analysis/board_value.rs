@@ -852,6 +852,8 @@ fn validate_args(board: Board, value: BoardValue, rule: GameRule) -> Result<(), 
 }
 
 /// A struct representing closed interval between two [`BoardValue`]s.
+///
+/// An interval is returned by [`evaluate_board`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Interval {
     left: BoardValue,
@@ -865,22 +867,39 @@ impl std::fmt::Display for Interval {
 }
 
 impl Interval {
+    /// Creates new object.
     pub fn new(left: BoardValue, right: BoardValue) -> Self {
         Self { left, right }
     }
 
+    /// Returns a reference to the left end value.
     pub fn left(&self) -> &BoardValue {
         &self.left
     }
 
+    /// Returns a reference to the right end value.
     pub fn right(&self) -> &BoardValue {
         &self.right
     }
 
+    /// Returns if a given value is between left and right.
     pub fn contains(&self, item: &BoardValue) -> bool {
         self.left <= *item && *item <= self.right
     }
 
+    /// Returns one value in the interval if left and right values are the same.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{Interval, BoardValue};
+    ///
+    /// let win = BoardValue::win(3).unwrap();
+    /// let interval1 = Interval::new(win, win);
+    /// assert_eq!(Some(win), interval1.single());
+    /// let lose = BoardValue::lose(4).unwrap();
+    /// let interval2 = Interval::new(lose, win);
+    /// assert_eq!(None, interval2.single());
+    /// ```
     pub fn single(&self) -> Option<BoardValue> {
         if self.left == self.right {
             Some(self.left)
