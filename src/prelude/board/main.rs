@@ -15,7 +15,7 @@ use crate::prelude::board::{
 pub use crate::prelude::board::{
     container::{ActionContainer, DoveSet, DoveSetIntoIter},
     display::{BoardDisplay, BoardDisplayFormat},
-    mask::Rectangle,
+    mask::{Rectangle, RectangleSize},
 };
 
 // *******************************************************************
