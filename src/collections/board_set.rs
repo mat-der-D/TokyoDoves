@@ -1,4 +1,7 @@
-use crate::analysis::io::{Fragment, FragmentIter};
+//! A module containing a light [`Board`](`crate::Board`) container
+//! [`BoardSet`] and associated items.
+
+use crate::collections::io::{Fragment, FragmentIter};
 use crate::prelude::{Board, BoardBuilder};
 use std::{
     collections::{HashMap, HashSet},
@@ -28,7 +31,7 @@ fn u64_to_board(hash: u64) -> Board {
 /// # Examples
 /// ```rust
 /// use tokyodoves::Board;
-/// use tokyodoves::analysis::BoardSet;
+/// use tokyodoves::collections::BoardSet;
 ///
 /// let mut set = BoardSet::new();
 /// set.insert(Board::new());
@@ -56,7 +59,7 @@ impl Capacity {
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::analysis::{BoardSet, Capacity};
+    /// use tokyodoves::collections::{BoardSet, Capacity};
     ///
     /// let empty = BoardSet::new().capacity();
     /// assert_eq!(empty, Capacity::new());
@@ -72,7 +75,7 @@ impl Capacity {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
@@ -87,7 +90,7 @@ impl Capacity {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set = BoardSet::new();
     /// assert!(set.capacity().is_empty());
@@ -107,7 +110,7 @@ impl std::ops::Add for Capacity {
     /// ```rust
     /// use std::str::FromStr;
     /// use tokyodoves::{BoardBuilder, Board};
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut set_left = BoardSet::new();
@@ -135,7 +138,7 @@ impl std::ops::AddAssign for Capacity {
     /// ```rust
     /// use std::str::FromStr;
     /// use tokyodoves::{BoardBuilder, Board};
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut set_left = BoardSet::new();
@@ -238,7 +241,7 @@ impl BoardSet {
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     /// let set = BoardSet::new();
     /// ```
     pub fn new() -> Self {
@@ -250,7 +253,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::{BoardSet, board_set::RawBoardSet};
+    /// use tokyodoves::collections::{BoardSet, board_set::RawBoardSet};
     ///
     /// let board = Board::new();
     /// let mut set = BoardSet::new();
@@ -268,7 +271,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let board = Board::new();
     /// let mut set1 = BoardSet::new();
@@ -288,7 +291,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::{BoardSet, board_set::RawBoardSet};
+    /// use tokyodoves::collections::{BoardSet, board_set::RawBoardSet};
     ///
     /// let board = Board::new();
     /// let mut set1 = BoardSet::new();
@@ -309,7 +312,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::{BoardSet, board_set::RawBoardSet};
+    /// use tokyodoves::collections::{BoardSet, board_set::RawBoardSet};
     ///
     /// let board = Board::new();
     /// let mut raw_set1 = RawBoardSet::new();
@@ -348,7 +351,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     /// let mut set0 = BoardSet::new();
     /// set0.insert(Board::new());
     /// let capacity = set0.capacity();
@@ -364,7 +367,7 @@ impl BoardSet {
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     /// let set = BoardSet::new();
     /// let capacity = set.capacity();
     /// ```
@@ -378,7 +381,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
     /// for x in set.iter() {
@@ -394,7 +397,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     /// let mut set = BoardSet::new();
     /// assert_eq!(set.len(), 0);
     /// set.insert(Board::new());
@@ -409,7 +412,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     /// let mut set = BoardSet::new();
     /// assert!(set.is_empty());
     /// set.insert(Board::new());
@@ -430,7 +433,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::{BoardSet, Capacity};
+    /// use tokyodoves::collections::{BoardSet, Capacity};
     ///
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
@@ -451,7 +454,7 @@ impl BoardSet {
     /// ```rust
     /// use std::str::FromStr;
     /// use tokyodoves::{Board, BoardBuilder};
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
@@ -472,7 +475,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
@@ -489,7 +492,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set0 = BoardSet::new();
     /// set0.insert(Board::new());
@@ -535,7 +538,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set = BoardSet::new();
     /// let board = Board::new();
@@ -553,7 +556,7 @@ impl BoardSet {
     /// ```rust
     /// use std::str::FromStr;
     /// use tokyodoves::{Board, BoardBuilder};
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let board0 = Board::new();
@@ -577,7 +580,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set0 = BoardSet::new();
     /// set0.insert(Board::new());
@@ -594,7 +597,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set0 = BoardSet::new();
     /// set0.insert(Board::new());
@@ -614,7 +617,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set = BoardSet::new();
     /// assert_eq!(set.len(), 0);
@@ -631,7 +634,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set = BoardSet::new();
     /// let board = Board::new();
@@ -650,7 +653,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set = BoardSet::new();
     /// let board = Board::new();
@@ -667,7 +670,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set1 = BoardSet::new();
     /// let mut set2 = BoardSet::new();
@@ -679,7 +682,7 @@ impl BoardSet {
     /// allocating memory in advance may accelerate the process:
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set1 = BoardSet::new();
     /// let mut set2 = BoardSet::new();
@@ -700,7 +703,7 @@ impl BoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set1 = BoardSet::new();
     /// let mut set2 = BoardSet::new();
@@ -713,7 +716,7 @@ impl BoardSet {
     /// allocating memory in advance may accelerate the process:
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set1 = BoardSet::new();
     /// let mut set2 = BoardSet::new();
@@ -734,7 +737,7 @@ impl BoardSet {
     /// # Examples
     /// ``` ignore
     /// use std::fs::File;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
@@ -746,7 +749,7 @@ impl BoardSet {
     /// The following is more efficient especially when the target file is large.
     /// ``` ignore
     /// use std::fs::File;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
@@ -769,7 +772,7 @@ impl BoardSet {
     /// # Examples
     /// ``` ignore
     /// use std::fs::File;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
@@ -782,7 +785,7 @@ impl BoardSet {
     /// The following is more efficient especially when the target file is large.
     /// ``` ignore
     /// use std::fs::File;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
@@ -812,7 +815,7 @@ impl BoardSet {
     /// ``` ignore
     /// use std::fs::File;
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::BoardSet;
+    /// use tokyodoves::collections::BoardSet;
     ///
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
@@ -876,7 +879,7 @@ impl std::ops::Sub<&BoardSet> for &BoardSet {
 /// # Examples
 /// ```rust
 /// use tokyodoves::Board;
-/// use tokyodoves::analysis::BoardSet;
+/// use tokyodoves::collections::BoardSet;
 ///
 /// let mut set = BoardSet::new();
 /// set.insert(Board::new());
@@ -892,7 +895,7 @@ pub struct IntoIter(RawIntoIter);
 /// # Examples
 /// ```rust
 /// use tokyodoves::Board;
-/// use tokyodoves::analysis::BoardSet;
+/// use tokyodoves::collections::BoardSet;
 ///
 /// let mut set = BoardSet::new();
 /// set.insert(Board::new());
@@ -908,7 +911,7 @@ pub struct Drain<'a>(RawDrain<'a>);
 /// # Examples
 /// ```rust
 /// use tokyodoves::Board;
-/// use tokyodoves::analysis::BoardSet;
+/// use tokyodoves::collections::BoardSet;
 ///
 /// let mut set = BoardSet::new();
 /// set.insert(Board::new());
@@ -925,7 +928,7 @@ pub struct Iter<'a>(RawIter<'a>);
 /// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::{Board, BoardBuilder};
-/// use tokyodoves::analysis::BoardSet;
+/// use tokyodoves::collections::BoardSet;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut set1 = BoardSet::new();
@@ -948,7 +951,7 @@ pub struct Difference<'a>(RawDifference<'a>);
 /// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::{Board, BoardBuilder};
-/// use tokyodoves::analysis::BoardSet;
+/// use tokyodoves::collections::BoardSet;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut set1 = BoardSet::new();
@@ -971,7 +974,7 @@ pub struct SymmetricDifference<'a>(RawSymmetricDifference<'a>);
 /// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::{Board, BoardBuilder};
-/// use tokyodoves::analysis::BoardSet;
+/// use tokyodoves::collections::BoardSet;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut set1 = BoardSet::new();
@@ -994,7 +997,7 @@ pub struct Intersection<'a>(RawIntersection<'a>);
 /// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::{Board, BoardBuilder};
-/// use tokyodoves::analysis::BoardSet;
+/// use tokyodoves::collections::BoardSet;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut set1 = BoardSet::new();
@@ -1134,7 +1137,7 @@ impl RawBoardSet {
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     /// let set = RawBoardSet::new();
     /// ```
     pub fn new() -> Self {
@@ -1192,7 +1195,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set0 = RawBoardSet::new();
     /// set0.insert(Board::new().to_u64());
@@ -1211,7 +1214,7 @@ impl RawBoardSet {
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     /// let set = RawBoardSet::new();
     /// let capacity = set.capacity();
     /// ```
@@ -1229,7 +1232,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
     /// for x in set.iter() {
@@ -1253,7 +1256,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     /// let mut set = RawBoardSet::new();
     /// assert_eq!(set.len(), 0);
     /// set.insert(Board::new().to_u64());
@@ -1268,7 +1271,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     /// let mut set = RawBoardSet::new();
     /// assert!(set.is_empty());
     /// set.insert(Board::new().to_u64());
@@ -1289,8 +1292,8 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::Capacity;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::Capacity;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
@@ -1311,7 +1314,7 @@ impl RawBoardSet {
     /// ```rust
     /// use std::str::FromStr;
     /// use tokyodoves::{Board, BoardBuilder};
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
@@ -1337,7 +1340,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
@@ -1354,7 +1357,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set0 = RawBoardSet::new();
     /// set0.insert(Board::new().to_u64());
@@ -1417,7 +1420,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set = RawBoardSet::new();
     /// let hash = Board::new().to_u64();
@@ -1436,7 +1439,7 @@ impl RawBoardSet {
     /// ```rust
     /// use std::str::FromStr;
     /// use tokyodoves::{Board, BoardBuilder};
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let hash0 = Board::new().to_u64();
@@ -1464,7 +1467,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set0 = RawBoardSet::new();
     /// set0.insert(Board::new().to_u64());
@@ -1485,7 +1488,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set0 = RawBoardSet::new();
     /// set0.insert(Board::new().to_u64());
@@ -1505,7 +1508,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set = RawBoardSet::new();
     /// assert_eq!(set.len(), 0);
@@ -1523,7 +1526,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set = RawBoardSet::new();
     /// let hash = Board::new().to_u64();
@@ -1550,7 +1553,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set = RawBoardSet::new();
     /// let hash = Board::new().to_u64();
@@ -1574,7 +1577,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set1 = RawBoardSet::new();
     /// let mut set2 = RawBoardSet::new();
@@ -1586,7 +1589,7 @@ impl RawBoardSet {
     /// allocating memory in advance may accelerate the process:
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set1 = RawBoardSet::new();
     /// let mut set2 = RawBoardSet::new();
@@ -1612,7 +1615,7 @@ impl RawBoardSet {
     /// # Examples
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set1 = RawBoardSet::new();
     /// let mut set2 = RawBoardSet::new();
@@ -1625,7 +1628,7 @@ impl RawBoardSet {
     /// allocating memory in advance may accelerate the process:
     /// ```rust
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set1 = RawBoardSet::new();
     /// let mut set2 = RawBoardSet::new();
@@ -1654,7 +1657,7 @@ impl RawBoardSet {
     /// # Examples
     /// ``` ignore
     /// use std::fs::File;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
@@ -1666,7 +1669,7 @@ impl RawBoardSet {
     /// The following is more efficient especially when the target file is large.
     /// ``` ignore
     /// use std::fs::File;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
@@ -1714,7 +1717,7 @@ impl RawBoardSet {
     /// # Examples
     /// ``` ignore
     /// use std::fs::File;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
@@ -1727,7 +1730,7 @@ impl RawBoardSet {
     /// The following is more efficient especially when the target file is large.
     /// ``` ignore
     /// use std::fs::File;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
@@ -1781,7 +1784,7 @@ impl RawBoardSet {
     /// ``` ignore
     /// use std::fs::File;
     /// use tokyodoves::Board;
-    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
@@ -1848,7 +1851,7 @@ type SetIter<'a> = std::collections::hash_set::Iter<'a, u32>;
 /// # Examples
 /// ```rust
 /// use tokyodoves::Board;
-/// use tokyodoves::analysis::board_set::RawBoardSet;
+/// use tokyodoves::collections::board_set::RawBoardSet;
 ///
 /// let mut set = RawBoardSet::new();
 /// set.insert(Board::new().to_u64());
@@ -1904,7 +1907,7 @@ type SetIntoIter = std::collections::hash_set::IntoIter<u32>;
 /// # Examples
 /// ```rust
 /// use tokyodoves::Board;
-/// use tokyodoves::analysis::board_set::RawBoardSet;
+/// use tokyodoves::collections::board_set::RawBoardSet;
 ///
 /// let mut set = RawBoardSet::new();
 /// set.insert(Board::new().to_u64());
@@ -1956,7 +1959,7 @@ impl Iterator for RawIntoIter {
 /// # Examples
 /// ```rust
 /// use tokyodoves::Board;
-/// use tokyodoves::analysis::board_set::RawBoardSet;
+/// use tokyodoves::collections::board_set::RawBoardSet;
 ///
 /// let mut set = RawBoardSet::new();
 /// set.insert(Board::new().to_u64());
@@ -2035,7 +2038,7 @@ impl<'a> Drop for _RawDrain<'a> {
 /// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::{Board, BoardBuilder};
-/// use tokyodoves::analysis::board_set::RawBoardSet;
+/// use tokyodoves::collections::board_set::RawBoardSet;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut set1 = RawBoardSet::new();
@@ -2082,7 +2085,7 @@ impl<'a> Iterator for RawDifference<'a> {
 /// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::{Board, BoardBuilder};
-/// use tokyodoves::analysis::board_set::RawBoardSet;
+/// use tokyodoves::collections::board_set::RawBoardSet;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut set1 = RawBoardSet::new();
@@ -2139,7 +2142,7 @@ impl<'a> Iterator for RawSymmetricDifference<'a> {
 /// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::{Board, BoardBuilder};
-/// use tokyodoves::analysis::board_set::RawBoardSet;
+/// use tokyodoves::collections::board_set::RawBoardSet;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut set1 = RawBoardSet::new();
@@ -2186,7 +2189,7 @@ impl<'a> Iterator for RawIntersection<'a> {
 /// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::{Board, BoardBuilder};
-/// use tokyodoves::analysis::board_set::RawBoardSet;
+/// use tokyodoves::collections::board_set::RawBoardSet;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut set1 = RawBoardSet::new();
@@ -2234,7 +2237,7 @@ impl<'a> Iterator for RawUnion<'a> {
 mod tests {
     use std::str::FromStr;
 
-    use crate::{analysis::*, *};
+    use crate::{collections::*, *};
 
     fn create_from_strs(strs: &[&str]) -> BoardSet {
         let mut set = BoardSet::new();
