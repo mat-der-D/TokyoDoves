@@ -73,7 +73,27 @@ impl BoardDisplayFormat {
     }
 }
 
-/// A struct to configure display styles of [`Board`]
+/// A struct to configure display styles of [`Board`].
+///
+/// `Display` trait is implemented for this struct
+/// so that the display format depends on the internal value of [`BoardDisplayFormat`],
+/// which can be changed by the [`with_format`](`BoardDisplay::with_format`) method.
+/// See the documentation of [`BoardDisplayFormat`]
+/// for information about available display styles.
+///
+/// # Examples
+/// ```rust
+/// use tokyodoves::{Board, BoardDisplayFormat};
+///
+/// let board = Board::new();
+/// println!("{}", board.display()); // Default Display
+///
+/// let format = BoardDisplayFormat::Simple {
+///     empty: '-',
+///     delimiter: String::from(";"),
+/// }; // Simple display style
+/// println!("{}", board.display().with_format(format));
+/// ```
 #[derive(Debug, Clone)]
 pub struct BoardDisplay<'a> {
     board: &'a Board,
@@ -88,6 +108,10 @@ impl<'a> BoardDisplay<'a> {
         }
     }
 
+    /// Configures what kind of format is used.
+    ///
+    /// See the documentation of [`BoardDisplayFormat`]
+    /// for more information about available display styles.
     pub fn with_format(self, format: BoardDisplayFormat) -> Self {
         Self { format, ..self }
     }

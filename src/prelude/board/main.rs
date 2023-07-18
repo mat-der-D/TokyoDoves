@@ -175,13 +175,67 @@ impl_mutable_action_container! {
     }
 }
 
-/// An enum returned by
+/// Represents whether two bosses are surrounded or not.
+///
+/// This enum is created by
 /// the [`surrounded_status`](`Board::surrounded_status`) method
 /// on [`Board`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SurroundedStatus {
+    /// Both bosses are surrounded.
+    ///
+    /// # Examples
+    /// ```text
+    /// +---+---+---+---+
+    /// | b | B | h |   |
+    /// +---+---+---+---+
+    /// | A | a |   | m |
+    /// +---+---+---+---+
+    /// |   |   | M |   |
+    /// +---+---+---+---+
+    /// |   | H |   | Y |
+    /// +---+---+---+---+
+    /// ```
+    /// In this example,
+    /// - red boss "B" is surrounded by "b", "h", "a" and a wall.
+    /// - green boss "b" is surrounded by "B", "A" and two walls.
     Both,
+    /// Only one boss is surrounded.
+    ///
+    /// # Examples
+    /// ```text
+    /// +---+---+---+---+
+    /// | b |   | h |   |
+    /// +---+---+---+---+
+    /// | A | a | B | m |
+    /// +---+---+---+---+
+    /// |   |   | M |   |
+    /// +---+---+---+---+
+    /// |   | H |   | Y |
+    /// +---+---+---+---+
+    /// => OneSide(Color::Red)
+    /// ```
+    /// In this example,
+    /// - red boss "B" is surrounded by "h", "a", "m" and "M".
+    /// - the right side of green boss "b" is not occupied.
     OneSide(Color),
+    /// None of bosses are surrounded.
+    ///
+    /// # Examples
+    /// ```text
+    /// +---+---+---+---+
+    /// | b |   | h |   |
+    /// +---+---+---+---+
+    /// | A | a |   | m |
+    /// +---+---+---+---+
+    /// |   | B | M |   |
+    /// +---+---+---+---+
+    /// |   | H |   | Y |
+    /// +---+---+---+---+
+    /// ```
+    /// In this example,
+    /// - the left side of red boss "B" is not occupied.
+    /// - the right side of green boss "b" is not occupied.
     None,
 }
 
@@ -236,6 +290,7 @@ impl std::hash::Hash for Board {
 impl Board {
     /// Creates [`Board`] at the beginning of the game.
     ///
+    /// # Examples
     /// The following two ways are equivalent:
     /// ```rust
     /// use tokyodoves::{Board, BoardBuilder};
@@ -256,14 +311,16 @@ impl Board {
     /// Performs the specified `action` to `self`.
     ///
     /// # Errors
+    /// Returns `Err` if performing the specified `action` is illegal.
+    /// `self` will not be changed when this method returns `Err`.
     ///
     /// # Examples
     ///
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let mut board = BoardBuilder::new().build()?;
+    /// let mut board = Board::new();
     /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let result = board.perform(action);
     /// assert!(result.is_ok());
@@ -276,20 +333,33 @@ impl Board {
         Ok(())
     }
 
-    /// Returns the result of performing the specified action to `self`.
-    /// It differs from [`perform`](`Self::perform`) in that it does not change `self`.
+    /// Returns the result of the [`perform`](`Board::perform`) method
+    /// without changing `self`.
     ///
     /// # Errors
+    /// Returns `Err` if performing the specified `action` is illegal.
     ///
     /// # Examples
     ///
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let board = BoardBuilder::new().build()?;
+    /// let board = Board::new();
     /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let next_board = board.perform_copied(action)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    /// The code above is almost equivalent to the following.
+    /// ```rust
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board = Board::new();
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
+    /// let mut next_board = board; // copied
+    /// next_board.perform(action)?;
     /// # Ok(())
     /// # }
     /// ```
@@ -299,17 +369,22 @@ impl Board {
         Ok(board)
     }
 
-    /// Performs the specified backward action to `self`.
+    /// Performs the specified action to `self`. The action is checked in backward direction.
+    ///
+    /// The action (A) is legal in backward direction
+    /// if there is such a legal action (B) that
+    /// performing B to the board after A results in the board before A.
     ///
     /// # Errors
+    /// Returns `Err` if performing the specified `action` is illegal in backward direction.
+    /// `self` will not be changed when this method returns `Err`.
     ///
     /// # Examples
-    ///
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let mut board = BoardBuilder::new().build()?;
+    /// let mut board = Board::new();
     /// let action = Action::Put(Color::Red, Dove::A, Shift::new(-1, 1));
     /// let result = board.perform_bwd(action);
     /// assert!(result.is_ok());
@@ -322,20 +397,32 @@ impl Board {
         Ok(())
     }
 
-    /// Returns the result of performing the specified backward action to `self`.
-    /// It differs from [`perform_bwd`](`Self::perform_bwd`) in that it does not change `self`.
+    /// Returns the result of the [`perform_bwd`](`Board::perform_bwd`) method
+    /// without changing `self`.
     ///
     /// # Errors
+    /// Returns `Err` if performing the specified `action` is illegal in backward direction.
     ///
     /// # Examples
-    ///
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let board = BoardBuilder::new().build()?;
+    /// let board = Board::new();
     /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let next_board = board.perform_bwd_copied(action)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    /// The code above is almost equivalent to the following.
+    /// ```rust
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board = Board::new();
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
+    /// let mut next_board = board; // copied
+    /// next_board.perform_bwd(action)?;
     /// # Ok(())
     /// # }
     /// ```
@@ -345,31 +432,36 @@ impl Board {
         Ok(board)
     }
 
-    /// Performs `action` to `self` (without distinction between forward and backward).
+    /// Performs `action` to `self` without legality check.
     ///
-    /// It may return `Ok(())` even if the specified `action` is illegal.
-    /// In such a case, the resulting board may violate the rule (e.g. some dove would be isolated from others).
+    /// It may return `Ok(())` even if the specified `action` is illegal in both forward and backward directions.
+    /// In such a case, the resulting board may (or may not) violate the rule (e.g. some dove would be isolated from others).
     /// If you are not sure that the action is legal, consider to select one of the following choices:
-    /// - Call [`check_action`](`Self::check_action`) or [`check_action_bwd`](`Self::check_action_bwd`)
+    /// - Call the [`check_action`](`Self::check_action`) method
+    ///     or the [`check_action_bwd`](`Self::check_action_bwd`) method
     ///     to check legality in advance.
-    /// - Call [`perform`](`Self::perform`) or [`perform_bwd`](`Self::perform_bwd`) insted of this method,
-    ///     which calls [`check_action`](`Self::check_action`) or [`check_action_bwd`](`Self::check_action_bwd`) internally.
-    /// This method is faster than [`perform`](`Self::perform`) and [`perform_bwd`](`Self::perform_bwd`)
+    /// - Call the [`perform`](`Self::perform`) method
+    ///     or the [`perform_bwd`](`Self::perform_bwd`) method insted,
+    ///     which calls the [`check_action`](`Self::check_action`) method
+    ///     or the [`check_action_bwd`](`Self::check_action_bwd`) method internally.
+    ///
+    /// Note that this method is faster than
+    /// the methods [`perform`](`Self::perform`) and [`perform_bwd`](`Self::perform_bwd`)
     /// thanks to absence of legality check.
     ///
     /// # Panics
-    ///
-    /// Panics if the target position of [`Action::Move`] or [`Action::Put`] is more than two squares
+    /// Panics if the action is [`Move`](`Action::Move`) or [`Put`](`Action::Put`),
+    /// and the target position is more than two squares
     /// far from the current 4x4 field (, which are clearly illegal).
-    /// When it returns an error, `self` is not changed.
+    /// `self` will not be changed when this method returns `Err`.
     ///
     /// # Examples
     ///
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let mut board = BoardBuilder::new().build()?;
+    /// let mut board = Board::new();
     /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// board.perform_unchecked(action);
     /// # Ok(())
@@ -403,23 +495,35 @@ impl Board {
         Ok(())
     }
 
-    /// Returns the result of performing the specified action to `self`.
-    /// It differs from [`perform_unchecked`](`Self::perform_unchecked`) in that it does not change `self`.
+    /// Returns the result of the [`perform_unchecked`](`Board::perform_unchecked`) method
+    /// without changing `self`.
     ///
     /// # Panics
-    ///
-    /// Panics if the target position of [`Action::Move`] or [`Action::Put`] is more than two squares
+    /// Panics if the action is [`Move`](`Action::Move`) or [`Put`](`Action::Put`),
+    /// and the target position is more than two squares
     /// far from the current 4x4 field (, which are clearly illegal).
     ///
     /// # Examples
     ///
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let board = BoardBuilder::new().build()?;
+    /// let board = Board::new();
     /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// let next_board = board.perform_unchecked_copied(action);
+    /// # Ok(())
+    /// # }
+    /// ```
+    /// The code above is almost equivalent to the following.
+    /// ```rust
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board = Board::new();
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
+    /// let mut next_board = board; // copied
+    /// next_board.perform_unchecked(action);
     /// # Ok(())
     /// # }
     /// ```
@@ -432,17 +536,18 @@ impl Board {
     // *******************************************************************
     //  Methods For Actions Check
     // *******************************************************************
-    /// Check if `action` is legal.
+    /// Returns `Ok(())` if the given `action` is legal.
     ///
     /// # Errors
+    /// Returns `Err` if performing the specified `action` is illegal.
     ///
     /// # Examples
     ///
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let mut board = BoardBuilder::new().build()?;
+    /// let mut board = Board::new();
     /// let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
     /// assert!(board.check_action(action).is_ok());
     /// # Ok(())
@@ -452,17 +557,22 @@ impl Board {
         self.check_action_core(action, true)
     }
 
-    /// Check if backward `action` is legal.
+    /// Check if backward `action` is legal in backward direction.
+    ///
+    /// The action (A) is legal in backward direction
+    /// if there is such a legal action (B) that
+    /// performing B to the board after A results in the board before A.
     ///
     /// # Errors
+    /// Returns `Err` if performing the specified `action` is illegal in backward direction.
     ///
     /// # Examples
     ///
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Action, Color, Dove, Shift};
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let mut board = BoardBuilder::new().build()?;
+    /// let mut board = Board::new();
     /// let action = Action::Put(Color::Red, Dove::A, Shift::new(-1, 1));
     /// assert!(board.check_action_bwd(action).is_ok());
     /// # Ok(())
@@ -609,18 +719,20 @@ impl Board {
     // *******************************************************************
     //  Methods For Legal Action Search
     // *******************************************************************
-    /// Collects and returns the set of all legal [`Action`]s
-    /// for the specified player. Three boolean arguments ---
+    /// Collects and returns all legal [`Action`]s
+    /// performed by the specified player.
+    ///
+    /// Three boolean arguments ---
     /// `contains_put`, `contains_move` and `contains_remove` ---
-    /// controls what kinds of `Actions` should be contained.
+    /// specify what kinds of [`Action`]s should be contained.
     ///
     /// # Examples
     ///
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Color};
+    /// use tokyodoves::{Board, Color};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let board = BoardBuilder::new().build()?;
+    /// let board = Board::new();
     /// let actions = board.legal_actions(Color::Red, true, true, true);
     /// for action in actions {
     ///     println!("{}", board.perform_copied(action)?);
@@ -644,16 +756,20 @@ impl Board {
         )
     }
 
-    /// Collects and returns the set of all legal backward-[`Action`]s
-    /// for the specified player.
+    /// Collects and returns all [`Action`]s legal in backward direction
+    /// performed by the specified player.
+    ///
+    /// Three boolean arguments ---
+    /// `contains_put`, `contains_move` and `contains_remove` ---
+    /// specify what kinds of [`Action`]s should be contained.
     ///
     /// # Examples
     ///
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Color};
+    /// use tokyodoves::{Board, Color};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let board = BoardBuilder::new().build()?;
+    /// let board = Board::new();
     /// let actions = board.legal_actions_bwd(Color::Red, true, true, true);
     /// for action in actions {
     ///     println!("{}", board.perform_bwd_copied(action)?);
@@ -800,6 +916,21 @@ impl Board {
     }
 
     /// Swaps the colors red and green.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::BoardBuilder;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///
+    /// let mut board1 = BoardBuilder::from_str("BbA")?.build()?;
+    /// let board2 = BoardBuilder::from_str("bBa")?.build()?;
+    /// board1.swap_color();
+    /// assert_eq!(board1, board2);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn swap_color(&mut self) {
         self.positions.swap_color();
     }
@@ -830,6 +961,8 @@ impl Board {
     ///   +3  |    |    |    |     |    |    |    |
     ///       +----+----+----+-----+----+----+----+
     /// ```
+    ///
+    /// It returns `None` if specified dove is not found on the field.
     pub fn position_in_rbcc(&self, player: Color, dove: Dove) -> Option<Shift> {
         let pos = self.positions.position_of(player, dove);
         if *pos == 0 {
@@ -841,31 +974,85 @@ impl Board {
     }
 
     /// Counts the number of all doves on the field.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    ///
+    /// let board = Board::new();
+    /// assert_eq!(board.count_doves_on_field(), 2);
+    /// ```
     pub fn count_doves_on_field(&self) -> usize {
         self.positions.union().count_ones() as usize
     }
 
     /// Counts the number of doves of the `player` on the field.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, Color};
+    ///
+    /// let board = Board::new();
+    /// assert_eq!(board.count_doves_on_field_of(Color::Red), 1);
+    /// ```
     pub fn count_doves_on_field_of(&self, player: Color) -> usize {
         self.positions.union_in_color(player).count_ones() as usize
     }
 
     /// Collects and returns the set of doves in the `player`'s hand.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, Color};
+    ///
+    /// let board = Board::new();
+    /// for dove in board.doves_in_hand_of(Color::Red) {
+    ///     println!("{:?}", dove); // A, Y, M, T, H
+    /// }
+    /// ```
     pub fn doves_in_hand_of(&self, player: Color) -> DoveSet {
         self.positions.doves_in_hand(player)
     }
 
     /// Collects and returns the set of doves of the `player` on the field.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, Color};
+    ///
+    /// let board = Board::new();
+    /// for dove in board.doves_on_field_of(Color::Red) {
+    ///     println!("{:?}", dove); // B
+    /// }
+    /// ```
     pub fn doves_on_field_of(&self, player: Color) -> DoveSet {
         self.positions.doves_on_field(player)
     }
 
     /// Returns `true` if the `player`'s `dove` is on the field.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, Color, Dove};
+    ///
+    /// let board = Board::new();
+    /// assert!(board.is_on_field(Color::Red, Dove::B));
+    /// assert!(!board.is_on_field(Color::Green, Dove::A));
+    /// ```
     pub fn is_on_field(&self, player: Color, dove: Dove) -> bool {
         *self.positions.position_of(player, dove) != 0
     }
 
     /// Returns `true` if the `player`'s `dove` is in their hand.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, Color, Dove};
+    ///
+    /// let board = Board::new();
+    /// assert!(board.is_in_hand(Color::Green, Dove::A));
+    /// assert!(!board.is_in_hand(Color::Red, Dove::B));
+    /// ```
     pub fn is_in_hand(&self, player: Color, dove: Dove) -> bool {
         *self.positions.position_of(player, dove) == 0
     }
@@ -880,7 +1067,6 @@ impl Board {
     /// and completely surrounded.
     ///
     /// # Examples
-    ///
     /// ```text
     /// +---+---+---+---+
     /// | b | T |   |   |
@@ -893,9 +1079,21 @@ impl Board {
     /// +---+---+---+---+
     /// ```
     /// In this case, the liberty of "B" is two.
-    /// The liberty of "M" is two,
-    /// because two of four squares next to "M" is occupied
-    /// by "H" and a wall.
+    /// The liberty of "T" is one,
+    /// because three of four squares next to "T" is occupied
+    /// by "B", "b" and a wall.
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{BoardBuilder, Color, Dove};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board = BoardBuilder::from_str("bT; B; aHM;  m")?.build()?;
+    /// assert_eq!(Some(2), board.liberty(Color::Red, Dove::B));
+    /// assert_eq!(Some(1), board.liberty(Color::Red, Dove::T));
+    /// assert_eq!(None, board.liberty(Color::Green, Dove::H)); // not on field
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn liberty(&self, player: Color, dove: Dove) -> Option<usize> {
         let all = self.positions.union();
         let walls = self.viewer.view_mask().calc_wall_bits(all);
@@ -909,18 +1107,63 @@ impl Board {
 
     /// Returns "liberty" of `player`'s boss-hato.
     ///
-    /// The meaning of liberty is written in [`liberty`](`Self::liberty`) section.
+    /// The meaning of liberty is written in the description
+    /// of the [`liberty`](`Self::liberty`) method.
     /// A player loses when the liberty of their boss-hato becomes 0.
     ///
     /// # Panics
-    ///
     /// Panics if `player`'s boss is not on the field,
     /// which does not happen in normal play.
+    ///
+    /// # Examples
+    /// ```text
+    /// +---+---+---+---+
+    /// | b | T |   |   |
+    /// +---+---+---+---+
+    /// |   | B |   |   |
+    /// +---+---+---+---+
+    /// |   | a | H | M |
+    /// +---+---+---+---+
+    /// |   |   | m |   |
+    /// +---+---+---+---+
+    /// ```
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{BoardBuilder, Color, Dove};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board = BoardBuilder::from_str("bT; B; aHM;  m")?.build()?;
+    /// assert_eq!(2, board.liberty_of_boss(Color::Red));
+    /// assert_eq!(1, board.liberty_of_boss(Color::Green));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn liberty_of_boss(&self, player: Color) -> usize {
         self.liberty(player, Dove::B).unwrap()
     }
 
-    /// Get info whether bosses are surrounded or not
+    /// Returns information about whether bosses are surrounded or not.
+    ///
+    /// See the description of [`SurroundedStatus`] for detail.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{BoardBuilder, Color, Dove, SurroundedStatus};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board1 = BoardBuilder::from_str("bBh;Aa m;  M; H Y")?.build()?;
+    /// let board2 = BoardBuilder::from_str("b h;AaBm;  M; H Y")?.build()?;
+    /// let board3 = BoardBuilder::from_str("b h;Aa m; BM ; H Y")?.build()?;
+    ///
+    /// assert_eq!(SurroundedStatus::Both, board1.surrounded_status());
+    /// assert_eq!(
+    ///     SurroundedStatus::OneSide(Color::Red),
+    ///     board2.surrounded_status()
+    /// );
+    /// assert_eq!(SurroundedStatus::None, board3.surrounded_status());
+    /// # Ok(())
+    /// # }
     pub fn surrounded_status(&self) -> SurroundedStatus {
         let lib_red = self.liberty_of_boss(Color::Red);
         let lib_green = self.liberty_of_boss(Color::Green);
@@ -990,7 +1233,7 @@ impl Board {
     // *******************************************************************
     //  Methods For Conversion
     // *******************************************************************
-    /// Returns a light expression of 64 bits.
+    /// Returns a light expression of a `Board` in `u64`.
     ///
     /// 64 bits consist of the following three parts:
     /// - Top 4 bits: empty (filled by 0)
@@ -1000,6 +1243,31 @@ impl Board {
     ///
     /// The order of 12 doves is "B > b > A > a > Y > y > M > m > T > t > H > h",
     /// where capital/lower cases mean red/green dove, respectively.
+    ///
+    /// # Examples
+    /// Initial board:
+    /// ```text
+    /// +---+---+---+---+     +---+---+---+---+
+    /// | b |   |   |   |     | 0 | 1 | 2 | 3 |
+    /// +---+---+---+---+     +---+---+---+---+
+    /// | B |   |   |   |     | 4 | 5 | 6 | 7 |
+    /// +---+---+---+---+ <=> +---+---+---+---+
+    /// |   |   |   |   |     | 8 | 9 |10 |11 |
+    /// +---+---+---+---+     +---+---+---+---+
+    /// |   |   |   |   |     |12 |13 |14 |15 |
+    /// +---+---+---+---+     +---+---+---+---+
+    /// ```
+    /// As a code:
+    /// ```rust
+    /// use tokyodoves::Board;
+    ///
+    /// let board = Board::new();
+    /// let top_4 = 0b0000;
+    /// let next_12 = 0b110000_000000; // B + b
+    /// let next_48 = 4 << 44 | 0 << 40; // B at 4 + b at 0
+    /// let hash = top_4 << 60 | next_12 << 48 | next_48;
+    /// assert_eq!(board.to_u64(), hash);
+    /// ```
     pub fn to_u64(&self) -> u64 {
         let mut hash = 0;
         for d in Dove::iter() {
@@ -1021,12 +1289,69 @@ impl Board {
         hash
     }
 
-    /// Returns a light expression of `u64` with a universality.
+    /// Returns a light expression of `u64` invariant under reflection, rotation and translation
+    /// transformations.
     ///
     /// The composition of the returned value is the same as that of [`to_u64`](`Self::to_u64`).
-    /// "Universality" means that this method returns the same value for boards that
+    /// This method returns the same value for boards that
     /// - coinside with each other under reflection, rotation, translation, and any compositions of them.
     /// - coinside with each other after alternating next player and swapping colors of doves simultaneously.
+    ///
+    /// # Examples
+    /// Boards
+    /// ```text
+    /// +---+---+---+---+
+    /// | b | B |   |   |
+    /// +---+---+---+---+
+    /// |   | H |   |   |
+    /// +---+---+---+---+
+    /// |   | y |   |   |
+    /// +---+---+---+---+
+    /// |   |   |   |   |
+    /// +---+---+---+---+
+    /// ```
+    /// and
+    /// ```text
+    /// +---+---+---+---+
+    /// |   |   |   |   |
+    /// +---+---+---+---+
+    /// |   | b |   |   |
+    /// +---+---+---+---+
+    /// |   | B | H | y |
+    /// +---+---+---+---+
+    /// |   |   |   |   |
+    /// +---+---+---+---+
+    /// ```
+    /// viewed from red and
+    /// ```text
+    /// +---+---+---+---+
+    /// |   |   |   |   |
+    /// +---+---+---+---+
+    /// |   | B |   |   |
+    /// +---+---+---+---+
+    /// |   | b | h | Y |
+    /// +---+---+---+---+
+    /// |   |   |   |   |
+    /// +---+---+---+---+
+    /// ```
+    /// viewed from green
+    /// return the same values.
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{BoardBuilder, Color};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board1 = BoardBuilder::from_str("bB; H; y")?.build()?;
+    /// let hash1 = board1.to_invariant_u64(Color::Red);
+    /// let board2 = BoardBuilder::from_str("; b; BHy")?.build()?;
+    /// let hash2 = board2.to_invariant_u64(Color::Red);
+    /// let board3 = BoardBuilder::from_str("; B; bhY")?.build()?;
+    /// let hash3 = board3.to_invariant_u64(Color::Green);
+    /// assert_eq!(hash1, hash2);
+    /// assert_eq!(hash2, hash3);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn to_invariant_u64(&self, next_player: Color) -> u64 {
         use Color::*;
         let mut board = *self;
@@ -1070,10 +1395,10 @@ impl Board {
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Color, Dove};
+    /// use tokyodoves::{Board, Color, Dove};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let board = BoardBuilder::new().build()?;
+    /// let board = Board::new();
     /// let matrix = [
     ///     [Some((Color::Green, Dove::B)), None, None, None],
     ///     [Some((Color::Red, Dove::B)), None, None, None],
@@ -1111,6 +1436,10 @@ impl Board {
         matrix
     }
 
+    /// Returns [`BoardDisplay`] to display the board.
+    ///
+    /// [`BoardDisplay`] provides a way to configure display styles.
+    /// See its documentation for more.
     pub fn display(&self) -> BoardDisplay {
         BoardDisplay::new(self)
     }
@@ -1119,10 +1448,10 @@ impl Board {
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::BoardBuilder;
+    /// use tokyodoves::Board;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let board = BoardBuilder::new().build()?;
+    /// let board = Board::new();
     /// let string: String = [
     ///     "+---+---+---+---+",
     ///     "| b |   |   |   |",
@@ -1144,6 +1473,19 @@ impl Board {
             .to_string()
     }
 
+    /// Returns a simple `String` expression.
+    ///
+    /// `empty` specifies what character fills empty squares.
+    /// `delimiter` specifies what `&str` divides each row.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    ///
+    /// let board = Board::new();
+    /// let string = String::from("b---;B---;----;----");
+    /// assert_eq!(string, board.to_simple_string('-', ";"));
+    /// ```
     pub fn to_simple_string(&self, empty: char, delimiter: &str) -> String {
         self.display()
             .with_format(BoardDisplayFormat::Simple {
@@ -1167,7 +1509,7 @@ mod tests {
 
     impl RandomPlayIter {
         fn new() -> Self {
-            let board = BoardBuilder::new().build_unchecked();
+            let board = Board::new();
             let num = 0;
             let player = Color::Red;
             RandomPlayIter { board, num, player }
@@ -1192,7 +1534,7 @@ mod tests {
             match self.board.surrounded_status() {
                 SurroundedStatus::None => self.player = !self.player,
                 _ => {
-                    self.board = BoardBuilder::new().build_unchecked();
+                    self.board = Board::new();
                     self.player = Color::Red;
                 }
             }
