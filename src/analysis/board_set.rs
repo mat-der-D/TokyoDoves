@@ -246,11 +246,37 @@ impl BoardSet {
     }
 
     /// Returns a reference to the internal [`RawBoardSet`].
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::{BoardSet, board_set::RawBoardSet};
+    ///
+    /// let board = Board::new();
+    /// let mut set = BoardSet::new();
+    /// set.insert(board);
+    /// let mut raw_set = RawBoardSet::new();
+    /// raw_set.insert(board.to_u64());
+    /// assert_eq!(*set.raw(), raw_set);
+    /// ```
     pub fn raw(&self) -> &RawBoardSet {
         &self.raw
     }
 
     /// Returns a mutable reference to the internal [`RawBoardSet`].
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let board = Board::new();
+    /// let mut set1 = BoardSet::new();
+    /// set1.insert(board);
+    /// let mut set2 = BoardSet::new();
+    /// set2.raw_mut().insert(board.to_u64());
+    /// assert_eq!(set1, set2);
+    /// ```
     pub fn raw_mut(&mut self) -> &mut RawBoardSet {
         &mut self.raw
     }
@@ -258,6 +284,20 @@ impl BoardSet {
     /// Returns the internal [`RawBoardSet`].
     ///
     /// The ownership of the set is moved.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::{BoardSet, board_set::RawBoardSet};
+    ///
+    /// let board = Board::new();
+    /// let mut set1 = BoardSet::new();
+    /// set1.insert(board);
+    /// let raw_set1 = set1.into_raw();
+    /// let mut raw_set2 = RawBoardSet::new();
+    /// raw_set2.insert(board.to_u64());
+    /// assert_eq!(raw_set1, raw_set2);
+    /// ```
     pub fn into_raw(self) -> RawBoardSet {
         self.raw
     }
@@ -265,6 +305,19 @@ impl BoardSet {
     /// Creates the set that has a [`RawBoardSet`] internally.
     ///
     /// The ownership of `raw` is moved.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::{BoardSet, board_set::RawBoardSet};
+    ///
+    /// let board = Board::new();
+    /// let mut raw_set1 = RawBoardSet::new();
+    /// let set1 = BoardSet::from_raw(raw_set1);
+    /// let mut set2 = BoardSet::new();
+    /// set2.insert(board);
+    /// assert_eq!(set1, set2);
+    /// ```
     pub fn from_raw(raw: RawBoardSet) -> Self {
         Self { raw }
     }
