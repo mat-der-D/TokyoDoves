@@ -627,12 +627,145 @@ impl std::ops::Sub<&BoardSet> for &BoardSet {
     }
 }
 
+/// An owing iterator over the items of a [`BoardSet`].
+///
+/// This struct is created by the [`into_iter`](`IntoIterator::into_iter`)
+/// method on [`BoardSet`] (provided by the [`IntoIterator`] trait).
+/// See the documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use tokyodoves::Board;
+/// use tokyodoves::analysis::BoardSet;
+///
+/// let mut set = BoardSet::new();
+/// set.insert(Board::new());
+/// let mut iter = set.into_iter();
+/// ```
 pub struct IntoIter(RawIntoIter);
+
+/// A draining iterator over the items of a [`BoardSet`].
+///
+/// This struct is created by the [`drain`](`BoardSet::drain`) method
+/// on [`BoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use tokyodoves::Board;
+/// use tokyodoves::analysis::BoardSet;
+///
+/// let mut set = BoardSet::new();
+/// set.insert(Board::new());
+/// let mut drain = set.drain();
+/// ```
 pub struct Drain<'a>(RawDrain<'a>);
+
+/// An iterator over the items of a [`BoardSet`].
+///
+/// This struct is created by the [`iter`](`BoardSet::iter`) method
+/// on [`BoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use tokyodoves::Board;
+/// use tokyodoves::analysis::BoardSet;
+///
+/// let mut set = BoardSet::new();
+/// set.insert(Board::new());
+/// let mut iter = set.iter();
+/// ```
 pub struct Iter<'a>(RawIter<'a>);
+
+/// A lazy iterator producing elements in the difference of [`BoardSet`]s.
+///
+/// This struct is created by the [`difference`](`BoardSet::difference`) method
+/// on [`BoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use std::str::FromStr;
+/// use tokyodoves::{Board, BoardBuilder};
+/// use tokyodoves::analysis::BoardSet;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let mut set1 = BoardSet::new();
+/// set1.insert(Board::new());
+/// let mut set2 = BoardSet::new();
+/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+///
+/// let mut difference = set1.difference(&set2);
+/// # Ok(())
+/// # }
+/// ```
 pub struct Difference<'a>(RawDifference<'a>);
+
+/// A lazy iterator producing elements in the symmetric difference of [`BoardSet`]s.
+///
+/// This struct is created by the [`symmetric_difference`](`BoardSet::symmetric_difference`) method
+/// on [`BoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use std::str::FromStr;
+/// use tokyodoves::{Board, BoardBuilder};
+/// use tokyodoves::analysis::BoardSet;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let mut set1 = BoardSet::new();
+/// set1.insert(Board::new());
+/// let mut set2 = BoardSet::new();
+/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+///
+/// let mut symmetric_difference = set1.symmetric_difference(&set2);
+/// # Ok(())
+/// # }
+/// ```
 pub struct SymmetricDifference<'a>(RawSymmetricDifference<'a>);
+
+/// A lazy iterator producing elements in the intersection of [`BoardSet`]s.
+///
+/// This struct is created by the [`intersection`](`BoardSet::intersection`) method
+/// on [`BoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use std::str::FromStr;
+/// use tokyodoves::{Board, BoardBuilder};
+/// use tokyodoves::analysis::BoardSet;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let mut set1 = BoardSet::new();
+/// set1.insert(Board::new());
+/// let mut set2 = BoardSet::new();
+/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+///
+/// let mut intersection = set1.intersection(&set2);
+/// # Ok(())
+/// # }
+/// ```
 pub struct Intersection<'a>(RawIntersection<'a>);
+
+/// A lazy iterator producing elements in the union of [`BoardSet`]s.
+///
+/// This struct is created by the [`union`](`BoardSet::union`) method
+/// on [`BoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use std::str::FromStr;
+/// use tokyodoves::{Board, BoardBuilder};
+/// use tokyodoves::analysis::BoardSet;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let mut set1 = BoardSet::new();
+/// set1.insert(Board::new());
+/// let mut set2 = BoardSet::new();
+/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+///
+/// let mut union_iter = set1.union(&set2);
+/// # Ok(())
+/// # }
+/// ```
 pub struct Union<'a>(RawUnion<'a>);
 
 macro_rules! impl_iterators {
@@ -1274,6 +1407,20 @@ impl std::ops::Sub<&RawBoardSet> for &RawBoardSet {
 type MapIter<'a> = std::collections::hash_map::Iter<'a, u32, HashSet<u32>>;
 type SetIter<'a> = std::collections::hash_set::Iter<'a, u32>;
 
+/// An iterator over the items of a [`RawBoardSet`].
+///
+/// This struct is created by the [`iter`](`RawBoardSet::iter`) method
+/// on [`RawBoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use tokyodoves::Board;
+/// use tokyodoves::analysis::board_set::RawBoardSet;
+///
+/// let mut set = RawBoardSet::new();
+/// set.insert(Board::new().to_u64());
+/// let mut iter = set.iter();
+/// ```
 pub struct RawIter<'a> {
     map_iter: MapIter<'a>, // iterator of top2bottoms
     state: Option<(
@@ -1315,6 +1462,21 @@ impl<'a> Iterator for RawIter<'a> {
 type MapIntoIter = std::collections::hash_map::IntoIter<u32, HashSet<u32>>;
 type SetIntoIter = std::collections::hash_set::IntoIter<u32>;
 
+/// An owing iterator over the items of a [`RawBoardSet`].
+///
+/// This struct is created by the [`into_iter`](`IntoIterator::into_iter`)
+/// method on [`RawBoardSet`] (provided by the [`RawIntoIterator`] trait).
+/// See the documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use tokyodoves::Board;
+/// use tokyodoves::analysis::board_set::RawBoardSet;
+///
+/// let mut set = RawBoardSet::new();
+/// set.insert(Board::new().to_u64());
+/// let mut iter = set.into_iter();
+/// ```
 pub struct RawIntoIter {
     map_iter: MapIntoIter, // iterator of set.top2bottoms
     state: Option<(
@@ -1353,6 +1515,20 @@ impl Iterator for RawIntoIter {
     }
 }
 
+/// A draining iterator over the items of a [`RawBoardSet`].
+///
+/// This struct is created by the [`drain`](`RawBoardSet::drain`) method
+/// on [`RawBoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use tokyodoves::Board;
+/// use tokyodoves::analysis::board_set::RawBoardSet;
+///
+/// let mut set = RawBoardSet::new();
+/// set.insert(Board::new().to_u64());
+/// let mut drain = set.drain();
+/// ```
 pub struct RawDrain<'a>(_RawDrain<'a>);
 
 impl<'a> RawDrain<'a> {
@@ -1417,6 +1593,27 @@ impl<'a> Drop for _RawDrain<'a> {
     }
 }
 
+/// A lazy iterator producing elements in the difference of [`RawBoardSet`]s.
+///
+/// This struct is created by the [`difference`](`RawBoardSet::difference`) method
+/// on [`RawBoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use std::str::FromStr;
+/// use tokyodoves::{Board, BoardBuilder};
+/// use tokyodoves::analysis::board_set::RawBoardSet;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let mut set1 = RawBoardSet::new();
+/// set1.insert(Board::new().to_u64());
+/// let mut set2 = RawBoardSet::new();
+/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked().to_u64());
+///
+/// let mut difference = set1.difference(&set2);
+/// # Ok(())
+/// # }
+/// ```
 pub struct RawDifference<'a> {
     left: RawIter<'a>,
     right: &'a RawBoardSet,
@@ -1443,6 +1640,27 @@ impl<'a> Iterator for RawDifference<'a> {
     }
 }
 
+/// A lazy iterator producing elements in the symmetric difference of [`RawBoardSet`]s.
+///
+/// This struct is created by the [`symmetric_difference`](`RawBoardSet::symmetric_difference`) method
+/// on [`RawBoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use std::str::FromStr;
+/// use tokyodoves::{Board, BoardBuilder};
+/// use tokyodoves::analysis::board_set::RawBoardSet;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let mut set1 = RawBoardSet::new();
+/// set1.insert(Board::new().to_u64());
+/// let mut set2 = RawBoardSet::new();
+/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked().to_u64());
+///
+/// let mut symmetric_difference = set1.symmetric_difference(&set2);
+/// # Ok(())
+/// # }
+/// ```
 pub struct RawSymmetricDifference<'a> {
     left: &'a RawBoardSet,
     left_iter: RawIter<'a>,
@@ -1479,6 +1697,27 @@ impl<'a> Iterator for RawSymmetricDifference<'a> {
     }
 }
 
+/// A lazy iterator producing elements in the intersection of [`RawBoardSet`]s.
+///
+/// This struct is created by the [`intersection`](`RawBoardSet::intersection`) method
+/// on [`RawBoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use std::str::FromStr;
+/// use tokyodoves::{Board, BoardBuilder};
+/// use tokyodoves::analysis::board_set::RawBoardSet;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let mut set1 = RawBoardSet::new();
+/// set1.insert(Board::new().to_u64());
+/// let mut set2 = RawBoardSet::new();
+/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked().to_u64());
+///
+/// let mut intersection = set1.intersection(&set2);
+/// # Ok(())
+/// # }
+/// ```
 pub struct RawIntersection<'a> {
     left_iter: RawIter<'a>,
     right: &'a RawBoardSet,
@@ -1505,6 +1744,27 @@ impl<'a> Iterator for RawIntersection<'a> {
     }
 }
 
+/// A lazy iterator producing elements in the union of [`RawBoardSet`]s.
+///
+/// This struct is created by the [`union`](`RawBoardSet::union`) method
+/// on [`RawBoardSet`]. See its documentation for more.
+///
+/// # Examples
+/// ```rust
+/// use std::str::FromStr;
+/// use tokyodoves::{Board, BoardBuilder};
+/// use tokyodoves::analysis::board_set::RawBoardSet;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let mut set1 = RawBoardSet::new();
+/// set1.insert(Board::new().to_u64());
+/// let mut set2 = RawBoardSet::new();
+/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked().to_u64());
+///
+/// let mut union_iter = set1.union(&set2);
+/// # Ok(())
+/// # }
+/// ```
 pub struct RawUnion<'a> {
     left_iter: RawIter<'a>,
     right: &'a RawBoardSet,
