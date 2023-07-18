@@ -17,9 +17,13 @@ fn u64_to_board(hash: u64) -> Board {
 ///
 /// Note that, unlike [`HashSet`],
 /// the capacity does not behaves like `usize`.
-/// It has a structure like `HashMap<u32, usize>`,
+/// It has an internal data `HashMap<u32, usize>`,
 /// where keys represents top half of `u64` expression of [`Board`]s
 /// and values represents how many elements the set can hold.
+/// An addition of two capacities is defined by
+/// the addition of values of internal hash maps
+/// sharing the same keys.
+///
 ///
 /// # Examples
 /// ```rust
@@ -97,7 +101,7 @@ impl Capacity {
 
 impl std::ops::Add for Capacity {
     type Output = Capacity;
-    /// Creates a new capacity by adding the capacity of `self` and `rhs`.
+    /// Creates a new capacity by adding the capacities of `self` and `rhs`.
     ///
     /// # Examples
     /// ```rust
@@ -623,10 +627,16 @@ impl std::ops::Sub<&BoardSet> for &BoardSet {
     }
 }
 
+pub struct IntoIter(RawIntoIter);
+pub struct Drain<'a>(RawDrain<'a>);
+pub struct Iter<'a>(RawIter<'a>);
+pub struct Difference<'a>(RawDifference<'a>);
+pub struct SymmetricDifference<'a>(RawSymmetricDifference<'a>);
+pub struct Intersection<'a>(RawIntersection<'a>);
+pub struct Union<'a>(RawUnion<'a>);
+
 macro_rules! impl_iterators {
     ({$iter:ident => $raw:ident}) => {
-        pub struct $iter($raw);
-
         impl Iterator for $iter {
             type Item = Board;
             fn next(&mut self) -> Option<Self::Item> {
@@ -636,8 +646,6 @@ macro_rules! impl_iterators {
     };
 
     (<$iter:ident => $raw:ident>) => {
-        pub struct $iter<'a>($raw<'a>);
-
         impl<'a> Iterator for $iter<'a> {
             type Item = Board;
             fn next(&mut self) -> Option<Self::Item> {

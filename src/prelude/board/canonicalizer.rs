@@ -184,9 +184,9 @@ const fn compose(a: [usize; 16], b: [usize; 16]) -> [usize; 16] {
 /// It supposes that the top-left corner of the minimum rectangle
 /// coincides with that of 4x4 matrix, and does the same for mapped boards.
 /// For full reduction of the degree of freedom,
-/// besides `PositionMapper`,
 /// implement some functions to translate the boards so that the top-left corner
-/// of the minimum rectangle moves to that of 4x4 matrix.
+/// of the minimum rectangle moves to that of 4x4 matrix,
+/// besides `PositionMapper`,
 #[derive(Debug, Clone, Copy)]
 pub struct PositionMapper {
     maps: &'static [[usize; 16]; 8],
