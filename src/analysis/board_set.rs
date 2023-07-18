@@ -161,28 +161,43 @@ impl std::ops::AddAssign for Capacity {
 // ********************************************************************
 //  BoardSet
 // ********************************************************************
-/// A light implementation of set of [`Board`]s.
+/// A light set of [`Board`]s.
 ///
-/// Its methods are similar to those of [`std::collections::HashSet`].
-/// Read their documentations for quick understanding.
+/// Its methods are similar to those of [`HashSet`](`std::collections::HashSet`).
+/// See the documentation for quick understanding.
 ///
-/// It has [`RawBoardSet`] internally, which is a set of `u64` expressions of
-/// [`Board`]s created by [`Board::to_u64`].
+/// It has a [`RawBoardSet`] internally, which is a set of `u64` expressions of
+/// [`Board`]s created by the [`to_u64`](`Board::to_u64`) method on [`Board`].
 /// [`RawBoardSet`] also has similar methods to `BoardSet`
 /// except that the elements are `u64`, not [`Board`].
 ///
 /// In general, the memory size of the set is smaller than `HashSet<Board>`,
 /// when they have the same number of elements.
 ///
-/// It supports i/o utilities [`BoardSet::load`], [`BoardSet::load_filter`]
-/// and [`BoardSet::save`].
-/// A binary file will be saved when [`BoardSet::save`] is called,
-/// which can be reloaded by [`BoardSet::load`].
-/// [`BoardSet::load_filter`] provides a way to load a part satisfying a criterion.
+/// `BoardSet` supports i/o utility methods [`load`](`BoardSet::load`),
+/// [`load_filter`](`BoardSet::load_filter`) and [`save`](`BoardSet::save`).
+/// A binary file will be saved when the [`save`](`BoardSet::save`) method is called,
+/// which can be reloaded by the [`load`](`BoardSet::load`) method.
+/// The [`load_filter`](`BoardSet::load_filter`) method provides a way
+/// to load a part satisfying a criterion.
 /// For efficient loading, the following process is better:
 /// 1. Calculate [`Capacity`] required to load the file by [`BoardSet::required_capacity`].
 /// 2. Allocate memories by [`BoardSet::reserve`] or create new `BoardSet` by [`BoardSet::with_capacity`].
 /// 3. Call [`BoardSet::load`] to load elements in the file.
+///
+/// # Examples
+/// ``` ignore
+/// use std::fs::File;
+/// use tokyodoves::analysis::BoardSet;
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let path = "/some/path/of/binary/file.tdl";
+/// let capacity = BoardSet::required_capacity(File::open(path)?);
+/// let mut set = BoardSet::with_capacity(capacity);
+/// set.load(File::open(path)?);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct BoardSet {
     raw: RawBoardSet,
@@ -232,7 +247,7 @@ impl<'a> IntoIterator for &'a BoardSet {
 
 impl From<RawBoardSet> for BoardSet {
     fn from(raw: RawBoardSet) -> Self {
-        Self { raw }
+        Self::from_raw(raw)
     }
 }
 
@@ -248,20 +263,28 @@ impl BoardSet {
         Self::default()
     }
 
-    /// Returns a reference to the internal [`RawBoardSet`]
+    /// Returns a reference to the internal [`RawBoardSet`].
     pub fn raw(&self) -> &RawBoardSet {
         &self.raw
     }
 
-    /// Returns a mutable reference to the internal [`RawBoardSet`]
+    /// Returns a mutable reference to the internal [`RawBoardSet`].
     pub fn raw_mut(&mut self) -> &mut RawBoardSet {
         &mut self.raw
     }
 
     /// Returns the internal [`RawBoardSet`].
-    /// The set loses its ownership.
+    ///
+    /// The ownership of the set is moved.
     pub fn into_raw(self) -> RawBoardSet {
         self.raw
+    }
+
+    /// Creates the set that has a [`RawBoardSet`] internally.
+    ///
+    /// The ownership of `raw` is moved.
+    pub fn from_raw(raw: RawBoardSet) -> Self {
+        Self { raw }
     }
 
     /// Returns [`Capacity`] required to load all elements specified by `reader`.
@@ -368,6 +391,18 @@ impl BoardSet {
     /// it drops the remaining elements.
     /// The returned iterator keeps a mutable borrow on the set to optimize
     /// its implementation.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::{BoardSet, Capacity};
+    ///
+    /// let mut set = BoardSet::new();
+    /// set.insert(Board::new());
+    /// set.drain();
+    /// assert!(set.is_empty());
+    /// assert_ne!(set.capacity(), Capacity::new());
+    /// ```
     pub fn drain(&mut self) -> Drain {
         Drain(RawDrain::new(&mut self.raw))
     }
@@ -397,7 +432,7 @@ impl BoardSet {
         self.raw.retain(|&h| f(&u64_to_board(h)))
     }
 
-    /// Clears the set, removing all values
+    /// Clears the set, removing all values.
     ///
     /// # Examples
     /// ```rust
@@ -415,6 +450,18 @@ impl BoardSet {
 
     /// Reserves capacity for at least `additional` more elements
     /// to be inserted in the `BoardSet` without reallocating.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set0 = BoardSet::new();
+    /// set0.insert(Board::new());
+    /// let capacity = set0.capacity();
+    /// let mut set1 = BoardSet::new();
+    /// set1.reserve(capacity);
+    /// ```
     pub fn reserve(&mut self, additional: Capacity) {
         self.raw.reserve(additional)
     }
@@ -449,24 +496,76 @@ impl BoardSet {
     }
 
     /// Returns `true` if the set contains a board.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set = BoardSet::new();
+    /// let board = Board::new();
+    /// set.insert(board);
+    /// assert!(set.contains(&board));
+    /// ```
     pub fn contains(&self, board: &Board) -> bool {
         self.raw.contains(&board.to_u64())
     }
 
     /// Returns `true` if `self` has no elements in common with `other`.
     /// This is equivalent to checking for an empty intersection.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{Board, BoardBuilder};
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board0 = Board::new();
+    /// let board1 = BoardBuilder::from_str("BbH")?.build_unchecked();
+    ///
+    /// let mut set0 = BoardSet::new();
+    /// set0.insert(board0);
+    /// let mut set1 = BoardSet::new();
+    /// set1.insert(board1);
+    /// assert!(set0.is_disjoint(&set1));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn is_disjoint(&self, other: &BoardSet) -> bool {
         self.raw.is_disjoint(&other.raw)
     }
 
     /// Returns `true` if the set is a subset of another, i.e.,
     /// `other` contains at least all the boards in `self`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set0 = BoardSet::new();
+    /// set0.insert(Board::new());
+    /// let set1 = BoardSet::new();
+    /// assert!(set1.is_subset(&set0));
+    /// ```
     pub fn is_subset(&self, other: &BoardSet) -> bool {
         self.raw.is_subset(&other.raw)
     }
 
     /// Returns `true` if the set is a superset of another, i.e.,
     /// `self` contains at least all the boards in `other`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set0 = BoardSet::new();
+    /// set0.insert(Board::new());
+    /// let set1 = BoardSet::new();
+    /// assert!(set0.is_superset(&set1));
+    /// ```
     pub fn is_superset(&self, other: &BoardSet) -> bool {
         self.raw.is_superset(&other.raw)
     }
@@ -476,18 +575,54 @@ impl BoardSet {
     /// Returns whether the board was newly inserted. That is:
     /// - If the set did not previously contain this board, `true` is returned.
     /// - If the set already contained this board, `false` is returned.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set = BoardSet::new();
+    /// assert_eq!(set.len(), 0);
+    /// set.insert(Board::new());
+    /// assert_eq!(set.len(), 1);
+    /// ```
     pub fn insert(&mut self, board: Board) -> bool {
         self.raw.insert(board.to_u64())
     }
 
     /// Removes a board from the set.
     /// Returns whether the board was present in the set.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set = BoardSet::new();
+    /// let board = Board::new();
+    /// set.insert(board);
+    /// assert_eq!(set.len(), 1);
+    /// set.remove(&board);
+    /// assert_eq!(set.len(), 0);
+    /// ```
     pub fn remove(&mut self, board: &Board) -> bool {
         self.raw.remove(&board.to_u64())
     }
 
     /// Removes and returns the board in the set, if any,
     /// that is equal to the given one.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set = BoardSet::new();
+    /// let board = Board::new();
+    /// set.insert(board);
+    /// assert_eq!(set.len(), 1);
+    /// set.take(&board);
+    /// assert_eq!(set.len(), 0);
     pub fn take(&mut self, board: &Board) -> Option<Board> {
         self.raw.take(&board.to_u64()).map(u64_to_board)
     }
@@ -806,6 +941,18 @@ impl_iterators!(
 // ********************************************************************
 //  BoardSet
 // ********************************************************************
+/// A set of [`u64`] built in [`BoardSet`].
+///
+/// Its methods are similar to those of [`HashSet`](`std::collections::HashSet`).
+/// Furthermore, the methods on `RawBoardSet` are almost the same as those on [`BoardSet`].
+/// See their documentations for quick understanding.
+///
+/// As an internal data of [`BoardSet`],
+/// items contained in `RawBoardSet` are `u64` expressions of [`Board`]s
+/// created by [`to_u64`](`Board::to_u64`) method on [`Board`].
+/// Almost all methods on [`BoardSet`] are implemented simply by calling
+/// the methods of `RawBoardSet` with the same name
+/// and converting inputs or outputs between `u64` and [`Board`].
 #[derive(Debug, Clone, Default)]
 pub struct RawBoardSet {
     pub(crate) top2bottoms: HashMap<u32, HashSet<u32>>,
@@ -941,6 +1088,7 @@ impl RawBoardSet {
     /// ```rust
     /// use tokyodoves::Board;
     /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
     /// let mut set0 = RawBoardSet::new();
     /// set0.insert(Board::new().to_u64());
     /// let capacity = set0.capacity();
@@ -1032,6 +1180,19 @@ impl RawBoardSet {
     /// it drops the remaining elements.
     /// The returned iterator keeps a mutable borrow on the set to optimize
     /// its implementation.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::Capacity;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set = RawBoardSet::new();
+    /// set.insert(Board::new().to_u64());
+    /// set.drain();
+    /// assert!(set.is_empty());
+    /// assert_ne!(set.capacity(), Capacity::new());
+    /// ```
     pub fn drain(&mut self) -> RawDrain {
         RawDrain::new(self)
     }
@@ -1066,7 +1227,7 @@ impl RawBoardSet {
         }
     }
 
-    /// Clears the set, removing all values
+    /// Clears the set, removing all values.
     ///
     /// # Examples
     /// ```rust
@@ -1084,6 +1245,18 @@ impl RawBoardSet {
 
     /// Reserves capacity for at least `additional` more elements
     /// to be inserted in the `RawBoardSet` without reallocating.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set0 = RawBoardSet::new();
+    /// set0.insert(Board::new().to_u64());
+    /// let capacity = set0.capacity();
+    /// let mut set1 = RawBoardSet::new();
+    /// set1.reserve(capacity);
+    /// ```
     pub fn reserve(&mut self, additional: Capacity) {
         for (top, additional_len) in additional.0 {
             match self.top2bottoms.get_mut(&top) {
@@ -1135,6 +1308,17 @@ impl RawBoardSet {
     }
 
     /// Returns `true` if the set contains a value.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set = RawBoardSet::new();
+    /// let hash = Board::new().to_u64();
+    /// set.insert(hash);
+    /// assert!(set.contains(&hash));
+    /// ```
     pub fn contains(&self, hash: &u64) -> bool {
         let (k, v) = Self::u64_to_u32_u32(*hash);
         self.top2bottoms.get(&k).map_or(false, |x| x.contains(&v))
@@ -1142,6 +1326,25 @@ impl RawBoardSet {
 
     /// Returns `true` if `self` has no elements in common with `other`.
     /// This is equivalent to checking for an empty intersection.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{Board, BoardBuilder};
+    /// use tokyodoves::analysis::RawBoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let hash0 = Board::new().to_u64();
+    /// let hash1 = BoardBuilder::from_str("BbH")?.build_unchecked().to_u64();
+    ///
+    /// let mut set0 = RawBoardSet::new();
+    /// set0.insert(hash0);
+    /// let mut set1 = RawBoardSet::new();
+    /// set1.insert(hash1);
+    /// assert!(set0.is_disjoint(&set1));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn is_disjoint(&self, other: &RawBoardSet) -> bool {
         if self.len() <= other.len() {
             self.iter().all(|v| !other.contains(&v))
@@ -1152,6 +1355,17 @@ impl RawBoardSet {
 
     /// Returns `true` if the set is a subset of another, i.e.,
     /// `other` contains at least all the boards in `self`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set0 = RawBoardSet::new();
+    /// set0.insert(Board::new().to_u64());
+    /// let set1 = BoardSet::new();
+    /// assert!(set1.is_subset(&set0));
+    /// ```
     pub fn is_subset(&self, other: &RawBoardSet) -> bool {
         if self.len() <= other.len() {
             self.iter().all(|v| other.contains(&v))
@@ -1162,6 +1376,17 @@ impl RawBoardSet {
 
     /// Returns `true` if the set is a superset of another, i.e.,
     /// `self` contains at least all the boards in `other`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set0 = RawBoardSet::new();
+    /// set0.insert(Board::new().to_u64());
+    /// let set1 = BoardSet::new();
+    /// assert!(set0.is_superset(&set1));
+    /// ```
     pub fn is_superset(&self, other: &RawBoardSet) -> bool {
         other.is_subset(self)
     }
@@ -1171,6 +1396,17 @@ impl RawBoardSet {
     /// Returns whether the value was newly inserted. That is:
     /// - If the set did not previously contain this value, `true` is returned.
     /// - If the set already contained this value, `false` is returned.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set = RawBoardSet::new();
+    /// assert_eq!(set.len(), 0);
+    /// set.insert(Board::new().to_u64());
+    /// assert_eq!(set.len(), 1);
+    /// ```
     pub fn insert(&mut self, hash: u64) -> bool {
         let (k, v) = Self::u64_to_u32_u32(hash);
         self.top2bottoms.entry(k).or_default().insert(v)
@@ -1178,6 +1414,19 @@ impl RawBoardSet {
 
     /// Removes a value from the set.
     /// Returns whether the value was present in the set.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set = RawBoardSet::new();
+    /// let hash = Board::new().to_u64();
+    /// set.insert(hash);
+    /// assert_eq!(set.len(), 1);
+    /// set.remove(&hash);
+    /// assert_eq!(set.len(), 0);
+    /// ```
     pub fn remove(&mut self, hash: &u64) -> bool {
         let (k, v) = Self::u64_to_u32_u32(*hash);
         let Some(set) = self.top2bottoms.get_mut(&k) else {
@@ -1192,6 +1441,19 @@ impl RawBoardSet {
 
     /// Removes and returns the value in the set, if any,
     /// that is equal to the given one.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set = RawBoardSet::new();
+    /// let hash = Board::new().to_u64();
+    /// set.insert(hash);
+    /// assert_eq!(set.len(), 1);
+    /// set.take(&hash);
+    /// assert_eq!(set.len(), 0);
+    /// ```
     pub fn take(&mut self, hash: &u64) -> Option<u64> {
         let (k, v) = Self::u64_to_u32_u32(*hash);
         let set = self.top2bottoms.get_mut(&k)?;
@@ -1465,7 +1727,7 @@ type SetIntoIter = std::collections::hash_set::IntoIter<u32>;
 /// An owing iterator over the items of a [`RawBoardSet`].
 ///
 /// This struct is created by the [`into_iter`](`IntoIterator::into_iter`)
-/// method on [`RawBoardSet`] (provided by the [`RawIntoIterator`] trait).
+/// method on [`RawBoardSet`] (provided by the [`IntoIterator`] trait).
 /// See the documentation for more.
 ///
 /// # Examples
