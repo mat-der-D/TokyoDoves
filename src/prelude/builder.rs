@@ -37,6 +37,8 @@ use crate::prelude::{
 ///     ... puts a dove on a position
 /// - [`remove_dove`](`Self::remove_dove`)<br>
 ///     ... removes a dove at a position
+/// - [`trim_outside_4x4`](`Self::trim_outside_4x4`)<br>
+///     ... removes all doves outside 4x4 region
 ///
 /// In the second step, [`BoardBuilder`] creates [`Board`] by one of the following methods:
 /// - [`build`](`Self::build`)<br>
@@ -193,7 +195,7 @@ impl BoardBuilder {
     /// use tokyodoves::{Board, BoardBuilder};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let builder = BoardBuilder::from_u16_bits([[32, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]]);
+    /// let builder = BoardBuilder::from_u16_bits([[16, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]]);
     /// let board = builder.build()?;
     /// assert_eq!(board, Board::new());
     /// # Ok(())
@@ -211,9 +213,9 @@ impl BoardBuilder {
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::{BoardBuilder, Color, Dove};
+    /// use tokyodoves::{Board, BoardBuilder, Color, Dove};
     ///
-    /// # fn main() -> Result<(), Box<dyn std::error::Erro>> {
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let matrix = [
     ///     [Some((Color::Green, Dove::B)), None, None, None],
     ///     [Some((Color::Red, Dove::B)), None, None, None],
