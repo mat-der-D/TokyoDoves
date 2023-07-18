@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/prelude/builder.rs`."><title>builder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokyodoves" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.0 (8ede3aae2 2023-07-12)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../tokyodoves/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/prelude/builder.rs`."><title>builder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokyodoves" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0 (90c541806 2023-05-31)" data-search-js="search-e077946657036a58.js" data-settings-js="settings-298e1ea74db45b39.js" data-settings-css="settings-7bfb4c59cc6bc502.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-905937fbbdc8e9ea.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f61008743c98d196.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../tokyodoves/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -311,6 +311,226 @@
 <a href="#311" id="311">311</a>
 <a href="#312" id="312">312</a>
 <a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a>
+<a href="#505" id="505">505</a>
+<a href="#506" id="506">506</a>
+<a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
+<a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
+<a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::str::FromStr;
 
 <span class="kw">use </span>strum::IntoEnumIterator;
@@ -327,16 +547,54 @@
 
 <span class="doccomment">/// A builder of [`Board`].
 ///
+/// This struct provides a variety of ways to construct [`Board`].
+/// It creates [`Board`] in two steps:
+/// 1. Create a [`BoardBuilder`] object. Edit it if necessary.
+/// 2. Call a method to build [`Board`].
+///
+/// In the first step, all information required to create [`Board`]
+/// has to be prepared. The following methods are supported to create [`BoardBuilder`]:
+/// - [`new`](`Self::new`)&lt;br&gt;
+///     ... creates the board at the begnining
+/// - [`empty`](`Self::empty`)&lt;br&gt;
+///     ... creates the board without any doves
+/// - [`try_from_4x4_matrix`](`Self::try_from_4x4_matrix`)&lt;br&gt;
+///     ... creates based on 4x4 matrix (array of array)
+/// - [`from_u16_bits`](`Self::from_u16_bits`)&lt;br&gt;
+///     ... creates based on `u16` values representing positions of doves
+/// - [`from_u64_bits`](`Self::from_u64_bits`)&lt;br&gt;
+///     ... creates based on `u64` values representing positions of doves
+///
+/// The following methods are for editing [`BoardBuilder`]:
+/// - [`put_dove`](`Self::put_dove`)&lt;br&gt;
+///     ... puts a dove on a position
+/// - [`remove_dove`](`Self::remove_dove`)&lt;br&gt;
+///     ... removes a dove at a position
+/// - [`trim_outside_4x4`](`Self::trim_outside_4x4`)&lt;br&gt;
+///     ... removes all doves outside 4x4 region
+///
+/// In the second step, [`BoardBuilder`] creates [`Board`] by one of the following methods:
+/// - [`build`](`Self::build`)&lt;br&gt;
+///     ... creates [`Board`] with checking the board to be created are legal.
+///     It needs unwrapping to extract [`Board`].
+/// - [`build_unchecked`](`Self::build_unchecked`)&lt;br&gt;
+///     ... creates [`Board`] without legality check.
+///
 /// # Examples
+/// The board at the beginning:
 /// ```rust
-/// use tokyodoves::BoardBuilder;
+/// use tokyodoves::{Board, BoardBuilder};
 ///
 /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-/// let board = BoardBuilder::new().build()?;
+/// let board0 = Board::new();
+/// let board1 = BoardBuilder::new().build()?;
+/// let board2 = BoardBuilder::default().build()?;
+/// assert_eq!(board0, board1);
+/// assert_eq!(board0, board2);
 /// # Ok(())
 /// # }
 /// ```
-///
+/// Create 4x4 (or `[[Option&lt;(Color, Dove)&gt;; 4]; 4]`).
 /// ```rust
 /// use tokyodoves::{BoardBuilder, Color, Dove};
 ///
@@ -353,7 +611,8 @@
 /// # Ok(())
 /// # }
 /// ```
-///
+/// The `u64` expression generated by the [`to_u64`](`Board::to_u64`) method
+/// is also a seed of [`BoardBuilder`].
 /// ```rust
 /// use tokyodoves::BoardBuilder;
 ///
@@ -363,7 +622,7 @@
 /// # Ok(())
 /// # }
 /// ```
-///
+/// A string expression is also supported. The method requires to use [`std::str::FromStr`].
 /// ```rust
 /// use std::str::FromStr;
 /// use tokyodoves::BoardBuilder;
@@ -397,38 +656,136 @@
 }
 
 <span class="kw">impl </span>BoardBuilder {
-    <span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// Creates the builder to build the board at the beginning of the game.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder};
+    ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let board0 = Board::new();
+    /// let board1 = BoardBuilder::new().build()?;
+    /// let board2 = BoardBuilder::default().build()?;
+    /// assert_eq!(board0, board1);
+    /// assert_eq!(board0, board2);
+    /// # Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::from_u64_bits([[<span class="number">1 </span>&lt;&lt; <span class="number">8</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]])
     }
 
-    <span class="kw">pub fn </span>empty() -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// Creates the builder to build the empty board.
+    ///
+    /// It fails to build unless the status is editted.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder, Color, Dove};
+    ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let mut builder = BoardBuilder::empty();
+    /// assert!(builder.build().is_err());
+    /// builder
+    ///     .put_dove(0, 0, Color::Green, Dove::B)
+    ///     .put_dove(1, 0, Color::Red, Dove::B);
+    /// let board = builder.build()?;
+    /// assert_eq!(board, Board::new());
+    /// # Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>empty() -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::from_u64_bits([[<span class="number">0</span>; <span class="number">6</span>]; <span class="number">2</span>])
     }
 
-    <span class="doccomment">/// Create `BoardBuilder` by indicating positions of doves in `u64` directly.
+    <span class="doccomment">/// Creates `BoardBuilder` by indicating positions of doves in `u64` directly.
     ///
     /// It is faster than [`from_u16_bits`](`Self::from_u16_bits`),
     /// but it does not ensure that all doves are included in the 4x4 region.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder};
+    ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let builder = BoardBuilder::from_u64_bits([[256, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]]);
+    /// let board = builder.build()?;
+    /// assert_eq!(board, Board::new());
+    /// # Ok(())
+    /// # }
+    /// ```
     </span><span class="kw">pub fn </span>from_u64_bits(positions: [[u64; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::from(positions)
     }
 
-    <span class="doccomment">/// Create `BoardBuilder` by indicating positions of doves in `u16` directly.
+    <span class="doccomment">/// Creates `BoardBuilder` by indicating positions of doves in `u16` directly.
     ///
     /// It ensures that all doves are included in the 4x4 region,
     /// in the cost of conversion from `u16` to `u64`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder};
+    ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let builder = BoardBuilder::from_u16_bits([[16, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]]);
+    /// let board = builder.build()?;
+    /// assert_eq!(board, Board::new());
+    /// # Ok(())
+    /// # }
+    /// ```
+    /// assert_eq!(board, Board::new());
     </span><span class="kw">pub fn </span>from_u16_bits(positions: [[u16; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::from(positions)
     }
 
-    <span class="doccomment">/// Alias of [`try_from::&lt;..&gt;`](`Self::try_from`)
+    <span class="doccomment">/// Creates `BoardBuilder` from 4x4 matrix of doves, i.e., `[[Option&lt;(Color, Dove)&gt;; 4]; 4]`.
+    ///
+    /// # Errors
+    /// It returns `Err` if the same dove (the same [`Color`] and [`Dove`]) is included in the matrix.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder, Color, Dove};
+    ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let matrix = [
+    ///     [Some((Color::Green, Dove::B)), None, None, None],
+    ///     [Some((Color::Red, Dove::B)), None, None, None],
+    ///     [None, None, None, None],
+    ///     [None, None, None, None],
+    /// ];
+    /// let builder = BoardBuilder::try_from_4x4_matrix(matrix)?;
+    /// // Equivalent:
+    /// // let builder = BoardBuilder::try_from(matrix)?;
+    /// let board = builder.build()?;
+    /// assert_eq!(board, Board::new());
+    /// # Ok(())
+    /// # }
+    /// ```
     </span><span class="kw">pub fn </span>try_from_4x4_matrix(
         matrix: [[<span class="prelude-ty">Option</span>&lt;(Color, Dove)&gt;; <span class="number">4</span>]; <span class="number">4</span>],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::Error&gt; {
         <span class="self">Self</span>::try_from(matrix)
     }
 
-    <span class="doccomment">/// Alias of [`from::&lt;u64&gt;`](`Self::from`)
+    <span class="doccomment">/// Creates `BoardBuilder` from `u64` expression of [`Board`].
+    ///
+    /// See the documentation of the method [`to_u64`](`Board::to_u64`) on [`Board`]
+    /// for the definition of `u64` expression.
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder};
+    ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let hash = 864761497199312896u64; // Board at the begining
+    /// let builder = BoardBuilder::from_u64(hash);
+    /// // Equivalent:
+    /// // let builder = BoardBuilder::from(hash);
+    /// let board = builder.build()?;
+    /// assert_eq!(board, Board::new());
+    /// # Ok(())
+    /// # }
+    /// ```
     </span><span class="kw">pub fn </span>from_u64(hash: u64) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::from(hash)
     }
@@ -440,7 +797,47 @@
         </span><span class="kw">unsafe </span>{ <span class="self">self</span>.positions.get_unchecked(icolor).get_unchecked(idove) }
     }
 
-    <span class="kw">pub fn </span>put_dove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos_v: usize, pos_h: usize, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    <span class="doccomment">/// Puts `dove` of the player in `color` on the specified position.
+    ///
+    /// A position is specified by two arguments `pos_v` and `pos_h`.
+    /// The following diagram shows how the square is identified by two values.
+    /// ```text
+    ///   h 0   1   2   3
+    /// v +---+---+---+---+
+    /// 0 |   |   |   |   |
+    ///   +---+---+---+---+
+    /// 1 |   |   | * |   |
+    ///   +---+---+---+---+
+    /// 2 |   |   |   |   |
+    ///   +---+---+---+---+
+    /// 3 |   |   |   |   |
+    ///   +---+---+---+---+
+    /// ```
+    /// For example, the square `*` is specified by `pos_v`=1 and `pos_h`=2.
+    ///
+    /// If both `pos_v` and `pos_h` are from 0 to 3, `color`&#39;s `dove` is put on that position.
+    /// If the dove has already exist on the board, it moves to the specified position.
+    /// If either of `pos_v` or `pos_h` is greater than 3, nothing is changed.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder, Color, Dove};
+    ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let mut builder = BoardBuilder::new();
+    /// builder.put_dove(2, 1, Color::Red, Dove::A);
+    /// let board = builder.build()?;
+    /// let ans = BoardBuilder::try_from_4x4_matrix([
+    ///     [Some((Color::Green, Dove::B)), None, None, None],
+    ///     [Some((Color::Red, Dove::B)), None, None, None],
+    ///     [None, Some((Color::Red, Dove::A)), None, None],
+    ///     [None, None, None, None],
+    /// ])?.build()?;
+    /// assert_eq!(board, ans);
+    /// # Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>put_dove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos_v: usize, pos_h: usize, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">if </span>pos_v &lt; <span class="number">4 </span>&amp;&amp; pos_h &lt; <span class="number">4 </span>{
             <span class="kw">let </span>pos = <span class="number">1 </span>&lt;&lt; (pos_h + <span class="number">8 </span>* pos_v);
             <span class="kw">let </span>icolor = color_to_index(color);
@@ -456,7 +853,22 @@
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>remove_dove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    <span class="doccomment">/// Removes `dove` of the player in `color`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{Board, BoardBuilder, Color, Dove};
+    ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let mut builder = BoardBuilder::from_str(&quot;bT;B&quot;)?;
+    /// builder.remove_dove(Color::Red, Dove::T);
+    /// let board = builder.build()?;
+    /// assert_eq!(board, Board::new());
+    /// # Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>remove_dove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, color: Color, dove: Dove) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">let </span>icolor = color_to_index(color);
         <span class="kw">let </span>idove = dove_to_index(dove);
         <span class="comment">// safety is guaranteed because icolor is in 0..2 and idove is in 0..6
@@ -469,7 +881,35 @@
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>prune_outside_4x4(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+    <span class="doccomment">/// Removes doves outside 4x4 field.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{Board, BoardBuilder};
+    ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let bits = [[256, 16, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]];
+    /// let mut builder = BoardBuilder::from_u64_bits(bits);
+    /// // The above builder corresponds to the below:
+    /// // +---+---+---+---+
+    /// // | b |   |   |   | A
+    /// // +---+---+---+---+
+    /// // | B |   |   |   |
+    /// // +---+---+---+---+
+    /// // |   |   |   |   |
+    /// // +---+---+---+---+
+    /// // |   |   |   |   |
+    /// // +---+---+---+---+
+    /// // &quot;A&quot; is outside of 4x4 matrix.
+    /// assert!(builder.build().is_err());
+    /// builder.trim_outside_4x4(); // &quot;A&quot; is trimmed (removed)
+    /// let board = builder.build()?;
+    /// assert_eq!(board, Board::new());
+    /// # Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>trim_outside_4x4(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="kw">let </span>core = <span class="number">0x0f0f0f0f</span>;
         <span class="kw">for </span>icolor <span class="kw">in </span><span class="number">0</span>..<span class="number">2 </span>{
             <span class="kw">for </span>idove <span class="kw">in </span><span class="number">0</span>..<span class="number">6 </span>{
