@@ -87,12 +87,12 @@ impl BoardDisplayFormat {
 ///
 /// let board = Board::new();
 /// println!("{}", board.display()); // Default Display
-/// println!(
-///     "{}",
-///     board
-///         .display()
-///         .with_format(BoardDisplayFormat::Simple('-', ";"))
-/// ); // indicate "Simple" display style
+///
+/// let format = BoardDisplayFormat::Simple {
+///     empty: '-',
+///     delimiter: String::from(";"),
+/// }; // Simple display style
+/// println!("{}", board.display().with_format(format));
 /// ```
 #[derive(Debug, Clone)]
 pub struct BoardDisplay<'a> {
