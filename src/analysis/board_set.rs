@@ -1415,7 +1415,7 @@ impl RawBoardSet {
     ///
     /// let mut set0 = RawBoardSet::new();
     /// set0.insert(Board::new().to_u64());
-    /// let set1 = BoardSet::new();
+    /// let set1 = RawBoardSet::new();
     /// assert!(set1.is_subset(&set0));
     /// ```
     pub fn is_subset(&self, other: &RawBoardSet) -> bool {
@@ -1436,7 +1436,7 @@ impl RawBoardSet {
     ///
     /// let mut set0 = RawBoardSet::new();
     /// set0.insert(Board::new().to_u64());
-    /// let set1 = BoardSet::new();
+    /// let set1 = RawBoardSet::new();
     /// assert!(set0.is_superset(&set1));
     /// ```
     pub fn is_superset(&self, other: &RawBoardSet) -> bool {
