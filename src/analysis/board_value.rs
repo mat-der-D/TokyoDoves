@@ -707,7 +707,7 @@ impl BoardValueTree {
     }
 
     fn to_dot_string(&self) -> String {
-        let dot = vec![
+        vec![
             "digraph {".to_string(),
             format!(
                 "node[style={:?} fontname=\"Courier New\" shape=\"box\"]",
@@ -717,8 +717,7 @@ impl BoardValueTree {
             self.to_dot_string_body("", ""),
             "}".to_string(),
         ]
-        .join("\n");
-        dot
+        .join("\n")
     }
 
     fn to_dot_string_body(&self, parent: &str, action: &str) -> String {
