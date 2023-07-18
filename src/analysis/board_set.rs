@@ -1436,7 +1436,7 @@ impl RawBoardSet {
     /// ```rust
     /// use std::str::FromStr;
     /// use tokyodoves::{Board, BoardBuilder};
-    /// use tokyodoves::analysis::RawBoardSet;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let hash0 = Board::new().to_u64();
