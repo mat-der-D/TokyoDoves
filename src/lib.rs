@@ -27,7 +27,7 @@ mod tests {
         let mut n = 0;
         let num_games = 10_000;
         for _ in 0..num_games {
-            let mut board = BoardBuilder::new().build_unchecked();
+            let mut board = Board::new();
             let mut player = Red;
             loop {
                 n = _get_next(n);
@@ -55,7 +55,7 @@ mod tests {
         let mut n = 0;
         let num_games = 10_000;
         for _ in 0..num_games {
-            let mut board = BoardBuilder::new().build_unchecked();
+            let mut board = Board::new();
             let mut player = Red;
             loop {
                 n = _get_next(n);

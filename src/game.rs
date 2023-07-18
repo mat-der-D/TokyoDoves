@@ -2,9 +2,7 @@
 
 use crate::analysis::{evaluate_board, find_best_actions};
 use crate::error;
-use crate::prelude::{
-    Action, ActionContainer, ActionsFwd, Board, BoardBuilder, Color, SurroundedStatus,
-};
+use crate::prelude::{Action, ActionContainer, ActionsFwd, Board, Color, SurroundedStatus};
 
 // ************************************************************
 //  Building Blocks
@@ -52,7 +50,7 @@ impl GameRule {
     pub fn new(is_remove_accepted: bool) -> Self {
         let first_player = Color::Red;
         let suicide_atk_judge = Judge::NextWins;
-        let initial_board = BoardBuilder::new().build_unchecked();
+        let initial_board = Board::new();
         Self {
             is_remove_accepted,
             first_player,

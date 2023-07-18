@@ -116,7 +116,7 @@ impl std::ops::Add for Capacity {
     /// let mut set_left = BoardSet::new();
     /// set_left.insert(Board::new());
     /// let mut set_right = BoardSet::new();
-    /// set_left.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+    /// set_left.insert(BoardBuilder::from_str("BbH")?.build()?);
     ///
     /// let capacity = set_left.capacity() + set_right.capacity();
     /// let mut set_added = BoardSet::with_capacity(capacity);
@@ -144,7 +144,7 @@ impl std::ops::AddAssign for Capacity {
     /// let mut set_left = BoardSet::new();
     /// set_left.insert(Board::new());
     /// let mut set_right = BoardSet::new();
-    /// set_left.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+    /// set_left.insert(BoardBuilder::from_str("BbH")?.build()?);
     ///
     /// let mut capacity = set_left.capacity();
     /// capacity += set_right.capacity();
@@ -456,12 +456,15 @@ impl BoardSet {
     /// use tokyodoves::{Board, BoardBuilder};
     /// use tokyodoves::collections::BoardSet;
     ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
     /// let set1 = set.clone();
-    /// set.insert(BoardBuilder::from_str("BbA").unwrap().build_unchecked());
+    /// set.insert(BoardBuilder::from_str("BbA")?.build()?);
     /// set.retain(|b| b.count_doves_on_field() == 2);
     /// assert_eq!(set1, set);
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn retain<F>(&mut self, mut f: F)
     where
@@ -560,7 +563,7 @@ impl BoardSet {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let board0 = Board::new();
-    /// let board1 = BoardBuilder::from_str("BbH")?.build_unchecked();
+    /// let board1 = BoardBuilder::from_str("BbH")?.build()?;
     ///
     /// let mut set0 = BoardSet::new();
     /// set0.insert(board0);
@@ -934,7 +937,7 @@ pub struct Iter<'a>(RawIter<'a>);
 /// let mut set1 = BoardSet::new();
 /// set1.insert(Board::new());
 /// let mut set2 = BoardSet::new();
-/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+/// set2.insert(BoardBuilder::from_str("BbH")?.build()?);
 ///
 /// let mut difference = set1.difference(&set2);
 /// # Ok(())
@@ -957,7 +960,7 @@ pub struct Difference<'a>(RawDifference<'a>);
 /// let mut set1 = BoardSet::new();
 /// set1.insert(Board::new());
 /// let mut set2 = BoardSet::new();
-/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+/// set2.insert(BoardBuilder::from_str("BbH")?.build()?);
 ///
 /// let mut symmetric_difference = set1.symmetric_difference(&set2);
 /// # Ok(())
@@ -980,7 +983,7 @@ pub struct SymmetricDifference<'a>(RawSymmetricDifference<'a>);
 /// let mut set1 = BoardSet::new();
 /// set1.insert(Board::new());
 /// let mut set2 = BoardSet::new();
-/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+/// set2.insert(BoardBuilder::from_str("BbH")?.build()?);
 ///
 /// let mut intersection = set1.intersection(&set2);
 /// # Ok(())
@@ -1003,7 +1006,7 @@ pub struct Intersection<'a>(RawIntersection<'a>);
 /// let mut set1 = BoardSet::new();
 /// set1.insert(Board::new());
 /// let mut set2 = BoardSet::new();
-/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+/// set2.insert(BoardBuilder::from_str("BbH")?.build()?);
 ///
 /// let mut union_iter = set1.union(&set2);
 /// # Ok(())
@@ -1316,12 +1319,15 @@ impl RawBoardSet {
     /// use tokyodoves::{Board, BoardBuilder};
     /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
     /// let set1 = set.clone();
-    /// set.insert(BoardBuilder::from_str("BbA").unwrap().build_unchecked().to_u64());
+    /// set.insert(BoardBuilder::from_str("BbA")?.build()?.to_u64());
     /// set.retain(|b| (b & 0xfff << 48).count_ones() == 2);
     /// assert_eq!(set1, set);
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn retain<F>(&mut self, mut f: F)
     where
@@ -1443,7 +1449,7 @@ impl RawBoardSet {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let hash0 = Board::new().to_u64();
-    /// let hash1 = BoardBuilder::from_str("BbH")?.build_unchecked().to_u64();
+    /// let hash1 = BoardBuilder::from_str("BbH")?.build()?.to_u64();
     ///
     /// let mut set0 = RawBoardSet::new();
     /// set0.insert(hash0);
@@ -2044,7 +2050,7 @@ impl<'a> Drop for _RawDrain<'a> {
 /// let mut set1 = RawBoardSet::new();
 /// set1.insert(Board::new().to_u64());
 /// let mut set2 = RawBoardSet::new();
-/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked().to_u64());
+/// set2.insert(BoardBuilder::from_str("BbH")?.build()?.to_u64());
 ///
 /// let mut difference = set1.difference(&set2);
 /// # Ok(())
@@ -2091,7 +2097,7 @@ impl<'a> Iterator for RawDifference<'a> {
 /// let mut set1 = RawBoardSet::new();
 /// set1.insert(Board::new().to_u64());
 /// let mut set2 = RawBoardSet::new();
-/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked().to_u64());
+/// set2.insert(BoardBuilder::from_str("BbH")?.build()?.to_u64());
 ///
 /// let mut symmetric_difference = set1.symmetric_difference(&set2);
 /// # Ok(())
@@ -2148,7 +2154,7 @@ impl<'a> Iterator for RawSymmetricDifference<'a> {
 /// let mut set1 = RawBoardSet::new();
 /// set1.insert(Board::new().to_u64());
 /// let mut set2 = RawBoardSet::new();
-/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked().to_u64());
+/// set2.insert(BoardBuilder::from_str("BbH")?.build()?.to_u64());
 ///
 /// let mut intersection = set1.intersection(&set2);
 /// # Ok(())
@@ -2195,7 +2201,7 @@ impl<'a> Iterator for RawIntersection<'a> {
 /// let mut set1 = RawBoardSet::new();
 /// set1.insert(Board::new().to_u64());
 /// let mut set2 = RawBoardSet::new();
-/// set2.insert(BoardBuilder::from_str("BbH")?.build_unchecked().to_u64());
+/// set2.insert(BoardBuilder::from_str("BbH")?.build()?.to_u64());
 ///
 /// let mut union_iter = set1.union(&set2);
 /// # Ok(())
