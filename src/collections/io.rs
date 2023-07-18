@@ -1,5 +1,5 @@
 use crate::{
-    analysis::board_set::{BoardSet, RawBoardSet},
+    collections::board_set::{BoardSet, RawBoardSet},
     prelude::{Board, BoardBuilder},
 };
 use std::{
