@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["board_set"],"struct":["LazyBoardLoader","LazyRawBoardLoader"]};
