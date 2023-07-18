@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/collections/board_set.rs`."><title>board_set.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokyodoves" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0 (90c541806 2023-05-31)" data-search-js="search-e077946657036a58.js" data-settings-js="settings-298e1ea74db45b39.js" data-settings-css="settings-7bfb4c59cc6bc502.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-905937fbbdc8e9ea.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f61008743c98d196.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../tokyodoves/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/collections/board_set.rs`."><title>board_set.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-be46fdc453a55015.css"><script src="../../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../tokyodoves/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2331,7 +2331,13 @@
 <a href="#2331" id="2331">2331</a>
 <a href="#2332" id="2332">2332</a>
 <a href="#2333" id="2333">2333</a>
-</pre></div><pre class="rust"><code><span class="doccomment">//! A module containing a light [`Board`](`crate::Board`) container
+<a href="#2334" id="2334">2334</a>
+<a href="#2335" id="2335">2335</a>
+<a href="#2336" id="2336">2336</a>
+<a href="#2337" id="2337">2337</a>
+<a href="#2338" id="2338">2338</a>
+<a href="#2339" id="2339">2339</a>
+</pre><pre class="rust"><code><span class="doccomment">//! A module containing a light [`Board`](`crate::Board`) container
 //! [`BoardSet`] and associated items.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::collections::io::{Fragment, FragmentIter};
@@ -2449,7 +2455,7 @@
     /// let mut set_left = BoardSet::new();
     /// set_left.insert(Board::new());
     /// let mut set_right = BoardSet::new();
-    /// set_left.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked());
+    /// set_left.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build()?);
     ///
     /// let capacity = set_left.capacity() + set_right.capacity();
     /// let mut set_added = BoardSet::with_capacity(capacity);
@@ -2477,7 +2483,7 @@
     /// let mut set_left = BoardSet::new();
     /// set_left.insert(Board::new());
     /// let mut set_right = BoardSet::new();
-    /// set_left.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked());
+    /// set_left.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build()?);
     ///
     /// let mut capacity = set_left.capacity();
     /// capacity += set_right.capacity();
@@ -2789,12 +2795,15 @@
     /// use tokyodoves::{Board, BoardBuilder};
     /// use tokyodoves::collections::BoardSet;
     ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
     /// let set1 = set.clone();
-    /// set.insert(BoardBuilder::from_str(&quot;BbA&quot;).unwrap().build_unchecked());
+    /// set.insert(BoardBuilder::from_str(&quot;BbA&quot;)?.build()?);
     /// set.retain(|b| b.count_doves_on_field() == 2);
     /// assert_eq!(set1, set);
+    /// # Ok(())
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>retain&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
     <span class="kw">where
@@ -2893,7 +2902,7 @@
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let board0 = Board::new();
-    /// let board1 = BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked();
+    /// let board1 = BoardBuilder::from_str(&quot;BbH&quot;)?.build()?;
     ///
     /// let mut set0 = BoardSet::new();
     /// set0.insert(board0);
@@ -3267,7 +3276,7 @@
 /// let mut set1 = BoardSet::new();
 /// set1.insert(Board::new());
 /// let mut set2 = BoardSet::new();
-/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked());
+/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build()?);
 ///
 /// let mut difference = set1.difference(&amp;set2);
 /// # Ok(())
@@ -3290,7 +3299,7 @@
 /// let mut set1 = BoardSet::new();
 /// set1.insert(Board::new());
 /// let mut set2 = BoardSet::new();
-/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked());
+/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build()?);
 ///
 /// let mut symmetric_difference = set1.symmetric_difference(&amp;set2);
 /// # Ok(())
@@ -3313,7 +3322,7 @@
 /// let mut set1 = BoardSet::new();
 /// set1.insert(Board::new());
 /// let mut set2 = BoardSet::new();
-/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked());
+/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build()?);
 ///
 /// let mut intersection = set1.intersection(&amp;set2);
 /// # Ok(())
@@ -3336,7 +3345,7 @@
 /// let mut set1 = BoardSet::new();
 /// set1.insert(Board::new());
 /// let mut set2 = BoardSet::new();
-/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked());
+/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build()?);
 ///
 /// let mut union_iter = set1.union(&amp;set2);
 /// # Ok(())
@@ -3649,12 +3658,15 @@
     /// use tokyodoves::{Board, BoardBuilder};
     /// use tokyodoves::collections::board_set::RawBoardSet;
     ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
     /// let set1 = set.clone();
-    /// set.insert(BoardBuilder::from_str(&quot;BbA&quot;).unwrap().build_unchecked().to_u64());
+    /// set.insert(BoardBuilder::from_str(&quot;BbA&quot;)?.build()?.to_u64());
     /// set.retain(|b| (b &amp; 0xfff &lt;&lt; 48).count_ones() == 2);
     /// assert_eq!(set1, set);
+    /// # Ok(())
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>retain&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>f: F)
     <span class="kw">where
@@ -3776,7 +3788,7 @@
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let hash0 = Board::new().to_u64();
-    /// let hash1 = BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked().to_u64();
+    /// let hash1 = BoardBuilder::from_str(&quot;BbH&quot;)?.build()?.to_u64();
     ///
     /// let mut set0 = RawBoardSet::new();
     /// set0.insert(hash0);
@@ -4377,7 +4389,7 @@
 /// let mut set1 = RawBoardSet::new();
 /// set1.insert(Board::new().to_u64());
 /// let mut set2 = RawBoardSet::new();
-/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked().to_u64());
+/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build()?.to_u64());
 ///
 /// let mut difference = set1.difference(&amp;set2);
 /// # Ok(())
@@ -4424,7 +4436,7 @@
 /// let mut set1 = RawBoardSet::new();
 /// set1.insert(Board::new().to_u64());
 /// let mut set2 = RawBoardSet::new();
-/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked().to_u64());
+/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build()?.to_u64());
 ///
 /// let mut symmetric_difference = set1.symmetric_difference(&amp;set2);
 /// # Ok(())
@@ -4481,7 +4493,7 @@
 /// let mut set1 = RawBoardSet::new();
 /// set1.insert(Board::new().to_u64());
 /// let mut set2 = RawBoardSet::new();
-/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked().to_u64());
+/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build()?.to_u64());
 ///
 /// let mut intersection = set1.intersection(&amp;set2);
 /// # Ok(())
@@ -4528,7 +4540,7 @@
 /// let mut set1 = RawBoardSet::new();
 /// set1.insert(Board::new().to_u64());
 /// let mut set2 = RawBoardSet::new();
-/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build_unchecked().to_u64());
+/// set2.insert(BoardBuilder::from_str(&quot;BbH&quot;)?.build()?.to_u64());
 ///
 /// let mut union_iter = set1.union(&amp;set2);
 /// # Ok(())
@@ -4664,4 +4676,5 @@
         <span class="macro">assert_eq!</span>(capacity, set.capacity());
     }
 }
-</code></pre></div></section></main></body></html>
+</code></pre></div>
+</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokyodoves" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
