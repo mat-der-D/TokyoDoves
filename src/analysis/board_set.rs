@@ -180,24 +180,6 @@ impl std::ops::AddAssign for Capacity {
 /// which can be reloaded by the [`load`](`BoardSet::load`) method.
 /// The [`load_filter`](`BoardSet::load_filter`) method provides a way
 /// to load a part satisfying a criterion.
-/// For efficient loading, the following process is better:
-/// 1. Calculate [`Capacity`] required to load the file by [`BoardSet::required_capacity`].
-/// 2. Allocate memories by [`BoardSet::reserve`] or create new `BoardSet` by [`BoardSet::with_capacity`].
-/// 3. Call [`BoardSet::load`] to load elements in the file.
-///
-/// # Examples
-/// ``` ignore
-/// use std::fs::File;
-/// use tokyodoves::analysis::BoardSet;
-///
-/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// let path = "/some/path/of/binary/file.tdl";
-/// let capacity = BoardSet::required_capacity(File::open(path)?);
-/// let mut set = BoardSet::with_capacity(capacity);
-/// set.load(File::open(path)?);
-/// # Ok(())
-/// # }
-/// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct BoardSet {
     raw: RawBoardSet,
@@ -695,6 +677,32 @@ impl BoardSet {
     }
 
     /// Inserts all elements given by `reader` into `self`.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let mut set = BoardSet::new();
+    /// set.load(File::open(path)?);
+    /// # Ok(())
+    /// # }
+    /// ```
+    /// The following is more efficient especially when the target file is large.
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let capacity = BoardSet::required_capacity(File::open(path)?);
+    /// let mut set = BoardSet::with_capacity(capacity);
+    /// set.load(File::open(path)?);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn load<R>(&mut self, reader: R) -> std::io::Result<()>
     where
         R: Read,
@@ -704,6 +712,34 @@ impl BoardSet {
 
     /// Inserts all elements (`e`) given by `reader` under the condition of `f`
     /// (where `f(&e)` is `true`) into `self`.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let filter = |board| board.count_doves_on_field() >= 3;
+    /// let mut set = BoardSet::new();
+    /// set.load_filter(File::open(path)?, filter);
+    /// # Ok(())
+    /// # }
+    /// ```
+    /// The following is more efficient especially when the target file is large.
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let filter = |board| board.count_doves_on_field() >= 3;
+    /// let capacity = BoardSet::required_capacity_filter(File::open(path)?, filter);
+    /// let mut set = BoardSet::with_capacity(capacity);
+    /// set.load_filter(File::open(path)?, filter);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn load_filter<R, F>(&mut self, reader: R, f: F) -> std::io::Result<()>
     where
         R: Read,
@@ -713,7 +749,23 @@ impl BoardSet {
     }
 
     /// Writes all elements in the set to `writer`.
-    /// The saved data can be loaded both by [`BoardSet::load`] and [`RawBoardSet::load`].
+    /// The saved data can be loaded both
+    /// by the [`load`](`BoardSet::load`) method on [`BoardSet`],
+    /// the [`load_filter`](`BoardSet::load_filter`) method on `BoardSet`,
+    /// the [`load`](`RawBoardSet::load`) method on [`RawBoardSet`]
+    /// and the [`load_filter`](`RawBoardSet::load_filter`) method on `RawBoardSet`.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set = BoardSet::new();
+    /// set.insert(Board::new());
+    /// let target_path = "/some/target/path.tdl";
+    /// set.save(File::create(target_path)?);
+    /// ```
     pub fn save<W>(&self, writer: W) -> std::io::Result<()>
     where
         W: Write,
@@ -1545,6 +1597,32 @@ impl RawBoardSet {
     }
 
     /// Inserts all elements given by `reader` into `self`.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let mut set = RawBoardSet::new();
+    /// set.load(File::open(path)?);
+    /// # Ok(())
+    /// # }
+    /// ```
+    /// The following is more efficient especially when the target file is large.
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let capacity = RawBoardSet::required_capacity(File::open(path)?);
+    /// let mut set = RawBoardSet::with_capacity(capacity);
+    /// set.load(File::open(path)?);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn load<R>(&mut self, reader: R) -> std::io::Result<()>
     where
         R: Read,
@@ -1579,6 +1657,34 @@ impl RawBoardSet {
 
     /// Inserts all elements (`e`) given by `reader` under the condition of `f`
     /// (where `f(&e)` is `true`) into `self`.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let filter = |hash| (hash & (0xfff << 48)).count_ones() >= 3;
+    /// let mut set = RawBoardSet::new();
+    /// set.load_filter(File::open(path)?, filter);
+    /// # Ok(())
+    /// # }
+    /// ```
+    /// The following is more efficient especially when the target file is large.
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let filter = |hash| (hash & (0xfff << 48)).count_ones() >= 3;
+    /// let capacity = RawBoardSet::required_capacity_filter(File::open(path)?, filter);
+    /// let mut set = RawBoardSet::with_capacity(capacity);
+    /// set.load_filter(File::open(path)?, filter);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn load_filter<R, F>(&mut self, reader: R, mut f: F) -> std::io::Result<()>
     where
         R: Read,
@@ -1617,6 +1723,18 @@ impl RawBoardSet {
 
     /// Writes all elements in the set to `writer`.
     /// The saved data can be loaded both by [`BoardSet::load`] and [`RawBoardSet::load`].
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::board_set::RawBoardSet;
+    ///
+    /// let mut set = RawBoardSet::new();
+    /// set.insert(Board::new().to_u64());
+    /// let target_path = "/some/target/path.tdl";
+    /// set.save(File::create(target_path)?);
+    /// ```
     pub fn save<W>(&self, writer: W) -> std::io::Result<()>
     where
         W: Write,
