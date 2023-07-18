@@ -12,18 +12,84 @@ fn u64_to_board(hash: u64) -> Board {
 // ********************************************************************
 //  Capacity
 // ********************************************************************
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+/// A capacity, i.e., what size of memory is allocated by [`BoardSet`]
+/// or [`RawBoardSet`].
+///
+/// Note that, unlike [`HashSet`],
+/// the capacity does not behaves like `usize`.
+/// It has a structure like `HashMap<u32, usize>`,
+/// where keys represents top half of `u64` expression of [`Board`]s
+/// and values represents how many elements the set can hold.
+///
+/// # Examples
+/// ```rust
+/// use tokyodoves::Board;
+/// use tokyodoves::analysis::BoardSet;
+///
+/// let mut set = BoardSet::new();
+/// set.insert(Board::new());
+/// let capacity = set.capacity();
+/// ```
+#[derive(Debug, Clone, Default)]
 pub struct Capacity(HashMap<u32, usize>);
 
+impl PartialEq for Capacity {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.iter().all(|(t, n)| {
+            other
+                .0
+                .get(t)
+                .map(|nn| *n == *nn)
+                .unwrap_or_else(|| *n == 0)
+        })
+    }
+}
+
+impl Eq for Capacity {}
+
 impl Capacity {
+    /// Returns an empty capacity.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::analysis::{BoardSet, Capacity};
+    ///
+    /// let empty = BoardSet::new().capacity();
+    /// assert_eq!(empty, Capacity::new());
+    /// ```
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Returns the number of [`Board`]s (or `u64`s)
+    /// the [`BoardSet`] (or [`RawBoardSet`]) with the capacity
+    /// can hold.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set = BoardSet::new();
+    /// set.insert(Board::new());
+    /// assert!(set.capacity().len() >= 1);
+    /// ```
     pub fn len(&self) -> usize {
         self.0.values().sum()
     }
 
+    /// Returns `true` if no capacity.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// let mut set = BoardSet::new();
+    /// assert!(set.capacity().is_empty());
+    /// set.insert(Board::new());
+    /// assert!(!set.capacity().is_empty());
+    /// ```
     pub fn is_empty(&self) -> bool {
         self.0.values().all(|&n| n == 0)
     }
@@ -31,6 +97,27 @@ impl Capacity {
 
 impl std::ops::Add for Capacity {
     type Output = Capacity;
+    /// Creates a new capacity by adding the capacity of `self` and `rhs`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{BoardBuilder, Board};
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut set_left = BoardSet::new();
+    /// set_left.insert(Board::new());
+    /// let mut set_right = BoardSet::new();
+    /// set_left.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+    ///
+    /// let capacity = set_left.capacity() + set_right.capacity();
+    /// let mut set_added = BoardSet::with_capacity(capacity);
+    /// set_added.extend(set_left); // without memory allocation
+    /// set_added.extend(set_right); // without memory allocation
+    /// # Ok(())
+    /// # }
+    /// ```
     fn add(mut self, rhs: Self) -> Self::Output {
         self += rhs;
         self
@@ -38,6 +125,28 @@ impl std::ops::Add for Capacity {
 }
 
 impl std::ops::AddAssign for Capacity {
+    /// Adds the capacity of `rhs` to that of `self`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{BoardBuilder, Board};
+    /// use tokyodoves::analysis::BoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut set_left = BoardSet::new();
+    /// set_left.insert(Board::new());
+    /// let mut set_right = BoardSet::new();
+    /// set_left.insert(BoardBuilder::from_str("BbH")?.build_unchecked());
+    ///
+    /// let mut capacity = set_left.capacity();
+    /// capacity += set_right.capacity();
+    /// let mut set_added = BoardSet::with_capacity(capacity);
+    /// set_added.extend(set_left); // without memory allocation
+    /// set_added.extend(set_right); // without memory allocation
+    /// # Ok(())
+    /// # }
+    /// ```
     fn add_assign(&mut self, rhs: Self) {
         for (top, num_bottoms) in rhs.0 {
             *self.0.entry(top).or_default() += num_bottoms;
@@ -65,7 +174,7 @@ impl std::ops::AddAssign for Capacity {
 /// and [`BoardSet::save`].
 /// A binary file will be saved when [`BoardSet::save`] is called,
 /// which can be reloaded by [`BoardSet::load`].
-/// [`BoardSet::load_filter`] gives a way to load a part satisfying a criterion.
+/// [`BoardSet::load_filter`] provides a way to load a part satisfying a criterion.
 /// For efficient loading, the following process is better:
 /// 1. Calculate [`Capacity`] required to load the file by [`BoardSet::required_capacity`].
 /// 2. Allocate memories by [`BoardSet::reserve`] or create new `BoardSet` by [`BoardSet::with_capacity`].
@@ -1433,6 +1542,15 @@ mod tests {
             set.insert(board);
         }
         set
+    }
+
+    #[test]
+    fn test_empty_capacity() {
+        let mut set = BoardSet::new();
+        assert_eq!(set.capacity(), Capacity::new());
+        set.insert(Board::new());
+        set.drain();
+        assert_ne!(set.capacity(), Capacity::new());
     }
 
     #[test]

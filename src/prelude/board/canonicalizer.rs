@@ -158,7 +158,7 @@ const fn compose(a: [usize; 16], b: [usize; 16]) -> [usize; 16] {
 /// ```text
 /// f_i: {0, 1, ..., 15} -> {0, 1, ..., 15} (i=0, 1, ..., 7),
 /// ```
-/// which is what `PositionMapper` provedes.
+/// which is what `PositionMapper` provides.
 ///
 /// In the above example, the minimum rectangle, the rectangle that contains all pieces,
 /// has a shape of 3x2.
