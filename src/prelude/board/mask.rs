@@ -550,12 +550,15 @@ impl BitMask {
 
 /// A rectangle with edges of [`usize`] coordinates.
 ///
-/// This struct is used to describe the minimum rectangle
-/// that contains all doves on the field.
-/// Fields stand for coordinates of edges of the rectangle.
+/// A rectangle is created by
+/// the [`minimum_rectangle`](`crate::Board::minimum_rectangle`) method,
+/// which calculates the minimum rectangle that contains
+/// all doves on the board.
+/// The fields of this struct stand for coordinates of edges.
+///
 /// # Examples
-/// Case 1
 /// ```text
+/// [Case 1]
 ///     0   1   2   3
 ///   +---+---+---+---+
 /// 0 | b |   | T |   |
@@ -567,9 +570,8 @@ impl BitMask {
 /// 3 |   |   |   |   |
 ///   +---+---+---+---+
 /// -> hmin=0, hmax=2, vmin=0, vmax=1
-/// ```
-/// Case 2
-/// ```text
+///
+/// [Case 2]
 ///     0   1   2   3
 ///   +---+---+---+---+
 /// 0 |   |   |   |   |
@@ -581,9 +583,8 @@ impl BitMask {
 /// 3 |   |   |   |   |
 ///   +---+---+---+---+
 /// -> hmin=0, hmax=3, vmin=1, vmax=2
-/// ```
-/// Case 3
-/// ```text
+///
+/// [Case 3]
 ///     0   1   2   3
 ///   +---+---+---+---+
 /// 0 |   |   |   |   |
@@ -595,6 +596,31 @@ impl BitMask {
 /// 3 | h | B | b | Y |
 ///   +---+---+---+---+
 /// -> hmin=0, hmax=3, vmin=3, vmax=3
+/// ```
+/// ```rust
+/// use std::str::FromStr;
+/// use tokyodoves::{BoardBuilder, Rectangle};
+///
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let boards = vec![
+///     BoardBuilder::from_str("b T; Ba")?.build()?,
+///     BoardBuilder::from_str("; b;a HB")?.build()?,
+///     BoardBuilder::from_str(";;;hBbY")?.build()?,
+/// ];
+/// assert_eq!(
+///     boards[0].minimum_rectangle(),
+///     Rectangle { hmin: 0, hmax: 2, vmin: 0, vmax: 1 }
+/// );
+/// assert_eq!(
+///     boards[1].minimum_rectangle(),
+///     Rectangle { hmin: 0, hmax: 3, vmin: 1, vmax: 2 }
+/// );
+/// assert_eq!(
+///     boards[2].minimum_rectangle(),
+///     Rectangle { hmin: 0, hmax: 3, vmin: 3, vmax: 3 }
+/// );
+/// # Ok(())
+/// # }
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Rectangle {
@@ -611,10 +637,10 @@ pub struct Rectangle {
 /// A struct to represent the lengths of edges of [`Rectangle`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RectangleSize {
-    /// The length of the horizontal edge
-    pub hsize: usize,
     /// The length of the vertical edge
     pub vsize: usize,
+    /// The length of the horizontal edge
+    pub hsize: usize,
 }
 
 impl Rectangle {
