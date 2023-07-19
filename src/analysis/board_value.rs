@@ -780,6 +780,56 @@ impl BoardValueTree {
 /// Formats of display used by [`TreeDisplay`].
 #[derive(Debug, Clone)]
 pub enum TreeDisplayFormat {
+    /// The default value.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{BoardBuilder, Color};
+    /// use tokyodoves::game::GameRule;
+    /// use tokyodoves::analysis::create_checkmate_tree;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board = BoardBuilder::from_str(" By;H  a;A m;  Yb")?.build()?;
+    /// let rule = GameRule::new(true);
+    /// let tree = create_checkmate_tree(board, Color::Red, 3, rule)?;
+    /// println!("{}", tree.display());
+    /// # Ok(())
+    /// # }
+    /// ```
+    /// The following is the standard output of above code.
+    /// ```text
+    /// (Board(" By ;H  a;A m ;  Yb"), Red, Win(3))
+    ///     +MS1E1 => (Board(" By ;H Ma;A m ;  Yb"), Green, Lose(2))
+    ///         bS2E2 => (Board(" By ;H Ma;A mb;  Y "), Red, Win(1))
+    ///             YS3E2 => (Board(" By ;H Ma;A mb;   Y"), Red, Finished)
+    ///         +hE2 => (Board(" Byh;H Ma;A m ;  Yb"), Red, Win(1))
+    ///             MS2E2 => (Board(" Byh;H  a;A mM;  Yb"), Red, Finished)
+    ///         -a => (Board(" By ;H M ;A m ;  Yb"), Red, Win(1))
+    ///             MS2E2 => (Board(" By ;H   ;A mM;  Yb"), Red, Finished)
+    ///         +hS2 => (Board(" By ;H Ma;Ahm ;  Yb"), Red, Win(1))
+    ///             MS2E2 => (Board(" By ;H  a;AhmM;  Yb"), Red, Finished)
+    ///         yE2 => (Board(" B y;H Ma;A m ;  Yb"), Red, Win(1))
+    ///             MS2E2 => (Board(" B y;H  a;A mM;  Yb"), Red, Finished)
+    ///         mS1 => (Board(" By ;HmMa;A   ;  Yb"), Red, Win(1))
+    ///             MS2E2 => (Board(" By ;Hm a;A  M;  Yb"), Red, Finished)
+    ///         +hS3 => (Board(" By ;H Ma;A m ; hYb"), Red, Win(1))
+    ///             MS2E2 => (Board(" By ;H  a;A mM; hYb"), Red, Finished)
+    ///         -m => (Board(" By ;H Ma;A   ;  Yb"), Red, Win(1))
+    ///             MS2E2 => (Board(" By ;H  a;A  M;  Yb"), Red, Finished)
+    ///         +tS2 => (Board(" By ;H Ma;Atm ;  Yb"), Red, Win(1))
+    ///             MS2E2 => (Board(" By ;H  a;AtmM;  Yb"), Red, Finished)
+    ///         +tE2 => (Board(" Byt;H Ma;A m ;  Yb"), Red, Win(1))
+    ///             MS2E2 => (Board(" Byt;H  a;A mM;  Yb"), Red, Finished)
+    ///         +tS3 => (Board(" By ;H Ma;A m ; tYb"), Red, Win(1))
+    ///             MS2E2 => (Board(" By ;H  a;A mM; tYb"), Red, Finished)
+    ///         aE2 => (Board(" Bya;H M ;A m ;  Yb"), Red, Win(1))
+    ///             MS2E2 => (Board(" Bya;H   ;A mM;  Yb"), Red, Finished)
+    ///         mS3 => (Board(" By ;H Ma;A   ; mYb"), Red, Win(1))
+    ///             MS2E2 => (Board(" By ;H  a;A  M; mYb"), Red, Finished)
+    ///         -y => (Board(" B  ;H Ma;A m ;  Yb"), Red, Win(1))
+    ///             MS2E2 => (Board(" B  ;H  a;A mM;  Yb"), Red, Finished)
+    /// ```
     Standard,
 }
 
@@ -851,6 +901,10 @@ impl<'a> TreeDisplay<'a> {
         }
     }
 
+    /// Configures what kind of format is used.
+    ///
+    /// See the documentation of [`TreeDisplayFormat`]
+    /// for more information about available display styles.
     pub fn with_format(self, format: TreeDisplayFormat) -> Self {
         Self { format, ..self }
     }
