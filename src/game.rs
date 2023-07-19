@@ -537,6 +537,18 @@ pub struct RandomAgent {
     n: usize,
 }
 
+impl std::fmt::Debug for RandomAgent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "RandomAgent")
+    }
+}
+
+impl std::fmt::Display for RandomAgent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        <Self as std::fmt::Debug>::fmt(self, f)
+    }
+}
+
 impl RandomAgent {
     /// Creates `RandomAgent` object.
     ///
@@ -580,6 +592,21 @@ pub struct AnalystAgent {
     depth: usize,
     n: usize,
     declare_about_to_end: bool,
+}
+
+impl std::fmt::Debug for AnalystAgent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AnalystAgent")
+            .field("depth", &self.depth)
+            .field("declare_about_to_end", &self.declare_about_to_end)
+            .finish()
+    }
+}
+
+impl std::fmt::Display for AnalystAgent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "AnalystAgent")
+    }
 }
 
 impl AnalystAgent {
@@ -668,6 +695,18 @@ impl ConsoleAgent {
     }
 }
 
+impl std::fmt::Debug for ConsoleAgent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ConsoleAgent")
+    }
+}
+
+impl std::fmt::Display for ConsoleAgent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        <Self as std::fmt::Debug>::fmt(self, f)
+    }
+}
+
 impl Agent for ConsoleAgent {
     /// Asks what action should be performed to the console, and performs it.
     ///
@@ -713,6 +752,7 @@ impl Agent for ConsoleAgent {
 }
 
 /// A struct to let two [`Agent`]s to play the game.
+#[derive(Debug, Clone)]
 pub struct Arena<AR, AG>
 where
     AR: Agent,
@@ -721,6 +761,20 @@ where
     agent_red: AR,
     agent_green: AG,
     game: Game,
+}
+
+impl<AR, AG> std::fmt::Display for Arena<AR, AG>
+where
+    AR: Agent + std::fmt::Display,
+    AG: Agent + std::fmt::Display,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = format!(
+            "Red Agent  : {}\nGreen Agent: {}\n{}",
+            self.agent_red, self.agent_green, self.game
+        );
+        write!(f, "{s}")
+    }
 }
 
 impl<AR, AG> Arena<AR, AG>
