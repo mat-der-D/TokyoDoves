@@ -75,12 +75,12 @@ impl PartialOrd for BoardValueKind {
 /// It takes another value `Finished`, which is attributed to boards of finished games.
 /// This value is, however, not compared to other values,
 /// which is the reason why `BoardValue` is `PartialOrd` but not `Ord`.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct BoardValue {
     value: Option<usize>,
 }
 
-impl std::fmt::Display for BoardValue {
+impl std::fmt::Debug for BoardValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use BoardValueKind::*;
         let kind = self.kind();
@@ -92,6 +92,12 @@ impl std::fmt::Display for BoardValue {
             }
         };
         write!(f, "{s}")
+    }
+}
+
+impl std::fmt::Display for BoardValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        <Self as std::fmt::Debug>::fmt(self, f)
     }
 }
 
@@ -576,12 +582,29 @@ impl Iterator for NextBoardIter {
 /// and [`Action`]s on its edges.
 ///
 /// It is returned by [`create_checkmate_tree`].
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct BoardValueTree {
     board_raw: u64,
     player: Color,
     value: BoardValue,
     actions2children: HashMap<Action, BoardValueTree>,
+}
+
+impl std::fmt::Debug for BoardValueTree {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BoardValueTree")
+            .field("board", &self.board())
+            .field("player", self.player())
+            .field("value", self.value())
+            .field("actions_children", &self.actions2children)
+            .finish()
+    }
+}
+
+impl std::fmt::Display for BoardValueTree {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.display().fmt(f)
+    }
 }
 
 impl BoardValueTree {
@@ -786,7 +809,7 @@ impl TreeDisplayFormat {
         };
         let node = format!(
             "({0:?}, {1}, {2})",
-            tree.board().to_simple_string(' ', ";"),
+            tree.board(),
             tree.player(),
             tree.value()
         );
