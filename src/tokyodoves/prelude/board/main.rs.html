@@ -1846,15 +1846,15 @@
 
             <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::fmt::Debug <span class="kw">for </span><span class="macro-nonterminal">$iter</span>&lt;<span class="lifetime">&#39;a</span>&gt; {
                 <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-                    <span class="kw">let </span>vec: Vec&lt;String&gt; = <span class="self">self</span>.<span class="number">0</span>.clone().map(|a| <span class="macro">format!</span>(<span class="string">&quot;{a:?}&quot;</span>)).collect();
-                    <span class="macro">write!</span>(f, <span class="string">&quot;{}([{}])&quot;</span>, <span class="macro-nonterminal">$iter_name</span>, vec.join(<span class="string">&quot;, &quot;</span>))
+                    <span class="kw">let </span>vec: Vec&lt;<span class="kw-2">&amp;</span>Action&gt; = <span class="self">self</span>.<span class="number">0</span>.clone().collect();
+                    f.debug_tuple(<span class="macro-nonterminal">$iter_name</span>).field(<span class="kw-2">&amp;</span>vec).finish()
                 }
             }
 
             <span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span><span class="macro-nonterminal">$into_iter </span>{
                 <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-                    <span class="kw">let </span>vec: Vec&lt;String&gt; = <span class="self">self</span>.<span class="number">0</span>.clone().map(|a| <span class="macro">format!</span>(<span class="string">&quot;{a:?}&quot;</span>)).collect();
-                    <span class="macro">write!</span>(f, <span class="string">&quot;{}([{}])&quot;</span>, <span class="macro-nonterminal">$into_iter_name</span>, vec.join(<span class="string">&quot;, &quot;</span>))
+                    <span class="kw">let </span>vec: Vec&lt;Action&gt; = <span class="self">self</span>.<span class="number">0</span>.clone().collect();
+                    f.debug_tuple(<span class="macro-nonterminal">$into_iter_name</span>).field(<span class="kw-2">&amp;</span>vec).finish()
                 }
             }
 
