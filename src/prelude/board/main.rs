@@ -33,15 +33,15 @@ macro_rules! impl_mutable_action_container {
 
             impl<'a> std::fmt::Debug for $iter<'a> {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    let vec: Vec<String> = self.0.clone().map(|a| format!("{a:?}")).collect();
-                    write!(f, "{}([{}])", $iter_name, vec.join(", "))
+                    let vec: Vec<&Action> = self.0.clone().collect();
+                    f.debug_tuple($iter_name).field(&vec).finish()
                 }
             }
 
             impl std::fmt::Debug for $into_iter {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    let vec: Vec<String> = self.0.clone().map(|a| format!("{a:?}")).collect();
-                    write!(f, "{}([{}])", $into_iter_name, vec.join(", "))
+                    let vec: Vec<Action> = self.0.clone().collect();
+                    f.debug_tuple($into_iter_name).field(&vec).finish()
                 }
             }
 
