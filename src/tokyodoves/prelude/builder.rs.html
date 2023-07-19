@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/prelude/builder.rs`."><title>builder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokyodoves" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.0 (8ede3aae2 2023-07-12)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../tokyodoves/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/prelude/builder.rs`."><title>builder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ba5701c5741a7b69.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokyodoves" data-themes="" data-resource-suffix="" data-rustdoc-version="1.70.0 (90c541806 2023-05-31)" data-search-js="search-e077946657036a58.js" data-settings-js="settings-298e1ea74db45b39.js" data-settings-css="settings-7bfb4c59cc6bc502.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-905937fbbdc8e9ea.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f61008743c98d196.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../tokyodoves/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -558,6 +558,55 @@
 <a href="#558" id="558">558</a>
 <a href="#559" id="559">559</a>
 <a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::str::FromStr;
 
 <span class="kw">use </span>strum::IntoEnumIterator;
@@ -580,17 +629,20 @@
 /// 2. Call a method to build [`Board`].
 ///
 /// In the first step, all information required to create [`Board`]
-/// has to be prepared. The following methods are supported to create [`BoardBuilder`]:
+/// has to be prepared. The following methods to create [`BoardBuilder`]
+/// are supported:
 /// - [`new`](`Self::new`)&lt;br&gt;
-///     ... creates the board at the begnining
+///     ... creates the builder for the board at the begnining
 /// - [`empty`](`Self::empty`)&lt;br&gt;
-///     ... creates the board without any doves
+///     ... creates the builder for the board without any doves (edit needed after construction!)
+/// - [`from_str`](`Self::from_str`)&lt;br&gt;
+///     ... creates the builder based on string expression.
 /// - [`try_from_4x4_matrix`](`Self::try_from_4x4_matrix`)&lt;br&gt;
-///     ... creates based on 4x4 matrix (array of array)
+///     ... creates the builder based on 4x4 matrix (array of array)
 /// - [`from_u16_bits`](`Self::from_u16_bits`)&lt;br&gt;
-///     ... creates based on `u16` values representing positions of doves
+///     ... creates the builder based on `u16` values representing positions of doves
 /// - [`from_u64_bits`](`Self::from_u64_bits`)&lt;br&gt;
-///     ... creates based on `u64` values representing positions of doves
+///     ... creates the builder based on `u64` values representing positions of doves
 ///
 /// The following methods are for editing [`BoardBuilder`]:
 /// - [`put_dove`](`Self::put_dove`)&lt;br&gt;
@@ -607,70 +659,7 @@
 /// - [`build_unchecked`](`Self::build_unchecked`)&lt;br&gt;
 ///     ... creates [`Board`] without legality check.
 ///
-/// # Examples
-/// The board at the beginning:
-/// ```rust
-/// use tokyodoves::{Board, BoardBuilder};
-///
-/// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-/// let board0 = Board::new();
-/// let board1 = BoardBuilder::new().build()?;
-/// let board2 = BoardBuilder::default().build()?;
-/// assert_eq!(board0, board1);
-/// assert_eq!(board0, board2);
-/// # Ok(())
-/// # }
-/// ```
-/// Create 4x4 (or `[[Option&lt;(Color, Dove)&gt;; 4]; 4]`).
-/// ```rust
-/// use tokyodoves::{BoardBuilder, Color, Dove};
-///
-/// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-/// use Color::*;
-/// use Dove::*;
-/// let matrix = [
-///     [Some((Green, B)), None, None, None],
-///     [Some((Red, B)), None, None, None],
-///     [None, Some((Red, A)), Some((Green, H)), None],
-///     [None, None, None, None],
-/// ];
-/// let board = BoardBuilder::try_from(matrix)?.build()?;
-/// # Ok(())
-/// # }
-/// ```
-/// The `u64` expression generated by the [`to_u64`](`Board::to_u64`) method
-/// is also a seed of [`BoardBuilder`].
-/// ```rust
-/// use tokyodoves::BoardBuilder;
-///
-/// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-/// let hash = 864761497199312896u64; // Board at the begining
-/// let board = BoardBuilder::from(hash).build()?;
-/// # Ok(())
-/// # }
-/// ```
-/// A string expression is also supported. The method requires to use [`std::str::FromStr`].
-/// ```rust
-/// use std::str::FromStr;
-/// use tokyodoves::BoardBuilder;
-///
-/// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-/// let board_str = &quot;b   ;B   ; Ah ;    &quot;;
-/// // Short-cut version:
-/// // let board_str = &quot;b;B; Ah&quot;;
-/// let board = BoardBuilder::from_str(board_str)?.build()?;
-/// # Ok(())
-/// # }
-/// ```
-///
-/// ```rust
-/// use tokyodoves::BoardBuilder;
-///
-/// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-/// let board = BoardBuilder::new().build_unchecked();
-/// # Ok(())
-/// # }
-/// ```
+/// See documentations and examples given to each method for more instructions.
 </span><span class="attr">#[derive(Debug, Clone, Copy)]
 </span><span class="kw">pub struct </span>BoardBuilder {
     positions: [[u64; <span class="number">6</span>]; <span class="number">2</span>],
@@ -735,7 +724,10 @@
     /// use tokyodoves::{Board, BoardBuilder};
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let builder = BoardBuilder::from_u64_bits([[256, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]]);
+    /// let bits = [[256, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]];
+    /// let builder = BoardBuilder::from_u64_bits(bits);
+    /// // Equivalent:
+    /// // let builder = BoardBuilder::from(bits);
     /// let board = builder.build()?;
     /// assert_eq!(board, Board::new());
     /// # Ok(())
@@ -755,7 +747,10 @@
     /// use tokyodoves::{Board, BoardBuilder};
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let builder = BoardBuilder::from_u16_bits([[16, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]]);
+    /// let bits = [[16, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]];
+    /// let builder = BoardBuilder::from_u16_bits(bits);
+    /// // Equivalent:
+    /// // let builder = BoardBuilder::from(bits);
     /// let board = builder.build()?;
     /// assert_eq!(board, Board::new());
     /// # Ok(())
@@ -769,7 +764,7 @@
     <span class="doccomment">/// Creates `BoardBuilder` from 4x4 matrix of doves, i.e., `[[Option&lt;(Color, Dove)&gt;; 4]; 4]`.
     ///
     /// # Errors
-    /// It returns `Err` if the same dove (the same [`Color`] and [`Dove`]) is included in the matrix.
+    /// It returns `Err` if the same dove with the same color is included in the matrix.
     ///
     /// # Examples
     /// ```rust
@@ -848,18 +843,23 @@
     ///
     /// # Examples
     /// ```rust
+    /// use std::str::FromStr;
     /// use tokyodoves::{Board, BoardBuilder, Color, Dove};
     ///
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut builder = BoardBuilder::new();
     /// builder.put_dove(2, 1, Color::Red, Dove::A);
     /// let board = builder.build()?;
-    /// let ans = BoardBuilder::try_from_4x4_matrix([
-    ///     [Some((Color::Green, Dove::B)), None, None, None],
-    ///     [Some((Color::Red, Dove::B)), None, None, None],
-    ///     [None, Some((Color::Red, Dove::A)), None, None],
-    ///     [None, None, None, None],
-    /// ])?.build()?;
+    /// let ans = BoardBuilder::from_str(&quot;b;B; A&quot;)?.build()?;
+    /// // +---+---+---+---+
+    /// // | b |   |   |   |
+    /// // +---+---+---+---+
+    /// // | B |   |   |   |
+    /// // +---+---+---+---+
+    /// // |   | A |   |   |
+    /// // +---+---+---+---+
+    /// // |   |   |   |   |
+    /// // +---+---+---+---+
     /// assert_eq!(board, ans);
     /// # Ok(())
     /// # }
@@ -928,7 +928,7 @@
     /// // +---+---+---+---+
     /// // |   |   |   |   |
     /// // +---+---+---+---+
-    /// // &quot;A&quot; is outside of 4x4 field.
+    /// // &quot;A&quot; is outside of the 4x4 field.
     /// assert!(builder.build().is_err());
     /// builder.trim_outside_4x4(); // &quot;A&quot; is trimmed (removed)
     /// let board = builder.build()?;
@@ -952,7 +952,24 @@
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>build_unchecked(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Board {
+    <span class="doccomment">/// Builds [`Board`] based on settings the builder knows without checking.
+    ///
+    /// It skips all checks the [`build`](`BoardBuilder::build`) method does.
+    /// Note that the resulting board may be strange state,
+    /// for example, some dove is out of 4x4 region, some dove is isolated or
+    /// some boss is not on the field.
+    /// This method is more suitable than the [`build`](`BoardBuilder::build`) method
+    /// when the validity of the builder is guaranteed by other means
+    /// and you want to make the calculation time as short as possible.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder};
+    ///
+    /// let builder = BoardBuilder::new();
+    /// assert_eq!(builder.build_unchecked(), Board::new());
+    /// ```
+    </span><span class="kw">pub fn </span>build_unchecked(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Board {
         <span class="kw">let </span>viewer = MaskViewer::new();
         <span class="kw">let </span>positions = ColorDovePositions::new([
             DovePositions::new(<span class="self">self</span>.positions[<span class="number">0</span>]),
@@ -961,7 +978,26 @@
         Board::from_components(viewer, positions)
     }
 
-    <span class="kw">pub fn </span>build(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Board, error::Error&gt; {
+    <span class="doccomment">/// Builds [`Board`] based on settings the builder knows.
+    ///
+    /// It checks the following points:
+    /// - All positions are single bit or zero
+    /// - Both bosses are on the field
+    /// - Multiple doves are not in one position
+    /// - All doves are in 4x4 region
+    /// - No dove is isolated from others
+    ///
+    /// # Errors
+    /// It returns [`Err`] if one of the checks above fails.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, BoardBuilder};
+    ///
+    /// let builder = BoardBuilder::new();
+    /// assert!(matches!(builder.build(), Ok(board) if board == Board::new()));
+    /// ```
+    </span><span class="kw">pub fn </span>build(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Board, error::Error&gt; {
         <span class="kw">use </span>error::BoardCreateErrorKind::<span class="kw-2">*</span>;
 
         <span class="kw">for </span>icolor <span class="kw">in </span><span class="number">0</span>..<span class="number">2 </span>{
@@ -995,13 +1031,15 @@
 }
 
 <span class="kw">impl </span>From&lt;[[u64; <span class="number">6</span>]; <span class="number">2</span>]&gt; <span class="kw">for </span>BoardBuilder {
-    <span class="kw">fn </span>from(bits: [[u64; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// See the documentation of the [`from_u64_bits`](`Self::from_u64_bits`) method.
+    </span><span class="kw">fn </span>from(bits: [[u64; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ positions: bits }
     }
 }
 
 <span class="kw">impl </span>From&lt;[[u16; <span class="number">6</span>]; <span class="number">2</span>]&gt; <span class="kw">for </span>BoardBuilder {
-    <span class="kw">fn </span>from(bits: [[u16; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// See the documentation of the [`from_u16_bits`](`Self::from_u16_bits`) method.
+    </span><span class="kw">fn </span>from(bits: [[u16; <span class="number">6</span>]; <span class="number">2</span>]) -&gt; <span class="self">Self </span>{
         <span class="kw">fn </span>extend_u16_to_u64(x: u16) -&gt; u64 {
             <span class="kw">let </span><span class="kw-2">mut </span>x_u64 = <span class="number">0</span>;
             x_u64 |= (x &amp; <span class="number">0xf</span>) <span class="kw">as </span>u64;
@@ -1023,7 +1061,8 @@
 
 <span class="kw">impl </span>TryFrom&lt;[[<span class="prelude-ty">Option</span>&lt;(Color, Dove)&gt;; <span class="number">4</span>]; <span class="number">4</span>]&gt; <span class="kw">for </span>BoardBuilder {
     <span class="kw">type </span>Error = error::Error;
-    <span class="kw">fn </span>try_from(matrix: [[<span class="prelude-ty">Option</span>&lt;(Color, Dove)&gt;; <span class="number">4</span>]; <span class="number">4</span>]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    <span class="doccomment">/// See the documentation of the [`try_from_4x4_matrix`](`Self::try_from_4x4_matrix`) method.
+    </span><span class="kw">fn </span>try_from(matrix: [[<span class="prelude-ty">Option</span>&lt;(Color, Dove)&gt;; <span class="number">4</span>]; <span class="number">4</span>]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="kw">use </span>error::BoardCreateErrorKind::<span class="kw-2">*</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = BoardBuilder::empty();
@@ -1043,7 +1082,8 @@
 }
 
 <span class="kw">impl </span>From&lt;u64&gt; <span class="kw">for </span>BoardBuilder {
-    <span class="kw">fn </span>from(hash: u64) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// See the documentation of the [`from_u64`](`Self::from_u64`) method.
+    </span><span class="kw">fn </span>from(hash: u64) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>builder = BoardBuilder::empty();
         <span class="kw">let </span><span class="kw-2">mut </span>onoff_mask = <span class="number">1_u64 </span>&lt;&lt; <span class="number">59</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>pos_mask = <span class="number">0xf_u64 </span>&lt;&lt; <span class="number">44</span>;
@@ -1070,7 +1110,65 @@
 
 <span class="kw">impl </span>FromStr <span class="kw">for </span>BoardBuilder {
     <span class="kw">type </span><span class="prelude-val">Err </span>= error::Error;
-    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
+    <span class="doccomment">/// Creates `BoardBuilder` from a string expression.
+    ///
+    /// It requires `use std::str::FromStr` to be called.
+    ///
+    /// # Errors
+    /// It returns `Err` if the same dove in the same color is included in the matrix.
+    ///
+    /// # Examples
+    /// The initial board
+    /// ```text
+    /// +---+---+---+---+
+    /// | b |   |   |   |
+    /// +---+---+---+---+
+    /// | B |   |   |   |
+    /// +---+---+---+---+
+    /// |   |   |   |   |
+    /// +---+---+---+---+
+    /// |   |   |   |   |
+    /// +---+---+---+---+
+    /// ```
+    /// can be expressed, for example, as the following.
+    /// - `&quot;b   ;B   ;    ;    &quot;`
+    /// - `&quot;b---;B---;----;----&quot;`
+    /// - `&quot;b-.*;B~/^;_0@z;(=!?&quot;`
+    /// - `&quot;b;B&quot;`
+    ///
+    /// The rules of the string expression:
+    /// - Use one character for each dove.
+    ///     See the table in the documentation of [`crate::color_dove_to_char`]
+    ///     to identify what character is suitable
+    /// - Use &quot;;&quot; to separate each row.
+    /// - Use some character except those represent some dove or &quot;;&quot;
+    ///     to express vacant square.
+    ///     (For readability, &quot; &quot; or &quot;-&quot; would be most suitable
+    ///     although this method accepts other characters.)
+    /// - You can omit the vacant squares between doves and &quot;;&quot; and extra rows.
+    ///
+    /// Doves outside the 4x4 region are simply ignored.
+    ///
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{Board, BoardBuilder};
+    ///
+    /// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let board_strs = [
+    ///     &quot;b   ;B   ;    ;    &quot;,
+    ///     &quot;b---;B---;----;----&quot;,
+    ///     &quot;b-.*;B~/^;_0@z;(=!?&quot;,
+    ///     &quot;b;B&quot;,
+    ///     &quot;b---;B---T;----;----&quot;, // &quot;T&quot; will be ignored because it is outside the 4x4 region
+    /// ];
+    /// for board_str in board_strs {
+    ///     let board = BoardBuilder::from_str(board_str)?.build()?;
+    ///     assert_eq!(board, Board::new());
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
         <span class="kw">use </span>error::BoardCreateErrorKind::<span class="kw-2">*</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = BoardBuilder::empty();
