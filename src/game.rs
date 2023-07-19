@@ -7,7 +7,7 @@ use crate::prelude::{Action, ActionContainer, ActionsFwd, Board, Color, Surround
 // ************************************************************
 //  Building Blocks
 // ************************************************************
-/// Some kinds of detailed rules
+/// A struct holding detailed rules for playing games.
 ///
 /// # Examples
 /// ```rust
@@ -43,10 +43,19 @@ pub struct GameRule {
 impl GameRule {
     /// Constructs [`GameRule`] object
     ///
-    /// The values of fields are as below:
-    /// - `first_player`: `Color::Red`
-    /// - `suicide_atk_judge`: `Judge::NextWins`
-    /// - `initial_board`: `BoardConverter::new_game().board`
+    /// Default configurations:
+    /// - `first_player`<br>
+    ///     ... `Color::Red`
+    /// - `suicide_atk_judge` (who wins if both bosses are simultaneously surrounded)<br>
+    ///     ... `Judge::NextWins` (the next player who just moved the dove wins)
+    /// - `initial_board`<br>
+    ///     ... `Board::new()`
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::GameRule;
+    /// let rule = GameRule::new(true);
+    /// ```
     pub fn new(is_remove_accepted: bool) -> Self {
         let first_player = Color::Red;
         let suicide_atk_judge = Judge::NextWins;
@@ -59,23 +68,66 @@ impl GameRule {
         }
     }
 
+    /// Returns `true` if [`Action::Remove`] is accepted.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::GameRule;
+    ///
+    /// let rule = GameRule::new(true);
+    /// assert!(rule.is_remove_accepted());
+    /// ```
     pub fn is_remove_accepted(&self) -> &bool {
         &self.is_remove_accepted
     }
 
+    /// Returns the player who moves at the beginning of the game.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Color;
+    /// use tokyodoves::game::GameRule;
+    ///
+    /// let rule = GameRule::new(true);
+    /// assert!(matches!(rule.first_player(), Color::Red));
+    /// ```
     pub fn first_player(&self) -> &Color {
         &self.first_player
     }
 
+    /// Returns judgement when the both bosses are simultaneously surrounded.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::{GameRule, Judge};
+    ///
+    /// let rule = GameRule::new(true);
+    /// assert!(matches!(rule.suicide_atk_judge(), Judge::NextWins));
+    /// ```
     pub fn suicide_atk_judge(&self) -> &Judge {
         &self.suicide_atk_judge
     }
 
+    /// Returns the board at the beginning of the game.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Board;
+    /// use tokyodoves::game::GameRule;
+    ///
+    /// let rule = GameRule::new(true);
+    /// assert_eq!(*rule.initial_board(), Board::new());
     pub fn initial_board(&self) -> &Board {
         &self.initial_board
     }
 
-    /// Update whether accept `Remove` in the game or not
+    /// Update whether accept `Remove` in the game or not.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::GameRule;
+    /// let rule = GameRule::new(false).with_is_remove_accepted(true);
+    /// ```
     pub fn with_is_remove_accepted(self, is_remove_accepted: bool) -> Self {
         Self {
             is_remove_accepted,
@@ -83,7 +135,15 @@ impl GameRule {
         }
     }
 
-    /// Update the player moving firstly in the beginning of the game
+    /// Update the player moving firstly in the beginning of the game.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::Color;
+    /// use tokyodoves::game::GameRule;
+    ///
+    /// let rule = GameRule::new(true).with_first_player(Color::Green);
+    /// ```
     pub fn with_first_player(self, first_player: Color) -> Self {
         Self {
             first_player,
@@ -91,7 +151,13 @@ impl GameRule {
         }
     }
 
-    /// Update judgement rule when both bosses are surrounded simultaneously
+    /// Update judgement rule when both bosses are surrounded simultaneously.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::{GameRule, Judge};
+    /// let rule = GameRule::new(true).with_suicide_atk_judge(Judge::Draw);
+    /// ```
     pub fn with_suicide_atk_judge(self, judge: Judge) -> Self {
         Self {
             suicide_atk_judge: judge,
@@ -99,12 +165,25 @@ impl GameRule {
         }
     }
 
-    /// Update initial_board of [`GameRule`]
+    /// Update initial_board of [`GameRule`].
     ///
     /// # Errors
     /// It returns:
     /// - `Err(error::GameRuleCreateErrorKind::InitialBoardError.into())`
     ///     if `initial_board` is that of finished game
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::BoardBuilder;
+    /// use tokyodoves::game::GameRule;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board = BoardBuilder::from_str("BbA")?.build()?;
+    /// let rule = GameRule::new(true).with_initial_board(board)?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn with_initial_board(self, initial_board: Board) -> Result<Self, error::Error> {
         if !matches!(initial_board.surrounded_status(), SurroundedStatus::None) {
             return Err(error::GameRuleCreateErrorKind::InitialBoardError.into());
@@ -122,7 +201,7 @@ impl Default for GameRule {
     ///
     /// The default values of fields are as below:
     /// - `allow_remove`: `true`
-    /// - others: follow setting in [`Self::new`]
+    /// - others: follow setting in the [`new`](`Self::new`) method on `GameRule`.
     fn default() -> Self {
         Self::new(true)
     }
@@ -153,7 +232,7 @@ pub enum GameStatus {
 // ************************************************************
 //  Game Struct
 // ************************************************************
-/// A struct that provides methods to play Tokyo Doves games following rules.
+/// A struct that provides methods to play Tokyo Doves games.
 ///
 /// # Examples
 /// The following is a simple example in which one game is played:
@@ -206,8 +285,8 @@ pub enum GameStatus {
 /// # }
 /// ```
 /// For more information about the default value of [`GameRule`],
-/// see [the documentation about the implementation of `Default` trait
-/// for `GameRule`](`GameRule::default`)
+/// see the [documentation](`GameRule::default`) about the implementation of
+/// [`Default`] trait for `GameRule`.
 #[derive(Debug, Clone, Copy)]
 pub struct Game {
     board: Board,
@@ -352,8 +431,26 @@ impl std::fmt::Display for Game {
     }
 }
 
+/// Formats of display used by [`GameDisplay`]
 #[derive(Debug, Clone)]
 pub enum GameDisplayFormat {
+    /// Standard Display Style.
+    ///
+    /// It displays [`Board`] in framed style, and next player.
+    /// If the game is finished, next player is displayed as "None".
+    /// # Examples
+    /// ```text
+    /// +---+---+---+---+
+    /// | b |   |   |   |
+    /// +---+---+---+---+
+    /// | B |   |   |   |
+    /// +---+---+---+---+
+    /// |   |   |   |   |
+    /// +---+---+---+---+
+    /// |   |   |   |   |
+    /// +---+---+---+---+
+    /// Next Player: Red
+    /// ```
     Standard,
 }
 
@@ -381,6 +478,20 @@ impl GameDisplayFormat {
     }
 }
 
+/// A struct to configure display styles of [`Game`].
+///
+/// `Display` trait is implemented for this struct
+/// so that the display format depends on the internal value of [`GameDisplayFormat`],
+/// which can be changed by the [`with_format`](`GameDisplay::with_format`) method.
+/// See the documentation of [`GameDisplayFormat`]
+/// for information about available display styles.
+///
+/// # Examples
+/// ```rust
+/// use tokyodoves::game::Game;
+///
+/// let game = Game::new(true);
+/// println!("{}", game.display());
 #[derive(Debug, Clone)]
 pub struct GameDisplay<'a> {
     game: &'a Game,
@@ -409,16 +520,31 @@ impl<'a> std::fmt::Display for GameDisplay<'a> {
 // ************************************************************
 //  Agent Trait
 // ************************************************************
+/// An agant to play Tokyo Doves.
+///
+/// [`Arena`] receives two agetns and let them play the game.
 pub trait Agent {
+    /// Performs some action on board.
+    ///
+    /// Some agent may analyze the status of the game using
+    /// the [`board`](`Game::board`) method on [`Game`] or other information.
     fn play(&mut self, game: &mut Game);
 }
 
+/// An [`Agent`] who chooses a next action at random.
 #[derive(Default)]
 pub struct RandomAgent {
     n: usize,
 }
 
 impl RandomAgent {
+    /// Creates `RandomAgent` object.
+    ///
+    /// # Example
+    /// ```rust
+    /// use tokyodoves::game::RandomAgent;
+    /// let agent = RandomAgent::new();
+    /// ```
     pub fn new() -> Self {
         Self::default()
     }
@@ -429,6 +555,18 @@ impl RandomAgent {
 }
 
 impl Agent for RandomAgent {
+    /// Performs a legal action that was chosen at random.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::{Agent, Game, RandomAgent};
+    ///
+    /// let mut agent = RandomAgent::new();
+    /// let mut game = Game::new(true);
+    /// println!("{game}");
+    /// agent.play(&mut game);
+    /// println!("{game}");
+    /// ```
     fn play(&mut self, game: &mut Game) {
         self.update_parameter();
         let actions = game.legal_actions();
@@ -437,6 +575,7 @@ impl Agent for RandomAgent {
     }
 }
 
+/// An [`Agent`] who choses a next action based on analysis of the status.
 pub struct AnalystAgent {
     depth: usize,
     n: usize,
@@ -444,6 +583,19 @@ pub struct AnalystAgent {
 }
 
 impl AnalystAgent {
+    /// Creates an [`AnalystAgent] object.
+    ///
+    /// This agent searches the game until next `depth` turns
+    /// by tools in the [`analysis`](`crate::analysis`) module.
+    /// If `declare_about_to_end` is `true`,
+    /// a message to notify that the game is about to end
+    /// will displayed when this agent recognizes it.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::AnalystAgent;
+    /// let agent = AnalystAgent::new(3, true);
+    /// ```
     pub fn new(depth: usize, declare_about_to_end: bool) -> Self {
         Self {
             depth,
@@ -458,6 +610,26 @@ impl AnalystAgent {
 }
 
 impl Agent for AnalystAgent {
+    /// Choses and performs an action based on analysis of the game.
+    ///
+    /// It calls the [`find_best_actions`] function
+    /// in the [`analysis`](`crate::analysis`) module
+    /// to find candidates.
+    /// It choses and performs one of them at random.
+    /// If the value of the board is exactly identified,
+    /// it prints a message to notice that the game is about to end
+    /// if it was constructed with `declare_about_to_end=true`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::{Agent, Game, AnalystAgent};
+    ///
+    /// let mut agent = AnalystAgent::new(3, true);
+    /// let mut game = Game::new(true);
+    /// println!("{game}");
+    /// agent.play(&mut game);
+    /// println!("{game}");
+    /// ```
     fn play(&mut self, game: &mut Game) {
         self.update_parameter();
         let board = *game.board();
@@ -479,16 +651,39 @@ impl Agent for AnalystAgent {
     }
 }
 
+/// An [`Agent`] who asks what action should be performed to the console.
 #[derive(Default)]
 pub struct ConsoleAgent;
 
 impl ConsoleAgent {
+    /// Creates an [`AnalystAgent] object.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::ConsoleAgent;
+    /// let agent = ConsoleAgent::new();
+    /// ```
     pub fn new() -> Self {
         Self {}
     }
 }
 
 impl Agent for ConsoleAgent {
+    /// Asks what action should be performed to the console, and performs it.
+    ///
+    /// It receives actions in SSN (standard short notation).
+    /// See the documentation of [`Action`] for the definition of SSN.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use tokyodoves::game::{Agent, ConsoleAgent, Game};
+    ///
+    /// let mut agent = ConsoleAgent::new();
+    /// let mut game = Game::new(true);
+    /// println!("{game}");
+    /// agent.play(&mut game); // asks to the console
+    /// println!("{game}");
+    /// ```
     fn play(&mut self, game: &mut Game) {
         let legal_actions = game.legal_actions();
 
@@ -517,6 +712,7 @@ impl Agent for ConsoleAgent {
     }
 }
 
+/// A struct to let two [`Agent`]s to play the game.
 pub struct Arena<AR, AG>
 where
     AR: Agent,
@@ -532,6 +728,17 @@ where
     AR: Agent,
     AG: Agent,
 {
+    /// Creates an arena.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::{Arena, ConsoleAgent, RandomAgent, Game};
+    ///
+    /// let red = ConsoleAgent::new();
+    /// let green = RandomAgent::new();
+    /// let game = Game::new(true);
+    /// let arena = Arena::new(red, green, game);
+    /// ```
     pub fn new(agent_red: AR, agent_green: AG, game: Game) -> Self {
         Self {
             agent_red,
@@ -540,6 +747,26 @@ where
         }
     }
 
+    /// Let agents play the game until the game ends.
+    ///
+    /// In each turn,
+    /// [`Game`] object given on construction is passed to the agent of the turn,
+    /// and the agent receives it as an argument of the [`play`](`Agent::play`) method
+    /// to perform an action.
+    ///
+    /// If `verbose` is `true`, the status will be displayed on every turn.
+    /// If `verbose` is `false`, only the state at the end of the game will be displayed.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::game::{Arena, AnalystAgent, RandomAgent, Game};
+    ///
+    /// let red = RandomAgent::new();
+    /// let green = AnalystAgent::new(3, true);
+    /// let game = Game::new(true);
+    /// let mut arena = Arena::new(red, green, game);
+    /// arena.auto_play(true);
+    /// ```
     pub fn auto_play(&mut self, verbose: bool) {
         let mut num_turns = 0_u128;
         loop {
