@@ -105,17 +105,48 @@ impl BoardBuilder {
         Self::from_u64_bits([[0; 6]; 2])
     }
 
-    /// Creates `BoardBuilder` by indicating positions of doves in `u64` directly.
+    /// Creates `BoardBuilder` by indicating positions of doves by one-hot values of `u64`.
     ///
-    /// It is faster than [`from_u16_bits`](`Self::from_u16_bits`),
-    /// but it does not ensure that all doves are included in the 4x4 region.
+    /// It is faster than the method [`from_u16_bits`](`Self::from_u16_bits`)
+    /// because `u64` is more direct expression for internal implementation.
+    /// It does not, however, ensure that all doves are included in the 4x4 region.
+    ///
+    /// Each of elements of `position` indicates the position of each dove.
+    /// The below shows which value represents the position of what kinds of dove.
+    /// ```text
+    /// positions = [
+    ///     ['B', 'A', 'Y', 'M', 'T', 'H'],
+    ///     ['b', 'a', 'y', 'm', 't', 'h']
+    /// ]
+    /// ```
+    /// Each position is expressed by a one-hot value,
+    /// i.e., the value in binary that contains only one "1" bit.
+    /// The diagram below shows what value should be used.
+    /// ```text
+    /// +------+------+------+------+
+    /// | 1<<0 | 1<<1 | 1<<2 | 1<<3 |
+    /// +------+------+------+------+
+    /// | 1<<8 | 1<<9 | 1<<10| 1<<11|
+    /// +------+------+------+------+
+    /// | 1<<16| 1<<17| 1<<18| 1<<19|
+    /// +------+------+------+------+
+    /// | 1<<24| 1<<25| 1<<26| 1<<27|
+    /// +------+------+------+------+
+    /// ```
+    /// Values not shown in the above are outside the 4x4 region.
+    /// If the dove is not on the board, set 0.
+    ///
+    /// Note that it does NOT panic even if some element of `position` is not one-hot
+    /// or out of the 4x4 region.
+    /// Instead, the [`build`](`BoardBuilder::build`) method will return `Err`
+    /// without any treatment.
     ///
     /// # Examples
     /// ```rust
     /// use tokyodoves::{Board, BoardBuilder};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let bits = [[256, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]];
+    /// let bits = [[1 << 8, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]];
     /// let builder = BoardBuilder::from_u64_bits(bits);
     /// // Equivalent:
     /// // let builder = BoardBuilder::from(bits);
@@ -128,17 +159,46 @@ impl BoardBuilder {
         Self::from(positions)
     }
 
-    /// Creates `BoardBuilder` by indicating positions of doves in `u16` directly.
+    /// Creates `BoardBuilder` by indicating positions of doves by one-hot values of `u16`.
     ///
-    /// It ensures that all doves are included in the 4x4 region,
+    /// This method is similar to the [`from_u64_bits`](`Self::from_u64_bits`) method.
+    /// This method ensures that all doves are included in the 4x4 region,
     /// in the cost of conversion from `u16` to `u64`.
+    ///
+    /// Each of elements of `position` indicates the position of each dove.
+    /// The below shows which value represents the position of what kinds of dove.
+    /// ```text
+    /// positions = [
+    ///     ['B', 'A', 'Y', 'M', 'T', 'H'],
+    ///     ['b', 'a', 'y', 'm', 't', 'h']
+    /// ]
+    /// ```
+    /// Each position is expressed by a one-hot value,
+    /// i.e., the value in binary that contains only one "1" bit.
+    /// The diagram below shows what value should be used.
+    /// ```text
+    /// +------+------+------+------+
+    /// | 1<<0 | 1<<1 | 1<<2 | 1<<3 |
+    /// +------+------+------+------+
+    /// | 1<<4 | 1<<5 | 1<<6 | 1<<7 |
+    /// +------+------+------+------+
+    /// | 1<<8 | 1<<9 | 1<<10| 1<<11|
+    /// +------+------+------+------+
+    /// | 1<<12| 1<<13| 1<<14| 1<<15|
+    /// +------+------+------+------+
+    /// ```
+    /// If the dove is not on the board, set 0.
+    ///
+    /// Note that it does NOT panic even if some element of `position` is not one-hot.
+    /// Instead, the [`build`](`BoardBuilder::build`) method
+    /// will return `Err` without any treatment.
     ///
     /// # Examples
     /// ```rust
     /// use tokyodoves::{Board, BoardBuilder};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let bits = [[16, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]];
+    /// let bits = [[1 << 4, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]];
     /// let builder = BoardBuilder::from_u16_bits(bits);
     /// // Equivalent:
     /// // let builder = BoardBuilder::from(bits);
@@ -147,7 +207,6 @@ impl BoardBuilder {
     /// # Ok(())
     /// # }
     /// ```
-    /// assert_eq!(board, Board::new());
     pub fn from_u16_bits(positions: [[u16; 6]; 2]) -> Self {
         Self::from(positions)
     }
@@ -228,9 +287,15 @@ impl BoardBuilder {
     /// ```
     /// For example, the square `*` is specified by `pos_v`=1 and `pos_h`=2.
     ///
-    /// If both `pos_v` and `pos_h` are from 0 to 3, `color`'s `dove` is put on that position.
+    /// If both values of `pos_v` and `pos_h` are from 0 to 3,
+    /// `color`'s `dove` is put on that position.
     /// If the dove has already exist on the board, it moves to the specified position.
     /// If either of `pos_v` or `pos_h` is greater than 3, nothing is changed.
+    ///
+    /// This method ignores rules of the game, i.e., for example,
+    /// you can put a dove on an isolated position by this method.
+    /// The [`build`](`BoardBuilder::build`) method, however, will return `Err`
+    /// if the board to be built is illegal.
     ///
     /// # Examples
     /// ```rust
@@ -240,17 +305,17 @@ impl BoardBuilder {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let mut builder = BoardBuilder::new();
     /// builder.put_dove(2, 1, Color::Red, Dove::A);
+    /// // +---+---+---+---+    +---+---+---+---+
+    /// // | b |   |   |   |    | b |   |   |   |
+    /// // +---+---+---+---+    +---+---+---+---+
+    /// // | B |   |   |   |    | B |   |   |   |
+    /// // +---+---+---+---+ => +---+---+---+---+
+    /// // |   |   |   |   |    |   | A |   |   |
+    /// // +---+---+---+---+    +---+---+---+---+
+    /// // |   |   |   |   |    |   |   |   |   |
+    /// // +---+---+---+---+    +---+---+---+---+
     /// let board = builder.build()?;
     /// let ans = BoardBuilder::from_str("b;B; A")?.build()?;
-    /// // +---+---+---+---+
-    /// // | b |   |   |   |
-    /// // +---+---+---+---+
-    /// // | B |   |   |   |
-    /// // +---+---+---+---+
-    /// // |   | A |   |   |
-    /// // +---+---+---+---+
-    /// // |   |   |   |   |
-    /// // +---+---+---+---+
     /// assert_eq!(board, ans);
     /// # Ok(())
     /// # }
@@ -272,6 +337,11 @@ impl BoardBuilder {
     }
 
     /// Removes `dove` of the player in `color`.
+    ///
+    /// This method ignores rules of the game, i.e., for example,
+    /// you can remove a boss by this method.
+    /// The [`build`](`BoardBuilder::build`) method, however, will return `Err`
+    /// if the board to be built is illegal.
     ///
     /// # Examples
     /// ```rust
@@ -307,7 +377,7 @@ impl BoardBuilder {
     /// use tokyodoves::{Board, BoardBuilder};
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let bits = [[256, 16, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]];
+    /// let bits = [[1 << 8, 1 << 4, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]];
     /// let mut builder = BoardBuilder::from_u64_bits(bits);
     /// // The above builder corresponds to the below:
     /// // +---+---+---+---+
