@@ -6,6 +6,46 @@ use crate::prelude::{
 };
 
 /// Actions players can perform in their turn.
+///
+/// The definition of the Standard Short Notation (SSN) is given below.
+///
+/// Consider a coordinate system centered at red boss.
+/// ```text
+///         W3   W2   W1         E1   E2   E3
+///       +----+----+----+-----+----+----+----+
+///   N3  |    |    |    |     |    |    |    |
+///       +----+----+----+-----+----+----+----+
+///   N2  |    |    |    |     | ** |    |    |
+///       +----+----+----+-----+----+----+----+
+///   N1  |    |    |    |     |    |    |    |
+///       +----+----+----+-----+----+----+----+
+///       |    |    |    |  B  |    |    | @@ |
+///       +----+----+----+-----+----+----+----+
+///   S1  |    |    |    |     |    |    |    |
+///       +----+----+----+-----+----+----+----+
+///   S2  |    |    |    |  ?  |    |    |    |
+///       +----+----+----+-----+----+----+----+
+///   S3  |    |    |    |     |    |    |    |
+///       +----+----+----+-----+----+----+----+
+/// ```
+/// - The coordinate of "**" is written in "N2E1".
+/// - The coordinate of "@@" is written in "E3".
+/// - The coordinate of "?" is written in "S2".
+///
+/// Then the target positions of all legal actions are included in the above 7x7 squares,
+/// where the "target position" means:
+/// - for `Action::Put`, the square on which the dove will be put
+/// - for `Action::Move`, the square to which the dove moves
+/// - for `Action::Remove`, the target position not defined
+///
+/// Then the following notation is available:
+/// - For `Action::Put` => +{dove char}{target position} (e.g. "+AN2E1")
+/// - For `Action::Move` => {dove char}{target position} (e.g. "mE2")
+/// - For `Action::Remove` => -{dove char} (e.g. "-t")
+///
+/// To identify "dove char", see the table in the documentation of [`color_dove_to_char`].
+///
+/// Now the notation above is named SSN.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Action {
     /// Put [`Dove`] from [`Color`]'s hand on the board
@@ -21,6 +61,15 @@ pub enum Action {
 }
 
 impl Action {
+    /// Returns a reference to the player of the action.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Action, Color, Dove};
+    ///
+    /// let action = Action::Remove(Color::Red, Dove::H);
+    /// assert!(matches!(action.player(), Color::Red));
+    /// ```
     pub fn player(&self) -> &Color {
         use Action::*;
         match self {
@@ -30,6 +79,15 @@ impl Action {
         }
     }
 
+    /// Returns a reference to the dove of the action.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Action, Color, Dove};
+    ///
+    /// let action = Action::Remove(Color::Red, Dove::H);
+    /// assert!(matches!(action.dove(), Dove::H));
+    /// ```
     pub fn dove(&self) -> &Dove {
         use Action::*;
         match self {
@@ -39,6 +97,17 @@ impl Action {
         }
     }
 
+    /// Returns a reference to the shift of the action.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Action, Color, Dove, Shift};
+    ///
+    /// let action1 = Action::Remove(Color::Red, Dove::H);
+    /// assert!(action1.shift().is_none());
+    /// let action2 = Action::Move(Color::Red, Dove::B, Shift::new(1, 0));
+    /// assert_eq!(Shift::new(1, 0), *action2.shift().unwrap());
+    /// ```
     pub fn shift(&self) -> Option<&Shift> {
         use Action::*;
         match self {
@@ -48,7 +117,22 @@ impl Action {
         }
     }
 
-    /// Converts `self` into `String` in Standard Short Notation (SSN)
+    /// Converts `self` into `String` in SSN.
+    ///
+    /// See the documentation of [`Action`] for the definition of SSN.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board = Board::new();
+    /// let action = Action::Put(Color::Red, Dove::A, Shift::new(1, 0));
+    /// let ssn = action.try_into_ssn(&board)?;
+    /// assert_eq!(ssn, "+AS1");
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn try_into_ssn(self, board: &Board) -> Result<String, error::Error> {
         fn _shift_to_string(shift: Shift) -> String {
             let (ns, ns_num) = match shift.dv {
@@ -97,6 +181,21 @@ impl Action {
     }
 
     /// Creates `Action` from `&str` in Standard Short Notation (SSN)
+    ///
+    /// See the documentation of [`Action`] for the definition of SSN.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, Action, Color, Dove, Shift};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let board = Board::new();
+    /// let ssn = "+AS1";
+    /// let action = Action::try_from_ssn(ssn, &board)?;
+    /// assert_eq!(action, Action::Put(Color::Red, Dove::A, Shift::new(1, 0)));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn try_from_ssn(ssn: &str, board: &Board) -> Result<Action, error::Error> {
         enum ActionType {
             Put,
