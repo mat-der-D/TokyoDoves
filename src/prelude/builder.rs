@@ -2,7 +2,6 @@ use std::str::FromStr;
 
 use strum::IntoEnumIterator;
 
-use crate::error;
 use crate::prelude::{
     board::{
         main::Board,
@@ -11,6 +10,7 @@ use crate::prelude::{
     },
     pieces::{color_to_index, dove_to_index, try_char_to_color_dove, Color, Dove},
 };
+use crate::{error, try_index_to_color};
 
 /// A builder of [`Board`].
 ///
@@ -368,7 +368,7 @@ impl BoardBuilder {
     /// // +---+---+---+---+
     /// // |   |   |   |   |
     /// // +---+---+---+---+
-    /// // "A" is outside of 4x4 matrix.
+    /// // "A" is outside of 4x4 field.
     /// assert!(builder.build().is_err());
     /// builder.trim_outside_4x4(); // "A" is trimmed (removed)
     /// let board = builder.build()?;
@@ -404,13 +404,19 @@ impl BoardBuilder {
     pub fn build(&self) -> Result<Board, error::Error> {
         use error::BoardCreateErrorKind::*;
 
-        if self.positions[0][0] == 0 || self.positions[1][0] == 0 {
-            return Err(BossNotFound.into());
+        for icolor in 0..2 {
+            if self.positions[icolor][0] == 0 {
+                let color = try_index_to_color(icolor).unwrap();
+                return Err(BossNotFound(color).into());
+            }
         }
         let core = 0x0f0f0f0f;
         let mut bit_sum = 0;
         for colored_positions in self.positions {
             for bit in colored_positions {
+                if !matches!(bit.count_ones(), 0 | 1) {
+                    return Err(BitNeitherSingleNorZero(self.positions, bit).into());
+                }
                 if bit & bit_sum != 0 {
                     return Err(PositionDuplicated.into());
                 }
@@ -466,7 +472,7 @@ impl TryFrom<[[Option<(Color, Dove)>; 4]; 4]> for BoardBuilder {
                 if let Some((c, d)) = elem {
                     let pos = builder.position(*c, *d);
                     if *pos != 0 {
-                        return Err(DoveDuplicated.into());
+                        return Err(DoveDuplicated(*c, *d).into());
                     }
                     builder.put_dove(iv, ih, *c, *d);
                 }
@@ -521,7 +527,7 @@ impl FromStr for BoardBuilder {
 
             if let Some((color, dove)) = try_char_to_color_dove(c) {
                 if *builder.position(color, dove) != 0 {
-                    return Err(DoveDuplicated.into());
+                    return Err(DoveDuplicated(color, dove).into());
                 }
 
                 builder.put_dove(pos_v, pos_h, color, dove);
@@ -529,5 +535,26 @@ impl FromStr for BoardBuilder {
             pos_h += 1;
         }
         Ok(builder)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn test_single_bit() {
+        let positions = [[256, 0, 0, 0, 0, 0], [3, 0, 0, 0, 0, 0]];
+        let builder = BoardBuilder::from_u64_bits(positions);
+        let result = builder.build();
+        assert!(result.is_err());
+        use error::BoardCreateErrorKind::*;
+        use error::BoardError::*;
+        assert!(matches!(
+            result.unwrap_err().as_board_error().unwrap(),
+            BoardCreateError {
+                kind: BitNeitherSingleNorZero(_, _),
+            }
+        ));
     }
 }

@@ -145,6 +145,17 @@ pub(crate) fn color_to_index(color: Color) -> usize {
 }
 
 #[inline]
+pub(crate) fn try_index_to_color(index: usize) -> Option<Color> {
+    use Color::*;
+    let color = match index {
+        0 => Red,
+        1 => Green,
+        _ => return None,
+    };
+    Some(color)
+}
+
+#[inline]
 pub(crate) fn dove_to_index(dove: Dove) -> usize {
     use Dove::*;
     match dove {
@@ -263,6 +274,24 @@ mod tests {
                 continue;
             };
             assert_eq!(ch, color_dove_to_char(color, dove));
+        }
+    }
+
+    #[test]
+    fn test_color_index() {
+        for color in Color::iter() {
+            let idx = color_to_index(color);
+            assert_eq!(Some(color), try_index_to_color(idx));
+        }
+    }
+
+    #[test]
+    fn test_color_index_irregular() {
+        for idx in 0..1_000_000 {
+            let Some(color) = try_index_to_color(idx) else {
+                continue;
+            };
+            assert_eq!(idx, color_to_index(color));
         }
     }
 

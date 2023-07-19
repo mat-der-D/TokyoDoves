@@ -64,10 +64,10 @@ impl Error {
 /// Errors associated to [`Board`](`super::board::main::Board`)
 #[derive(Debug, thiserror::Error)]
 pub enum BoardError {
-    #[error("BoardCreateError: {kind:?}")]
+    #[error("BoardCreateError::{kind}")]
     BoardCreateError { kind: BoardCreateErrorKind },
 
-    #[error("ActionPeformError: {kind:?}")]
+    #[error("ActionPeformError::{kind:?}")]
     ActionPerformError {
         kind: ActionPerformErrorKind,
         action: Action,
@@ -92,11 +92,33 @@ impl BoardError {
 /// Error kinds on creating [`Board`](`super::board::main::Board`)
 #[derive(Debug)]
 pub enum BoardCreateErrorKind {
-    BossNotFound,
-    DoveDuplicated,
+    BossNotFound(Color),
+    DoveDuplicated(Color, Dove),
     PositionDuplicated,
     DoveIsolated,
     PositionOutOfRange,
+    BitNeitherSingleNorZero([[u64; 6]; 2], u64),
+}
+
+impl std::fmt::Display for BoardCreateErrorKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use BoardCreateErrorKind::*;
+        let msg = match self {
+            BossNotFound(color) => format!("BossNotFound: {color} boss not found"),
+            DoveDuplicated(color, dove) => {
+                format!("DoveDuplicated: found duplicated doves ({color}, {dove:?})")
+            }
+            PositionDuplicated => {
+                "PositionDuplicated: position duplicated with another dove".to_string()
+            }
+            DoveIsolated => "DoveIsolated: some dove is isolated".to_string(),
+            PositionOutOfRange => "PositionOutOfRange: some dove is out of 4x4 region".to_string(),
+            BitNeitherSingleNorZero(pos, bit) => {
+                format!("BitNeitherSingleNorZero: position {bit} in {pos:?} is neither single bit nor zero")
+            }
+        };
+        write!(f, "{msg}")
+    }
 }
 
 impl From<BoardCreateErrorKind> for Error {
@@ -135,10 +157,10 @@ impl From<(ActionPerformErrorKind, Action)> for Error {
 /// Errors on conversion between [`Action`] and string in SSN
 #[derive(Debug, thiserror::Error)]
 pub enum ActionConvertError {
-    #[error("EncodingError: {kind:?}")]
+    #[error("EncodingError::{kind:?}")]
     EncodingError { kind: EncodingErrorKind },
 
-    #[error("DecodingError: {kind:?}")]
+    #[error("DecodingError::{kind:?}")]
     DecodingError { kind: DecodingErrorKind },
 }
 
@@ -177,10 +199,10 @@ impl From<DecodingErrorKind> for Error {
 /// Errors associated to [`Game`](`crate::game::Game`)
 #[derive(Debug, thiserror::Error)]
 pub enum GameError {
-    #[error("GameRuleCreateError: {kind:?}")]
+    #[error("GameRuleCreateError::{kind:?}")]
     GameRuleCreateError { kind: GameRuleCreateErrorKind },
 
-    #[error("PlayingError: {kind:?}")]
+    #[error("PlayingError::{kind:?}")]
     PlayingError { kind: PlayingErrorKind },
 }
 
@@ -213,7 +235,7 @@ impl From<PlayingErrorKind> for Error {
 /// Error variants on analysis for games
 #[derive(Debug, thiserror::Error)]
 pub enum AnalysisError {
-    #[error("ArgsValidationError: {kind}")]
+    #[error("ArgsValidationError::{kind}")]
     ArgsValidationError { kind: ArgsValidationErrorKind },
 
     #[error("BoardValueMismatch: value of board is {0:?} than value in argument")]
@@ -238,9 +260,9 @@ impl std::fmt::Display for ArgsValidationErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ArgsValidationErrorKind::*;
         let msg = match self {
-            FinishedGameBoard(_board) => String::from("board of finished game"),
-            UnsupportedValue(value) => format!("{value} not supported"),
-            DrawJudge => String::from("Judge::Draw not supported"),
+            FinishedGameBoard(_board) => String::from("FinishedGameBoard: board of finished game"),
+            UnsupportedValue(value) => format!("UnsupportedValue: {value} not supported"),
+            DrawJudge => String::from("DrawJudge: Judge::Draw not supported"),
         };
         write!(f, "{msg}")
     }
