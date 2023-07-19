@@ -44,14 +44,7 @@ pub(crate) struct FiniteActionContainer<const N: usize> {
 
 impl<const N: usize> std::fmt::Debug for FiniteActionContainer<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "[{}]",
-            self.iter()
-                .map(|x| format!("{x:?}"))
-                .collect::<Vec<String>>()
-                .join(", ")
-        )
+        f.debug_list().entries(self.iter()).finish()
     }
 }
 
@@ -190,14 +183,7 @@ pub struct DoveSet {
 
 impl std::fmt::Debug for DoveSet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{{{}}}",
-            self.into_iter()
-                .map(|d| format!("{d:?}"))
-                .collect::<Vec<String>>()
-                .join(", ")
-        )
+        f.debug_set().entries(self.into_iter()).finish()
     }
 }
 
@@ -238,8 +224,8 @@ pub struct DoveSetIntoIter {
 
 impl std::fmt::Debug for DoveSetIntoIter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let vec: Vec<String> = self.clone().map(|d| format!("{d:?}")).collect();
-        write!(f, "DoveSetIntoIter[{}]", vec.join(", "))
+        let vec: Vec<Dove> = self.clone().collect();
+        f.debug_tuple("DoveSetIntoIter").field(&vec).finish()
     }
 }
 

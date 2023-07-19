@@ -183,9 +183,16 @@ impl std::ops::AddAssign for Capacity {
 /// which can be reloaded by the [`load`](`BoardSet::load`) method.
 /// The [`load_filter`](`BoardSet::load_filter`) method provides a way
 /// to load a part satisfying a criterion.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
 pub struct BoardSet {
     raw: RawBoardSet,
+}
+
+impl std::fmt::Debug for BoardSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let vec: Vec<Board> = self.iter().collect();
+        f.debug_set().entries(&vec).finish()
+    }
 }
 
 impl<const N: usize> From<[Board; N]> for BoardSet {
@@ -920,6 +927,7 @@ pub struct Drain<'a>(RawDrain<'a>);
 /// set.insert(Board::new());
 /// let mut iter = set.iter();
 /// ```
+#[derive(Clone)]
 pub struct Iter<'a>(RawIter<'a>);
 
 /// A lazy iterator producing elements in the difference of [`BoardSet`]s.
@@ -943,6 +951,7 @@ pub struct Iter<'a>(RawIter<'a>);
 /// # Ok(())
 /// # }
 /// ```
+#[derive(Clone)]
 pub struct Difference<'a>(RawDifference<'a>);
 
 /// A lazy iterator producing elements in the symmetric difference of [`BoardSet`]s.
@@ -966,6 +975,7 @@ pub struct Difference<'a>(RawDifference<'a>);
 /// # Ok(())
 /// # }
 /// ```
+#[derive(Clone)]
 pub struct SymmetricDifference<'a>(RawSymmetricDifference<'a>);
 
 /// A lazy iterator producing elements in the intersection of [`BoardSet`]s.
@@ -989,6 +999,7 @@ pub struct SymmetricDifference<'a>(RawSymmetricDifference<'a>);
 /// # Ok(())
 /// # }
 /// ```
+#[derive(Clone)]
 pub struct Intersection<'a>(RawIntersection<'a>);
 
 /// A lazy iterator producing elements in the union of [`BoardSet`]s.
@@ -1012,7 +1023,46 @@ pub struct Intersection<'a>(RawIntersection<'a>);
 /// # Ok(())
 /// # }
 /// ```
+#[derive(Clone)]
 pub struct Union<'a>(RawUnion<'a>);
+
+macro_rules! impl_debug {
+    (<$iter_name:expr, $iter:ident>) => {
+        impl<'a> std::fmt::Debug for $iter<'a> {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                let vec: Vec<<Self as Iterator>::Item> = self.clone().collect();
+                f.debug_tuple($iter_name).field(&vec).finish()
+            }
+        }
+    };
+
+    ($(<$iters2_name:expr, $iters2:ident>)*) => {
+        $(impl_debug!(<$iters2_name, $iters2>);)*
+    };
+}
+
+macro_rules! impl_debug_sealed {
+    ({$iter_name:expr, $iter:ident}) => {
+        impl std::fmt::Debug for $iter {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{}([..])", $iter_name)
+            }
+        }
+    };
+
+    (<$iter_name:expr, $iter:ident>) => {
+        impl<'a> std::fmt::Debug for $iter<'a> {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{}([..])", $iter_name)
+            }
+        }
+    };
+
+    ($({$iters1_name:expr, $iters1:ident})* $(<$iters2_name:expr, $iters2:ident>)*) => {
+        $(impl_debug_sealed!({$iters1_name, $iters1});)*
+        $(impl_debug_sealed!(<$iters2_name, $iters2>);)*
+    };
+}
 
 macro_rules! impl_iterators {
     ({$iter:ident => $raw:ident}) => {
@@ -1039,6 +1089,26 @@ macro_rules! impl_iterators {
     };
 }
 
+impl_debug!(
+    < "Iter", Iter >
+    < "RawIter", RawIter >
+    < "Difference", Difference >
+    < "RawDifference", RawDifference >
+    < "SymmetricDifference", SymmetricDifference >
+    < "RawSymmetricDifference", RawSymmetricDifference >
+    < "Intersection", Intersection >
+    < "RawIntersection", RawIntersection >
+    < "Union", Union >
+    < "RawUnion", RawUnion >
+);
+
+impl_debug_sealed!(
+    { "IntoIter", IntoIter }
+    { "RawIntoIter", RawIntoIter }
+    < "Drain", Drain >
+    < "RawDrain", RawDrain >
+);
+
 impl_iterators!(
     { IntoIter => RawIntoIter }
     < Drain => RawDrain >
@@ -1064,9 +1134,16 @@ impl_iterators!(
 /// Almost all methods on [`BoardSet`] are implemented simply by calling
 /// the methods of `RawBoardSet` with the same name
 /// and converting inputs or outputs between `u64` and [`Board`].
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct RawBoardSet {
     pub(crate) top2bottoms: HashMap<u32, HashSet<u32>>,
+}
+
+impl std::fmt::Debug for RawBoardSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let vec: Vec<u64> = self.iter().collect();
+        f.debug_set().entries(&vec).finish()
+    }
 }
 
 impl PartialEq for RawBoardSet {
@@ -1863,6 +1940,7 @@ type SetIter<'a> = std::collections::hash_set::Iter<'a, u32>;
 /// set.insert(Board::new().to_u64());
 /// let mut iter = set.iter();
 /// ```
+#[derive(Clone)]
 pub struct RawIter<'a> {
     map_iter: MapIter<'a>, // iterator of top2bottoms
     state: Option<(
@@ -2056,6 +2134,7 @@ impl<'a> Drop for _RawDrain<'a> {
 /// # Ok(())
 /// # }
 /// ```
+#[derive(Clone)]
 pub struct RawDifference<'a> {
     left: RawIter<'a>,
     right: &'a RawBoardSet,
@@ -2103,6 +2182,7 @@ impl<'a> Iterator for RawDifference<'a> {
 /// # Ok(())
 /// # }
 /// ```
+#[derive(Clone)]
 pub struct RawSymmetricDifference<'a> {
     left: &'a RawBoardSet,
     left_iter: RawIter<'a>,
@@ -2160,6 +2240,7 @@ impl<'a> Iterator for RawSymmetricDifference<'a> {
 /// # Ok(())
 /// # }
 /// ```
+#[derive(Clone)]
 pub struct RawIntersection<'a> {
     left_iter: RawIter<'a>,
     right: &'a RawBoardSet,
@@ -2207,6 +2288,7 @@ impl<'a> Iterator for RawIntersection<'a> {
 /// # Ok(())
 /// # }
 /// ```
+#[derive(Clone)]
 pub struct RawUnion<'a> {
     left_iter: RawIter<'a>,
     right: &'a RawBoardSet,
