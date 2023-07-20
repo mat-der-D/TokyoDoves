@@ -25,20 +25,26 @@ use crate::{
 
 /// Root of all errors in this crate
 ///
-/// You can find a rough sketch of dependency tree at [`crate::error`] page.
+/// You can find a rough sketch of dependency tree at the top page of the [`error`](`crate::error`) module.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// Errors associated to the [`Board`] struct
     #[error("BoardError::{0}")]
     BoardError(#[from] BoardError),
 
+    /// Errors associated to the [`game`](`crate::game`) module
     #[error("GameError::{0}")]
     GameError(#[from] GameError),
 
+    /// Errors associated to the [`analysis`](`crate::analysis`) module
     #[error("AnalysisError::{0}")]
     AnalysisError(#[from] AnalysisError),
 }
 
 impl Error {
+    /// Returns the value in [`Error::BoardError`].
+    ///
+    /// It returns [`None`] if `self` does not match `Error::BoardError`.
     pub fn as_board_error(&self) -> Option<&BoardError> {
         match self {
             Error::BoardError(err) => Some(err),
@@ -46,6 +52,9 @@ impl Error {
         }
     }
 
+    /// Returns the value in [`Error::GameError`].
+    ///
+    /// It returns [`None`] if `self` does not match `Error::GameError`.
     pub fn as_game_error(&self) -> Option<&GameError> {
         match self {
             Error::GameError(err) => Some(err),
@@ -53,6 +62,9 @@ impl Error {
         }
     }
 
+    /// Returns the value in [`Error::AnalysisError`].
+    ///
+    /// It returns [`None`] if `self` does not match `Error::AnalysisError`.
     pub fn as_analysis_error(&self) -> Option<&AnalysisError> {
         match self {
             Error::AnalysisError(err) => Some(err),
@@ -61,26 +73,33 @@ impl Error {
     }
 }
 
-/// Errors associated to [`Board`](`super::board::main::Board`)
+/// Errors associated to the [`Board`](`super::board::main::Board`) struct
 #[derive(Debug, thiserror::Error)]
 pub enum BoardError {
+    /// Errors on creation of [`Board`]
     #[error("BoardCreateError::{kind}")]
     BoardCreateError { kind: BoardCreateErrorKind },
 
+    /// Errors on performing [`Action`]s
     #[error("ActionPeformError::{kind:?}")]
     ActionPerformError {
         kind: ActionPerformErrorKind,
         action: Action,
     },
 
-    #[error("MaskShiftError")]
-    MaskShiftError,
+    /// Internal errors
+    #[error("InternalError")]
+    InternalError,
 
+    /// Errors on conversion between [`Action`] and string in SSN
     #[error("ActionConvertError::{0}")]
     ActionConvertError(#[from] ActionConvertError),
 }
 
 impl BoardError {
+    /// Returns the value in [`BoardError::ActionConvertError`].
+    ///
+    /// It returns [`None`] if `self` does not match `BoardError::ActionConvertError`.
     pub fn as_action_convert_error(&self) -> Option<&ActionConvertError> {
         match self {
             BoardError::ActionConvertError(err) => Some(err),
@@ -157,9 +176,11 @@ impl From<(ActionPerformErrorKind, Action)> for Error {
 /// Errors on conversion between [`Action`] and string in SSN
 #[derive(Debug, thiserror::Error)]
 pub enum ActionConvertError {
+    /// Errors on converting from [`Action`] to SSN
     #[error("EncodingError::{kind:?}")]
     EncodingError { kind: EncodingErrorKind },
 
+    /// Errors on converting from SSN to [`Action`]
     #[error("DecodingError::{kind:?}")]
     DecodingError { kind: DecodingErrorKind },
 }
@@ -199,9 +220,11 @@ impl From<DecodingErrorKind> for Error {
 /// Errors associated to [`Game`](`crate::game::Game`)
 #[derive(Debug, thiserror::Error)]
 pub enum GameError {
+    /// Errors on creating [`GameRule`](`crate::game::GameRule`)
     #[error("GameRuleCreateError::{kind:?}")]
     GameRuleCreateError { kind: GameRuleCreateErrorKind },
 
+    /// Errors on playing games
     #[error("PlayingError::{kind:?}")]
     PlayingError { kind: PlayingErrorKind },
 }
@@ -218,7 +241,7 @@ impl From<GameRuleCreateErrorKind> for Error {
     }
 }
 
-/// Error kinds that may occur during game playing
+/// Error kinds on playing games
 #[derive(Debug)]
 pub enum PlayingErrorKind {
     PlayerMismatch,
@@ -235,9 +258,11 @@ impl From<PlayingErrorKind> for Error {
 /// Error variants on analysis for games
 #[derive(Debug, thiserror::Error)]
 pub enum AnalysisError {
+    /// Errors on validating arguments
     #[error("ArgsValidationError::{kind}")]
     ArgsValidationError { kind: ArgsValidationErrorKind },
 
+    /// Errors for [`create_checkmate_tree_with_value`](`crate::analysis::create_checkmate_tree_with_value`)
     #[error("BoardValueMismatch: value of board is {0:?} than value in argument")]
     BoardValueMismatch(std::cmp::Ordering),
 }

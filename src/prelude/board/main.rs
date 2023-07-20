@@ -482,7 +482,7 @@ impl Board {
                 let pos = apply_shift(*boss_pos, s);
                 self.viewer
                     .shift_toward(pos)
-                    .map_err(|_| error::BoardError::MaskShiftError)?;
+                    .map_err(|_| error::BoardError::InternalError)?;
                 self.positions.set_position(c, d, pos);
             }
             Move(c, d, s) => {
@@ -490,7 +490,7 @@ impl Board {
                 let pos_next = apply_shift(*pos_now, s);
                 self.viewer
                     .shift_toward(pos_next)
-                    .map_err(|_| error::BoardError::MaskShiftError)?;
+                    .map_err(|_| error::BoardError::InternalError)?;
                 self.positions.set_position(c, d, pos_next);
             }
             Remove(c, d) => self.positions.set_position(c, d, 0),
