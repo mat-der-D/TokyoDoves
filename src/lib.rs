@@ -7,7 +7,7 @@
 //!     <https://image.gamemarket.jp/2019/11/v160.pdf>
 //! - A rule book in English:<br>
 //!     <https://www.daiso-syuppan.com/wp-content/uploads/2021/02/TOKYO-DOVES.pdf>
-//! - A video exlaining the rules on YouTube (Japanese):<br>
+//! - A video explaining the rules on YouTube (Japanese):<br>
 //!     <https://www.youtube.com/watch?v=SsyoqnipHWQ>
 //!
 //! The board is implemented with the bitboard technique,
