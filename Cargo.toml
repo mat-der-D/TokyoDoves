@@ -1,14 +1,20 @@
 [package]
 name = "tokyodoves"
 version = "0.1.0"
+authors = ["Smooth Pudding <smooth.pudding.1017@gmail.com>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Tokyodoves is a library of an efficient board of Tokyo Doves and associated toolkits."
 
-[profile.release]
-lto = "yes"
-codegen-units = 1
+documentation = "https://docs.rs/tokyodoves/"
+homepage = "https://crates.io/crates/tokyodoves"
+repository = "https://github.com/mat-der-D/tokyodoves"
 
+readme = "README.md"
+
+keywords = ["bitboard","tokyodoves","boardgame"]
+categories = ["game-engines"]
+license = "MIT"
 
 [dependencies]
 array-macro = "2.1.5"
