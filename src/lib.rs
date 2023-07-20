@@ -175,7 +175,7 @@
 //! See the documentation of the [`game`] module for more.
 //!
 //! # Analyze the game
-//! If you are absorbed into Tokyo Doves, you want to analyze the game much more deeply.
+//! If you are absorbed in Tokyo Doves, you want to analyze the game much more deeply.
 //! The [`analysis`] module provides several tools for analyses,
 //! including a function finding routes to the game end
 //! and a function suggesting the best actions that should be performed next.
