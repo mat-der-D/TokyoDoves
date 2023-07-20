@@ -2298,7 +2298,7 @@
                 <span class="kw">let </span>pos = apply_shift(<span class="kw-2">*</span>boss_pos, s);
                 <span class="self">self</span>.viewer
                     .shift_toward(pos)
-                    .map_err(|<span class="kw">_</span>| error::BoardError::MaskShiftError)<span class="question-mark">?</span>;
+                    .map_err(|<span class="kw">_</span>| error::BoardError::InternalError)<span class="question-mark">?</span>;
                 <span class="self">self</span>.positions.set_position(c, d, pos);
             }
             Move(c, d, s) =&gt; {
@@ -2306,7 +2306,7 @@
                 <span class="kw">let </span>pos_next = apply_shift(<span class="kw-2">*</span>pos_now, s);
                 <span class="self">self</span>.viewer
                     .shift_toward(pos_next)
-                    .map_err(|<span class="kw">_</span>| error::BoardError::MaskShiftError)<span class="question-mark">?</span>;
+                    .map_err(|<span class="kw">_</span>| error::BoardError::InternalError)<span class="question-mark">?</span>;
                 <span class="self">self</span>.positions.set_position(c, d, pos_next);
             }
             Remove(c, d) =&gt; <span class="self">self</span>.positions.set_position(c, d, <span class="number">0</span>),

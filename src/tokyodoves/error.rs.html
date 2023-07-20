@@ -278,6 +278,31 @@
 <a href="#278" id="278">278</a>
 <a href="#279" id="279">279</a>
 <a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Error variants
 //!
 //! A rough sketch of dependency tree:
@@ -305,35 +330,47 @@
 
 <span class="doccomment">/// Root of all errors in this crate
 ///
-/// You can find a rough sketch of dependency tree at [`crate::error`] page.
+/// You can find a rough sketch of dependency tree at the top page of the [`error`](`crate::error`) module.
 </span><span class="attr">#[derive(Debug, thiserror::Error)]
 </span><span class="kw">pub enum </span>Error {
-    <span class="attr">#[error(<span class="string">&quot;BoardError::{0}&quot;</span>)]
+    <span class="doccomment">/// Errors associated to the [`Board`] struct
+    </span><span class="attr">#[error(<span class="string">&quot;BoardError::{0}&quot;</span>)]
     </span>BoardError(<span class="attr">#[from] </span>BoardError),
 
-    <span class="attr">#[error(<span class="string">&quot;GameError::{0}&quot;</span>)]
+    <span class="doccomment">/// Errors associated to the [`game`](`crate::game`) module
+    </span><span class="attr">#[error(<span class="string">&quot;GameError::{0}&quot;</span>)]
     </span>GameError(<span class="attr">#[from] </span>GameError),
 
-    <span class="attr">#[error(<span class="string">&quot;AnalysisError::{0}&quot;</span>)]
+    <span class="doccomment">/// Errors associated to the [`analysis`](`crate::analysis`) module
+    </span><span class="attr">#[error(<span class="string">&quot;AnalysisError::{0}&quot;</span>)]
     </span>AnalysisError(<span class="attr">#[from] </span>AnalysisError),
 }
 
 <span class="kw">impl </span>Error {
-    <span class="kw">pub fn </span>as_board_error(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>BoardError&gt; {
+    <span class="doccomment">/// Returns the value in [`Error::BoardError`].
+    ///
+    /// It returns [`None`] if `self` does not match `Error::BoardError`.
+    </span><span class="kw">pub fn </span>as_board_error(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>BoardError&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             Error::BoardError(err) =&gt; <span class="prelude-val">Some</span>(err),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="kw">pub fn </span>as_game_error(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>GameError&gt; {
+    <span class="doccomment">/// Returns the value in [`Error::GameError`].
+    ///
+    /// It returns [`None`] if `self` does not match `Error::GameError`.
+    </span><span class="kw">pub fn </span>as_game_error(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>GameError&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             Error::GameError(err) =&gt; <span class="prelude-val">Some</span>(err),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="kw">pub fn </span>as_analysis_error(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>AnalysisError&gt; {
+    <span class="doccomment">/// Returns the value in [`Error::AnalysisError`].
+    ///
+    /// It returns [`None`] if `self` does not match `Error::AnalysisError`.
+    </span><span class="kw">pub fn </span>as_analysis_error(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>AnalysisError&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             Error::AnalysisError(err) =&gt; <span class="prelude-val">Some</span>(err),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -341,27 +378,34 @@
     }
 }
 
-<span class="doccomment">/// Errors associated to [`Board`](`super::board::main::Board`)
+<span class="doccomment">/// Errors associated to the [`Board`](`super::board::main::Board`) struct
 </span><span class="attr">#[derive(Debug, thiserror::Error)]
 </span><span class="kw">pub enum </span>BoardError {
-    <span class="attr">#[error(<span class="string">&quot;BoardCreateError::{kind}&quot;</span>)]
+    <span class="doccomment">/// Errors on creation of [`Board`]
+    </span><span class="attr">#[error(<span class="string">&quot;BoardCreateError::{kind}&quot;</span>)]
     </span>BoardCreateError { kind: BoardCreateErrorKind },
 
-    <span class="attr">#[error(<span class="string">&quot;ActionPeformError::{kind:?}&quot;</span>)]
+    <span class="doccomment">/// Errors on performing [`Action`]s
+    </span><span class="attr">#[error(<span class="string">&quot;ActionPeformError::{kind:?}&quot;</span>)]
     </span>ActionPerformError {
         kind: ActionPerformErrorKind,
         action: Action,
     },
 
-    <span class="attr">#[error(<span class="string">&quot;MaskShiftError&quot;</span>)]
-    </span>MaskShiftError,
+    <span class="doccomment">/// Internal errors
+    </span><span class="attr">#[error(<span class="string">&quot;InternalError&quot;</span>)]
+    </span>InternalError,
 
-    <span class="attr">#[error(<span class="string">&quot;ActionConvertError::{0}&quot;</span>)]
+    <span class="doccomment">/// Errors on conversion between [`Action`] and string in SSN
+    </span><span class="attr">#[error(<span class="string">&quot;ActionConvertError::{0}&quot;</span>)]
     </span>ActionConvertError(<span class="attr">#[from] </span>ActionConvertError),
 }
 
 <span class="kw">impl </span>BoardError {
-    <span class="kw">pub fn </span>as_action_convert_error(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ActionConvertError&gt; {
+    <span class="doccomment">/// Returns the value in [`BoardError::ActionConvertError`].
+    ///
+    /// It returns [`None`] if `self` does not match `BoardError::ActionConvertError`.
+    </span><span class="kw">pub fn </span>as_action_convert_error(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ActionConvertError&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             BoardError::ActionConvertError(err) =&gt; <span class="prelude-val">Some</span>(err),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -437,10 +481,12 @@
 <span class="doccomment">/// Errors on conversion between [`Action`] and string in SSN
 </span><span class="attr">#[derive(Debug, thiserror::Error)]
 </span><span class="kw">pub enum </span>ActionConvertError {
-    <span class="attr">#[error(<span class="string">&quot;EncodingError::{kind:?}&quot;</span>)]
+    <span class="doccomment">/// Errors on converting from [`Action`] to SSN
+    </span><span class="attr">#[error(<span class="string">&quot;EncodingError::{kind:?}&quot;</span>)]
     </span>EncodingError { kind: EncodingErrorKind },
 
-    <span class="attr">#[error(<span class="string">&quot;DecodingError::{kind:?}&quot;</span>)]
+    <span class="doccomment">/// Errors on converting from SSN to [`Action`]
+    </span><span class="attr">#[error(<span class="string">&quot;DecodingError::{kind:?}&quot;</span>)]
     </span>DecodingError { kind: DecodingErrorKind },
 }
 
@@ -479,10 +525,12 @@
 <span class="doccomment">/// Errors associated to [`Game`](`crate::game::Game`)
 </span><span class="attr">#[derive(Debug, thiserror::Error)]
 </span><span class="kw">pub enum </span>GameError {
-    <span class="attr">#[error(<span class="string">&quot;GameRuleCreateError::{kind:?}&quot;</span>)]
+    <span class="doccomment">/// Errors on creating [`GameRule`](`crate::game::GameRule`)
+    </span><span class="attr">#[error(<span class="string">&quot;GameRuleCreateError::{kind:?}&quot;</span>)]
     </span>GameRuleCreateError { kind: GameRuleCreateErrorKind },
 
-    <span class="attr">#[error(<span class="string">&quot;PlayingError::{kind:?}&quot;</span>)]
+    <span class="doccomment">/// Errors on playing games
+    </span><span class="attr">#[error(<span class="string">&quot;PlayingError::{kind:?}&quot;</span>)]
     </span>PlayingError { kind: PlayingErrorKind },
 }
 
@@ -498,7 +546,7 @@
     }
 }
 
-<span class="doccomment">/// Error kinds that may occur during game playing
+<span class="doccomment">/// Error kinds on playing games
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub enum </span>PlayingErrorKind {
     PlayerMismatch,
@@ -515,10 +563,12 @@
 <span class="doccomment">/// Error variants on analysis for games
 </span><span class="attr">#[derive(Debug, thiserror::Error)]
 </span><span class="kw">pub enum </span>AnalysisError {
-    <span class="attr">#[error(<span class="string">&quot;ArgsValidationError::{kind}&quot;</span>)]
+    <span class="doccomment">/// Errors on validating arguments
+    </span><span class="attr">#[error(<span class="string">&quot;ArgsValidationError::{kind}&quot;</span>)]
     </span>ArgsValidationError { kind: ArgsValidationErrorKind },
 
-    <span class="attr">#[error(<span class="string">&quot;BoardValueMismatch: value of board is {0:?} than value in argument&quot;</span>)]
+    <span class="doccomment">/// Errors for [`create_checkmate_tree_with_value`](`crate::analysis::create_checkmate_tree_with_value`)
+    </span><span class="attr">#[error(<span class="string">&quot;BoardValueMismatch: value of board is {0:?} than value in argument&quot;</span>)]
     </span>BoardValueMismatch(std::cmp::Ordering),
 }
 
