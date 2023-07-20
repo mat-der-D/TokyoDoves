@@ -39,7 +39,11 @@
 //! // |   |   |   |   |
 //! // +---+---+---+---+
 //! ```
-//! "B" is a red boss-hato and "b" is a green boss-hato.
+//! "B" stands for a red boss-hato
+//! and "b" stands for a green boss-hato.
+//! See the documentation of [`color_dove_to_char`]
+//! for other characters to be used.
+//!
 //! If you, red player, want to put from your hand
 //! the aniki-hato on the right side of your boss hato,
 //! perform an action `Action::Put(Color::Red, Dove::A, Shift::new(0, 1))`.
@@ -48,7 +52,7 @@
 //! # let mut board = Board::new();
 //! let action = Action::Put(Color::Red, Dove::A, Shift::new(0, 1));
 //! let result = board.perform(action);
-//! // assert!(result.is_ok());
+//! assert!(result.is_ok());
 //! println!("{board}");
 //! // +---+---+---+---+
 //! // | b |   |   |   |
@@ -61,7 +65,7 @@
 //! // +---+---+---+---+
 //! ```
 //! If the action is legal, `result` is `Ok(())`, otherwise `Err(_)`.
-//! See the documentation of the [`perform`](`Board::perform`) method.
+//! See the documentation of the [`perform`](`Board::perform`) method for more.
 //!
 //! The [`legal_actions`](`Board::legal_actions`) method returns all available actions.
 //! ```rust
@@ -81,11 +85,11 @@
 //! // Move(Green, B, Shift { dv: 1, dh: -1 })
 //! ```
 //! The type of the returned value is [`ActionsFwd`], which is a read-only
-//! container of [`Action`]s. Three boolean argument of [`legal_actions`](`Board::legal_actions`)
-//! controls the range of actions to be considered.
+//! container of [`Action`]s. Three boolean arguments of [`legal_actions`](`Board::legal_actions`)
+//! controls what kinds of actions to be considered.
 //! See their documentations for more.
 //!
-//! Next, green player chosen to put yaibato on the top-left square of green boss-hato.
+//! Next, suppose green player chose to put yaibato on the top-left square of green boss-hato.
 //! ```rust
 //! # use tokyodoves::*;
 //! # let mut board = Board::new();
@@ -109,6 +113,8 @@
 //! As shown above, the doves on the board slide automatically
 //! even if the target position is out of display,
 //! as far as the action is legal.
+//! See the documentation of [`Action`]
+//! for information about how to create actions.
 //!
 //! After several turns, the game is coming to the end.
 //! ```rust
@@ -136,7 +142,10 @@
 //! # use tokyodoves::*;
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! # let mut board = BoardBuilder::from_str(" bHh;AB M;m aY; T t")?.build()?;
-//! assert!(matches!(board.surrounded_status(), SurroundedStatus::None));
+//! let status = board.surrounded_status();
+//! assert!(
+//!     matches!(status, SurroundedStatus::None)
+//! );
 //! board.perform(Action::Move(Color::Red, Dove::A, Shift::new(-1, 0)));
 //! println!("{board}");
 //! // +---+---+---+---+
@@ -148,20 +157,36 @@
 //! // +---+---+---+---+
 //! // |   | T |   | t |
 //! // +---+---+---+---+
+//! let status = board.surrounded_status();
 //! assert!(
-//!     matches!(
-//!         board.surrounded_status(),
-//!         SurroundedStatus::OneSide(Color::Green)
-//!     )
+//!     matches!(status, SurroundedStatus::OneSide(Color::Green))
 //! );
 //! # Ok(())
 //! # }
 //! ```
 //!
-//!
 //! # Play more
+//! The codes in the last section are sufficient to play the game.
+//! This crate provides a [`game`] module,
+//! which lets you to realize this in more short codes.
+//! See the examples in the [`Game`](`crate::game::Game`) struct of [`game`] module.
+//! This module also provides an [`Arena`](`crate::game::Arena`),
+//! where two [`Agent`](crate::game::Agent`)s play against.
+//! See the documentation of the [`game`] module for more.
 //!
 //! # Analyze the game
+//! If you are absorbed into Tokyo Doves, you want to analyze the game much more deeply.
+//! The [`analysis`] module provides several tools for analyses,
+//! including a function finding routes to the game end
+//! and a function suggesting the best actions that should be performed next.
+//! See the documentation of the module for more.
+//!
+//! If you want to pool a large number of [`Board`]s during your analyses,
+//! the [`BoardSet`](`collections::BoardSet`) struct in the [`collections`] module must be useful.
+//! It provides not only methods to pool a lot of [`Board`]s,
+//! but also methods to save to/load from a binary file.
+//! See its documentation for more.
+//!
 
 pub use array_macro;
 pub use strum;

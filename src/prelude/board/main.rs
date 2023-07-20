@@ -243,6 +243,9 @@ pub enum SurroundedStatus {
 //  Implement Traits
 // *******************************************************************
 /// A board of Tokyo Doves based on bitboard techniques.
+///
+/// See [the documentation at the top of this crate](`crate`)
+/// for quick start examples.
 #[derive(Clone, Copy)]
 pub struct Board {
     pub(crate) viewer: MaskViewer,

@@ -1,4 +1,23 @@
 //! Convenient tools for playing games
+//!
+//! Main contents:
+//! - [`Game`]<br>
+//!     A struct that provides methods to play the game.
+//! - [`Agent`]<br>
+//!     A trait to define an agent playing the game.
+//!     The following agents are included:
+//!     - [`RandomAgent`]<br>
+//!         An agent who chooses the next action at random.
+//!     - [`AnalystAgent`]<br>
+//!         An agent who chooses the next action based on some analyses.
+//!     - [`ConsoleAgent`]<br>
+//!         An agent who asks the next action to the console.
+//!         It provides CLI with humans.
+//!
+//!     You can define another agent in you code
+//!     by implementing the [`Agent`] trait if you want.
+//! - [`Arena`]<br>
+//!     A struct of an arena, where two [`Agent`]s play against.
 
 use crate::analysis::{evaluate_board, find_best_actions};
 use crate::error;
@@ -232,7 +251,7 @@ pub enum GameStatus {
 // ************************************************************
 //  Game Struct
 // ************************************************************
-/// A struct that provides methods to play Tokyo Doves games.
+/// A struct that provides methods to play games.
 ///
 /// # Examples
 /// The following is a simple example in which one game is played:
@@ -520,7 +539,7 @@ impl<'a> std::fmt::Display for GameDisplay<'a> {
 // ************************************************************
 //  Agent Trait
 // ************************************************************
-/// An agant to play Tokyo Doves.
+/// An agant who plays the game.
 ///
 /// [`Arena`] receives two agetns and let them play the game.
 pub trait Agent {
