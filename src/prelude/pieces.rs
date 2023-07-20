@@ -29,7 +29,7 @@ impl std::ops::Not for Color {
 /// Six types of doves.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
 pub enum Dove {
-    /// Represents **B**oss-hato,
+    /// Represents **B**oss-hato (Boss Dove in English),
     /// which can move to adjacent squares in all eight directions,
     /// just like the King in chess.
     /// A player loses when their boss-hato is completely surrounded.
@@ -47,7 +47,7 @@ pub enum Dove {
     /// +---+---+---+---+---+
     /// ```
     B,
-    /// Represents **A**niki-hato,
+    /// Represents **A**niki-hato (Big Brother Dove in English),
     /// which can move to adjacent squares in all eight directions,
     /// just like the King in chess.
     /// ```text
@@ -64,7 +64,7 @@ pub enum Dove {
     /// +---+---+---+---+---+
     /// ```
     A,
-    /// Represents **Y**aibato,
+    /// Represents **Y**aibato (Razor Dove in English),
     /// which can move to four adjacent squares,
     /// forward, backward or sideways,
     /// just like '+'.
@@ -82,7 +82,7 @@ pub enum Dove {
     /// +---+---+---+---+---+
     /// ```
     Y,
-    /// Represents **M**amedeppo-bato,
+    /// Represents **M**amedeppo-bato (Peashooter Dove in English),
     /// which can move to four diagonally adjacent squares,
     /// just like 'x'.
     /// ```text
@@ -99,7 +99,7 @@ pub enum Dove {
     /// +---+---+---+---+---+
     /// ```
     M,
-    /// Represents **T**otsu-hato,
+    /// Represents **T**otsu-hato (Attack Dove in English),
     /// which can move forward, backward or sideways,
     /// through any number of squares,
     /// just like the Rook in chess.
@@ -117,7 +117,7 @@ pub enum Dove {
     /// +---+---+---+---+---+
     /// ```
     T,
-    /// Represents **H**ajike-hato,
+    /// Represents **H**ajike-hato (Crazy Dove in English),
     /// which can move (or jump) like the Knight in chess.
     /// ```text
     /// +---+---+---+---+---+
