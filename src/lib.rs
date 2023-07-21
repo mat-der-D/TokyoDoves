@@ -86,7 +86,7 @@
 //! ```
 //! The type of the returned value is [`ActionsFwd`], which is a read-only
 //! container of [`Action`]s. Three boolean arguments of [`legal_actions`](`Board::legal_actions`)
-//! controls what kinds of actions to be considered.
+//! control what kinds of actions to be considered.
 //! See their documentations for more.
 //!
 //! Next, suppose green player chose to put yaibato on the top-left square of green boss-hato.
@@ -98,7 +98,7 @@
 //! # println!("{board}");
 //! # let actions = board.legal_actions(Color::Green, true, true, true);
 //! let action = actions[6]; // Put(Green, Y , Shift { dv: -1, dh: -1 })
-//! board.perform(actions[0]);
+//! board.perform(action);
 //! println!("{board}");
 //! // +---+---+---+---+
 //! // | y |   |   |   |
@@ -166,8 +166,8 @@
 //! ```
 //!
 //! # Play more
-//! The codes in the last section are sufficient to play the game.
-//! This crate provides a [`game`] module,
+//! Although the codes in the last section are sufficient to play the game,
+//! this crate provides a [`game`] module,
 //! which lets you to realize this in more short codes.
 //! See the examples in the [`Game`](`crate::game::Game`) struct of [`game`] module.
 //! This module also provides an [`Arena`](`crate::game::Arena`),
