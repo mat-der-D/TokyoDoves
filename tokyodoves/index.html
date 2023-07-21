@@ -74,12 +74,12 @@ See the documentation of the <a href="struct.Board.html#method.perform" title="m
 // Move(Green, B, Shift { dv: 1, dh: -1 })</span></code></pre></div>
 <p>The type of the returned value is <a href="struct.ActionsFwd.html" title="struct tokyodoves::ActionsFwd"><code>ActionsFwd</code></a>, which is a read-only
 container of <a href="enum.Action.html" title="enum tokyodoves::Action"><code>Action</code></a>s. Three boolean arguments of <a href="struct.Board.html#method.legal_actions" title="method tokyodoves::Board::legal_actions"><code>legal_actions</code></a>
-controls what kinds of actions to be considered.
+control what kinds of actions to be considered.
 See their documentations for more.</p>
 <p>Next, suppose green player chose to put yaibato on the top-left square of green boss-hato.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>action = actions[<span class="number">6</span>]; <span class="comment">// Put(Green, Y , Shift { dv: -1, dh: -1 })
-</span>board.perform(actions[<span class="number">0</span>]);
+</span>board.perform(action);
 <span class="macro">println!</span>(<span class="string">&quot;{board}&quot;</span>);
 <span class="comment">// +---+---+---+---+
 // | y |   |   |   |
@@ -130,8 +130,8 @@ board.perform(Action::Move(Color::Red, Dove::A, Shift::new(-<span class="number"
     <span class="macro">matches!</span>(status, SurroundedStatus::OneSide(Color::Green))
 );</code></pre></div>
 <h2 id="play-more"><a href="#play-more">Play more</a></h2>
-<p>The codes in the last section are sufficient to play the game.
-This crate provides a <a href="game/index.html" title="mod tokyodoves::game"><code>game</code></a> module,
+<p>Although the codes in the last section are sufficient to play the game,
+this crate provides a <a href="game/index.html" title="mod tokyodoves::game"><code>game</code></a> module,
 which lets you to realize this in more short codes.
 See the examples in the <a href="game/struct.Game.html" title="struct tokyodoves::game::Game"><code>Game</code></a> struct of <a href="game/index.html" title="mod tokyodoves::game"><code>game</code></a> module.
 This module also provides an <a href="game/struct.Arena.html" title="struct tokyodoves::game::Arena"><code>Arena</code></a>,
