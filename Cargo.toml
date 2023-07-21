@@ -4,7 +4,7 @@ version = "0.1.3"
 authors = ["Smooth Pudding <smooth.pudding.1017@gmail.com>"]
 edition = "2021"
 
-description = "Tokyodoves is a library of an efficient board of Tokyo Doves and associated toolkits."
+description = "A library of an efficient board of Tokyo Doves and associated toolkits"
 
 documentation = "https://docs.rs/tokyodoves/"
 homepage = "https://crates.io/crates/tokyodoves"
