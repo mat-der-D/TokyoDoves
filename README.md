@@ -9,13 +9,16 @@ See the following pages for its rules.
     <https://www.daiso-syuppan.com/wp-content/uploads/2021/02/TOKYO-DOVES.pdf>
 - A video explaining the rules on YouTube (Japanese):<br>
     <https://www.youtube.com/watch?v=SsyoqnipHWQ>
+
 The board is implemented with the bitboard technique,
 which allows for extremely fast operations
 including moving, putting and removing pieces.
 
 ## Documentation
 Documentation is hosted on [docs.rs](https://docs.rs/tokyodoves/)
-See an auto-generated documentation [here](https://mat-der-d.github.io/tokyodoves/tokyodoves/).
+
+Alternatively, see [an auto-generated documentation](https://mat-der-d.github.io/tokyodoves/tokyodoves/)
+on the repository.
 
 ## Usage
 
