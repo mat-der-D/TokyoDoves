@@ -72,6 +72,15 @@ where
 // ***********************************************************************
 /// A utility to load [`Board`]s in a lazy way from the binary file
 /// saved by the [`save`](`BoardSet::save`) method of [`BoardSet`].
+///
+/// This struct has an internal [`LazyRawBoardLoader`],
+/// which is an iterator of `u64`s.
+/// The relation between two structs are similar to the one
+/// between [`BoardSet`] and [`RawBoardSet`].
+///
+/// It panics on iteration if some io error occurs in the process.
+/// To handle those errors,
+/// call the [`try_next`](`LazyBoardLoader::try_next`) method in a loop block.
 #[derive(Debug)]
 pub struct LazyBoardLoader<R>
 where
@@ -93,36 +102,153 @@ impl<R> LazyBoardLoader<R>
 where
     R: Read,
 {
+    /// Creates an lazy loader.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::LazyBoardLoader;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// for board in LazyBoardLoader::new(File::open(path)?) {
+    ///     println!("{board}");
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(reader: R) -> Self {
         Self {
             raw: LazyRawBoardLoader::new(reader),
         }
     }
 
+    /// Returns a reference to the internal [`LazyRawBoardLoader`].
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::LazyBoardLoader;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// let lazy_loader = LazyBoardLoader::new(File::open(path)?);
+    /// let raw_loader = lazy_loader.raw();
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn raw(&self) -> &LazyRawBoardLoader<R> {
         &self.raw
     }
 
+    /// Returns a reference to the internal [`LazyRawBoardLoader`].
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::LazyBoardLoader;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// let lazy_loader = LazyBoardLoader::new(File::open(path)?);
+    /// for hash in lazy_loader.raw_mut() {
+    ///     println!("{hash}");
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn raw_mut(&mut self) -> &mut LazyRawBoardLoader<R> {
         &mut self.raw
     }
 
+    /// Returns the internal [`LazyRawBoardLoader`].
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::LazyBoardLoader;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// let lazy_loader = LazyBoardLoader::new(File::open(path)?);
+    /// for hash in lazy_loader.into_raw() {
+    ///     println!("{hash}");
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn into_raw(self) -> LazyRawBoardLoader<R> {
         self.raw
     }
 
+    /// Returns the next item on iteration.
+    ///
+    /// # Errors
+    /// It returns `Err` if some io error occurs.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::LazyBoardLoader;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// let mut lazy_loader = LazyBoardLoader::new(File::open(path)?);
+    /// let next_item = lazy_loader.try_next();
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn try_next(&mut self) -> std::io::Result<Option<Board>> {
         self.raw
             .try_next()
             .map(|x| x.map(|h| BoardBuilder::from(h).build_unchecked()))
     }
 
+    /// Checks if the specified board is contained in a lazy way.
+    ///
+    /// This method consumes `self`.
+    ///
+    /// # Example
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::Board;
+    /// use tokyodoves::collections::LazyBoardLoader;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// let lazy_loader = LazyBoardLoader::new(File::open(path)?);
+    /// println!("{:?}", lazy_loader.contains(Board::new()));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn contains(self, board: Board) -> std::io::Result<bool> {
         self.into_raw().contains(board.to_u64())
     }
 
-    pub fn contains_all(self, boards: BoardSet) -> std::io::Result<bool> {
-        self.into_raw().contains_all(boards.into_raw())
+    /// Checks if all boards in the set are contained in a lazy way.
+    ///
+    /// This method consumes `self`.
+    ///
+    /// # Errors
+    /// It returns `Err` if some io error occurs.
+    ///
+    /// # Example
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::Board;
+    /// use tokyodoves::collections::{LazyBoardLoader, BoardSet};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// let lazy_loader = LazyBoardLoader::new(File::open(path)?);
+    /// let mut set = BoardSet::new();
+    /// set.insert(Board::new());
+    /// println!("{:?}", lazy_loader.contains_all(set));
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn contains_all(self, set: BoardSet) -> std::io::Result<bool> {
+        self.into_raw().contains_all(set.into_raw())
     }
 }
 
@@ -141,6 +267,10 @@ where
 // ***********************************************************************
 /// A struct almost the same as [`LazyBoardLoader`],
 /// except that it loads `u64` expressions of [`Board`]s instead.
+///
+/// It panics on iteration if some io error occurs in the process.
+/// To handle those errors,
+/// call the [`try_next`](`LazyRawBoardLoader::try_next`) method in a loop block.
 #[derive(Debug)]
 pub struct LazyRawBoardLoader<R>
 where
@@ -163,6 +293,21 @@ impl<R> LazyRawBoardLoader<R>
 where
     R: Read,
 {
+    /// Creates an lazy loader.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::LazyRawBoardLoader;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// for hash in LazyRawBoardLoader::new(File::open(path)?) {
+    ///     println!("{hash}");
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(reader: R) -> Self {
         Self {
             fragment_iter: FragmentIter::new(reader),
@@ -170,6 +315,23 @@ where
         }
     }
 
+    /// Returns the next item on iteration.
+    ///
+    /// # Errors
+    /// It returns `Err` if some io error occurs.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::LazyRawBoardLoader;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// let mut lazy_loader = LazyRawBoardLoader::new(File::open(path)?);
+    /// let next_item = lazy_loader.try_next();
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn try_next(&mut self) -> std::io::Result<Option<u64>> {
         let Some(next) = self.fragment_iter.try_next()? else {
             return Ok(None);
@@ -186,13 +348,52 @@ where
         }
     }
 
-    pub fn contains(self, board: u64) -> std::io::Result<bool> {
-        let boards = RawBoardSet::from_iter([board]);
+    /// Checks if the specified `u64` is contained in a lazy way.
+    ///
+    /// This method consumes `self`.
+    ///
+    /// # Example
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::Board;
+    /// use tokyodoves::collections::LazyBoardLoader;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// let lazy_loader = LazyRawBoardLoader::new(File::open(path)?);
+    /// println!("{:?}", lazy_loader.contains(Board::new().to_u64()));
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn contains(self, hash: u64) -> std::io::Result<bool> {
+        let boards = RawBoardSet::from_iter([hash]);
         self.contains_all(boards)
     }
 
-    pub fn contains_all(mut self, mut boards: RawBoardSet) -> std::io::Result<bool> {
-        if boards.is_empty() {
+    /// Checks if all `u64`s in the set are contained in a lazy way.
+    ///
+    /// This method consumes `self`.
+    ///
+    /// # Errors
+    /// It returns `Err` if some io error occurs.
+    ///
+    /// # Example
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::Board;
+    /// use tokyodoves::collections::{LazyRawBoardLoader, RawBoardSet};
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path.tdl";
+    /// let lazy_loader = LazyRawBoardLoader::new(File::open(path)?);
+    /// let mut set = RawBoardSet::new();
+    /// set.insert(Board::new().to_u64());
+    /// println!("{:?}", lazy_loader.contains_all(set));
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn contains_all(mut self, mut set: RawBoardSet) -> std::io::Result<bool> {
+        if set.is_empty() {
             return Ok(true);
         }
 
@@ -203,7 +404,7 @@ where
 
         loop {
             let Some(next_fragment) = self.fragment_iter.try_next()? else {
-                return Ok(boards.is_empty());
+                return Ok(set.is_empty());
             };
 
             use Fragment::*;
@@ -219,8 +420,8 @@ where
                     top_considering = dummy_top;
                     bottoms_considering = &mut dummy_set;
 
-                    if boards.top2bottoms.contains_key(&top) {
-                        let set = boards.top2bottoms.get_mut(&top).unwrap();
+                    if set.top2bottoms.contains_key(&top) {
+                        let set = set.top2bottoms.get_mut(&top).unwrap();
                         if !set.is_empty() {
                             bottoms_considering = set;
                             top_considering = top;
@@ -237,7 +438,7 @@ where
                     }
                     bottoms_considering = &mut dummy_set;
                     top_considering = dummy_top;
-                    if boards.is_empty() {
+                    if set.is_empty() {
                         return Ok(true);
                     }
                 }
