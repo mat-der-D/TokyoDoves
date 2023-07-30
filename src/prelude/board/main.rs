@@ -941,6 +941,36 @@ impl Board {
     // *******************************************************************
     //  Information
     // *******************************************************************
+    /// Returns the posotion of specified player and dove in 4x4 matrix.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use tokyodoves::{Board, Color, Dove, Shift};
+    ///
+    /// let board = Board::new();
+    /// assert_eq!(
+    ///     board.position_in_matrix(Color::Red, Dove::B),
+    ///     Some(Shift::new(1, 0))
+    /// );
+    /// assert_eq!(
+    ///     board.position_in_matrix(Color::Green, Dove::B),
+    ///     Some(Shift::new(0, 0))
+    /// );
+    /// assert_eq!(
+    ///     board.position_in_matrix(Color::Red, Dove::A),
+    ///     None
+    /// );
+    /// ```
+    pub fn position_in_matrix(&self, player: Color, dove: Dove) -> Option<Shift> {
+        let pos = self.positions.position_of(player, dove);
+        if *pos == 0 {
+            return None;
+        }
+        let idx = self.viewer.view_mask().field_idx(*pos)? as i8;
+        let (v, h) = (idx / 4, idx % 4);
+        Some(Shift::new(v, h))
+    }
+
     /// Returns the position of specified player and dove in
     /// Red-Boss-Centered Coordinate (RBCC).
     ///
@@ -1417,22 +1447,12 @@ impl Board {
 
         for c in Color::iter() {
             for d in Dove::iter() {
-                let pos = self.positions.position_of(c, d);
-                if *pos != 0 {
-                    let Some(idx) = self
-                    .viewer
-                    .view_mask()
-                    .field_idx(*pos) else {
-                        continue;
-                    };
-
-                    // safety is guaranteed because ih and iv ranges from 0 to 3
-                    // iv < 16 holds because field_idx above returns Some(0 ~ 15)
-                    let ih = idx % 4;
-                    let iv = idx / 4;
-                    unsafe {
-                        *matrix.get_unchecked_mut(iv).get_unchecked_mut(ih) = Some((c, d));
-                    }
+                let Some(Shift { dv, dh }) = self.position_in_matrix(c, d) else {
+                    continue;
+                };
+                let (iv, ih) = (dv as usize, dh as usize);
+                unsafe {
+                    *matrix.get_unchecked_mut(iv).get_unchecked_mut(ih) = Some((c, d));
                 }
             }
         }
