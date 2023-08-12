@@ -1284,7 +1284,7 @@ impl RawBoardSet {
     /// ```
     pub fn new_from_file(path: impl AsRef<std::path::Path>) -> std::io::Result<RawBoardSet> {
         let capacity = Self::required_capacity(std::fs::File::open(&path)?);
-        let mut set = RawBoardSet::with_capacity(capacity);
+        let mut set = Self::with_capacity(capacity);
         set.load(std::fs::File::open(path)?)?;
         Ok(set)
     }
