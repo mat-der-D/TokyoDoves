@@ -255,7 +255,7 @@ impl BoardSet {
         Self::default()
     }
 
-    /// Creates an `RawBoardSet` by loading a file.
+    /// Creates an `BoardSet` by loading a file.
     ///
     /// # Examples
     /// ``` ignore
