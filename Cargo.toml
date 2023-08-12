@@ -1,6 +1,6 @@
 [package]
 name = "tokyodoves"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Smooth Pudding <smooth.pudding.1017@gmail.com>"]
 edition = "2021"
 
