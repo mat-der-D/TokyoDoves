@@ -839,6 +839,28 @@ impl BoardSet {
         self.raw.save(writer)
     }
 
+    /// Splits the set into two sets.
+    ///
+    /// The argument `left_len` indicates the length of the left component
+    /// of the returned value.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{Board, BoardBuilder};
+    /// use tokyodoves::collections::BoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut set = BoardSet::new();
+    /// set.insert(Board::new());
+    /// set.insert(BoardBuilder::from_str("BbH")?.build()?);
+    /// set.insert(BoardBuilder::from_str("BbA")?.build()?);
+    /// let (left, right) = set.split(2);
+    /// assert_eq!(left.len(), 2);
+    /// assert_eq!(right.len(), 1);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn split(self, left_len: usize) -> (Self, Self) {
         let (left_raw, right_raw) = self.into_raw().split(left_len);
         (left_raw.into(), right_raw.into())
@@ -1895,6 +1917,28 @@ impl RawBoardSet {
         Ok(())
     }
 
+    /// Splits the set into two sets.
+    ///
+    /// The argument `left_len` indicates the length of the left component
+    /// of the returned value.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::str::FromStr;
+    /// use tokyodoves::{Board, BoardBuilder};
+    /// use tokyodoves::collections::board_set::RawBoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut set = RawBoardSet::new();
+    /// set.insert(Board::new().to_u64());
+    /// set.insert(BoardBuilder::from_str("BbH")?.build()?.to_u64());
+    /// set.insert(BoardBuilder::from_str("BbA")?.build()?.to_u64());
+    /// let (left, right) = set.split(2);
+    /// assert_eq!(left.len(), 2);
+    /// assert_eq!(right.len(), 1);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn split(self, len_left: usize) -> (Self, Self) {
         let mut left = RawBoardSet::new();
         let mut right = RawBoardSet::new();
