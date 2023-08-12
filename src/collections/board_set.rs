@@ -255,6 +255,24 @@ impl BoardSet {
         Self::default()
     }
 
+    /// Creates an `BoardSet` by loading a file.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::BoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let set = BoardSet::new_from_file(path)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn new_from_file(path: impl AsRef<std::path::Path>) -> std::io::Result<BoardSet> {
+        let raw_set = RawBoardSet::new_from_file(path)?;
+        Ok(raw_set.into())
+    }
+
     /// Returns a reference to the internal [`RawBoardSet`].
     ///
     /// # Examples
@@ -1240,7 +1258,7 @@ impl<'a> IntoIterator for &'a RawBoardSet {
 }
 
 impl RawBoardSet {
-    /// Creates an empty `BoardSet`.
+    /// Creates an empty `RawBoardSet`.
     ///
     /// # Examples
     /// ```rust
@@ -1249,6 +1267,26 @@ impl RawBoardSet {
     /// ```
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Creates an `RawBoardSet` by loading a file.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let set = RawBoardSet::new_from_file(path)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn new_from_file(path: impl AsRef<std::path::Path>) -> std::io::Result<RawBoardSet> {
+        let capacity = Self::required_capacity(std::fs::File::open(&path)?);
+        let mut set = Self::with_capacity(capacity);
+        set.load(std::fs::File::open(path)?)?;
+        Ok(set)
     }
 
     /// Returns [`Capacity`] required to load all elements specified by `reader`.
