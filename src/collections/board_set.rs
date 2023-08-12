@@ -838,6 +838,11 @@ impl BoardSet {
     {
         self.raw.save(writer)
     }
+
+    pub fn split(self, left_len: usize) -> (Self, Self) {
+        let (left_raw, right_raw) = self.into_raw().split(left_len);
+        (left_raw.into(), right_raw.into())
+    }
 }
 
 impl std::ops::BitAnd<&BoardSet> for &BoardSet {
@@ -1889,6 +1894,37 @@ impl RawBoardSet {
         writer.flush()?;
         Ok(())
     }
+
+    pub fn split(self, len_left: usize) -> (Self, Self) {
+        let mut left = RawBoardSet::new();
+        let mut right = RawBoardSet::new();
+
+        let mut add_to_left = true;
+        let mut len_left_tmp = 0;
+        for (top, bottoms) in self.top2bottoms {
+            if !add_to_left {
+                right.top2bottoms.insert(top, bottoms);
+                continue;
+            }
+
+            let residual = len_left - len_left_tmp;
+            if bottoms.len() <= residual {
+                len_left_tmp += bottoms.len();
+                left.top2bottoms.insert(top, bottoms);
+            } else {
+                let mut bottoms_iter = bottoms.into_iter();
+                let left_bottoms = (&mut bottoms_iter).take(residual).collect();
+                let right_bottoms = bottoms_iter.collect();
+                left.top2bottoms.insert(top, left_bottoms);
+                right.top2bottoms.insert(top, right_bottoms);
+            }
+
+            if len_left_tmp == len_left {
+                add_to_left = false;
+            }
+        }
+        (left, right)
+    }
 }
 
 impl std::ops::BitAnd<&RawBoardSet> for &RawBoardSet {
@@ -2417,5 +2453,40 @@ mod tests {
         }
         assert!(set.is_empty());
         assert_eq!(capacity, set.capacity());
+    }
+
+    #[test]
+    fn test_split() {
+        let set = create_from_strs(&["Bb", "Bbh", "Bba"]);
+
+        let (left, right) = set.clone().split(0);
+        assert_eq!(left.len(), 0);
+        assert_eq!(right.len(), 3);
+        assert_eq!(&left | &right, set);
+
+        let (left, right) = set.clone().split(1);
+        assert_eq!(left.len(), 1);
+        assert_eq!(right.len(), 2);
+        assert_eq!(&left | &right, set);
+
+        let (left, right) = set.clone().split(10);
+        assert_eq!(left.len(), 3);
+        assert_eq!(&left | &right, set);
+
+        let set = set.into_raw();
+
+        let (left, right) = set.clone().split(0);
+        assert_eq!(left.len(), 0);
+        assert_eq!(right.len(), 3);
+        assert_eq!(&left | &right, set);
+
+        let (left, right) = set.clone().split(1);
+        assert_eq!(left.len(), 1);
+        assert_eq!(right.len(), 2);
+        assert_eq!(&left | &right, set);
+
+        let (left, right) = set.clone().split(10);
+        assert_eq!(left.len(), 3);
+        assert_eq!(&left | &right, set);
     }
 }
