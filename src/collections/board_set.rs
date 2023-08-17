@@ -498,6 +498,13 @@ impl BoardSet {
         self.raw.retain(|&h| f(&u64_to_board(h)))
     }
 
+    pub fn load_to_delete<R>(&mut self, reader: R) -> std::io::Result<()>
+    where
+        R: Read,
+    {
+        self.raw.load_to_delete(reader)
+    }
+
     /// Clears the set, removing all values.
     ///
     /// # Examples
@@ -1480,6 +1487,42 @@ impl RawBoardSet {
                 let hash = RawBoardSet::u32_u32_to_u64(top, b);
                 f(&hash)
             });
+        }
+    }
+
+    pub fn load_to_delete<R>(&mut self, reader: R) -> std::io::Result<()>
+    where
+        R: Read,
+    {
+        let mut dummy = HashSet::new();
+        let mut bottoms = &mut dummy;
+        let mut is_capturing = false;
+        let mut iter = FragmentIter::new(reader);
+        loop {
+            let Some(fragment) = iter.try_next()? else {
+                return Ok(());
+            };
+
+            use Fragment::*;
+            match fragment {
+                Delimiter => continue,
+                Top(top_) => match self.top2bottoms.get_mut(&top_) {
+                    Some(bottoms_) => {
+                        is_capturing = true;
+                        bottoms = bottoms_;
+                    }
+                    None => {
+                        is_capturing = false;
+                        bottoms = &mut dummy;
+                    }
+                },
+                Bottom(bottom_) => {
+                    if !is_capturing {
+                        continue;
+                    }
+                    bottoms.remove(&bottom_);
+                }
+            }
         }
     }
 
