@@ -498,6 +498,31 @@ impl BoardSet {
         self.raw.retain(|&h| f(&u64_to_board(h)))
     }
 
+    /// Removes all loaded values from the set.
+    ///
+    /// It returns `Ok(true)` if some elements in the set are removed.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::BoardSet;
+    /// use tokyodoves::Board;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let mut set = BoardSet::new();
+    /// set.insert(Board::new());
+    /// set.remove_by_loading(File::open(path)?)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn remove_loaded_values<R>(&mut self, reader: R) -> std::io::Result<bool>
+    where
+        R: Read,
+    {
+        self.raw.remove_loaded_values(reader)
+    }
+
     /// Clears the set, removing all values.
     ///
     /// # Examples
@@ -1480,6 +1505,61 @@ impl RawBoardSet {
                 let hash = RawBoardSet::u32_u32_to_u64(top, b);
                 f(&hash)
             });
+        }
+    }
+
+    /// Removes all loaded values from the set.
+    ///
+    /// It returns `Ok(true)` if some elements in the set are removed.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
+    /// use tokyodoves::Board;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let mut set = RawBoardSet::new();
+    /// set.insert(Board::new().to_u64());
+    /// set.remove_by_loading(File::open(path)?)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn remove_loaded_values<R>(&mut self, reader: R) -> std::io::Result<bool>
+    where
+        R: Read,
+    {
+        let mut removed = false;
+        let mut dummy = HashSet::new();
+        let mut bottoms = &mut dummy;
+        let mut is_capturing = false;
+        let mut iter = FragmentIter::new(reader);
+        loop {
+            let Some(fragment) = iter.try_next()? else {
+                return Ok(removed);
+            };
+
+            use Fragment::*;
+            match fragment {
+                Delimiter => continue,
+                Top(top_) => match self.top2bottoms.get_mut(&top_) {
+                    Some(bottoms_) => {
+                        is_capturing = true;
+                        bottoms = bottoms_;
+                    }
+                    None => {
+                        is_capturing = false;
+                        bottoms = &mut dummy;
+                    }
+                },
+                Bottom(bottom_) => {
+                    if !is_capturing {
+                        continue;
+                    }
+                    removed |= bottoms.remove(&bottom_);
+                }
+            }
         }
     }
 
