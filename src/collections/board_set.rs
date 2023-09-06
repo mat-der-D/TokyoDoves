@@ -498,11 +498,29 @@ impl BoardSet {
         self.raw.retain(|&h| f(&u64_to_board(h)))
     }
 
-    pub fn remove_by_loading<R>(&mut self, reader: R) -> std::io::Result<bool>
+    /// Removes all loaded values from the set.
+    ///
+    /// It returns `Ok(true)` if some elements in the set are removed.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::BoardSet;
+    /// use tokyodoves::Board;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let mut set = BoardSet::new();
+    /// set.insert(Board::new());
+    /// set.remove_by_loading(File::open(path)?)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn remove_loaded_values<R>(&mut self, reader: R) -> std::io::Result<bool>
     where
         R: Read,
     {
-        self.raw.remove_by_loading(reader)
+        self.raw.remove_loaded_values(reader)
     }
 
     /// Clears the set, removing all values.
@@ -1490,7 +1508,25 @@ impl RawBoardSet {
         }
     }
 
-    pub fn remove_by_loading<R>(&mut self, reader: R) -> std::io::Result<bool>
+    /// Removes all loaded values from the set.
+    ///
+    /// It returns `Ok(true)` if some elements in the set are removed.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
+    /// use tokyodoves::Board;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let mut set = RawBoardSet::new();
+    /// set.insert(Board::new().to_u64());
+    /// set.remove_by_loading(File::open(path)?)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn remove_loaded_values<R>(&mut self, reader: R) -> std::io::Result<bool>
     where
         R: Read,
     {
