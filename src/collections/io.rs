@@ -243,12 +243,12 @@ where
     /// let lazy_loader = LazyBoardLoader::new(File::open(path)?);
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
-    /// println!("{:?}", lazy_loader.contains_all(set));
+    /// println!("{:?}", lazy_loader.contains_all(&set));
     /// # Ok(())
     /// # }
     /// ```
-    pub fn contains_all(self, set: BoardSet) -> std::io::Result<bool> {
-        self.into_raw().contains_all(set.into_raw())
+    pub fn contains_all(self, set: &BoardSet) -> std::io::Result<bool> {
+        self.into_raw().contains_all(set.raw())
     }
 }
 
@@ -367,7 +367,7 @@ where
     /// ```
     pub fn contains(self, hash: u64) -> std::io::Result<bool> {
         let boards = RawBoardSet::from_iter([hash]);
-        self.contains_all(boards)
+        self.contains_all(&boards)
     }
 
     /// Checks if all `u64`s in the set are contained in a lazy way.
@@ -388,11 +388,11 @@ where
     /// let lazy_loader = LazyRawBoardLoader::new(File::open(path)?);
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
-    /// println!("{:?}", lazy_loader.contains_all(set));
+    /// println!("{:?}", lazy_loader.contains_all(&set));
     /// # Ok(())
     /// # }
     /// ```
-    pub fn contains_all(mut self, mut set: RawBoardSet) -> std::io::Result<bool> {
+    pub fn contains_all(mut self, set: &RawBoardSet) -> std::io::Result<bool> {
         if set.is_empty() {
             return Ok(true);
         }
