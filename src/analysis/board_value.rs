@@ -730,7 +730,7 @@ impl BoardValueTree {
     }
 
     fn to_dot_string(&self) -> String {
-        vec![
+        [
             "digraph {".to_string(),
             format!(
                 "node[style={:?} fontname=\"Courier New\" shape=\"box\"]",

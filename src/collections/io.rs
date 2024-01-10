@@ -243,12 +243,12 @@ where
     /// let lazy_loader = LazyBoardLoader::new(File::open(path)?);
     /// let mut set = BoardSet::new();
     /// set.insert(Board::new());
-    /// println!("{:?}", lazy_loader.contains_all(set));
+    /// println!("{:?}", lazy_loader.contains_all(&set));
     /// # Ok(())
     /// # }
     /// ```
-    pub fn contains_all(self, set: BoardSet) -> std::io::Result<bool> {
-        self.into_raw().contains_all(set.into_raw())
+    pub fn contains_all(self, set: &BoardSet) -> std::io::Result<bool> {
+        self.into_raw().contains_all(set.raw())
     }
 }
 
@@ -367,7 +367,7 @@ where
     /// ```
     pub fn contains(self, hash: u64) -> std::io::Result<bool> {
         let boards = RawBoardSet::from_iter([hash]);
-        self.contains_all(boards)
+        self.contains_all(&boards)
     }
 
     /// Checks if all `u64`s in the set are contained in a lazy way.
@@ -388,23 +388,26 @@ where
     /// let lazy_loader = LazyRawBoardLoader::new(File::open(path)?);
     /// let mut set = RawBoardSet::new();
     /// set.insert(Board::new().to_u64());
-    /// println!("{:?}", lazy_loader.contains_all(set));
+    /// println!("{:?}", lazy_loader.contains_all(&set));
     /// # Ok(())
     /// # }
     /// ```
-    pub fn contains_all(mut self, mut set: RawBoardSet) -> std::io::Result<bool> {
+    pub fn contains_all(mut self, set: &RawBoardSet) -> std::io::Result<bool> {
         if set.is_empty() {
             return Ok(true);
         }
 
-        let mut dummy_set = HashSet::new();
-        let mut bottoms_considering = &mut dummy_set;
+        let mut tops: HashSet<u32> = set.top2bottoms.keys().cloned().collect();
+        let mut bottoms_pool = HashSet::new();
+
+        let dummy_set = HashSet::new();
+        let mut bottoms_considering = &dummy_set;
         let dummy_top = 0;
         let mut top_considering = dummy_top;
 
         loop {
             let Some(next_fragment) = self.fragment_iter.try_next()? else {
-                return Ok(set.is_empty());
+                return Ok(tops.is_empty() && bottoms_considering.is_empty());
             };
 
             use Fragment::*;
@@ -413,32 +416,37 @@ where
                     if !bottoms_considering.is_empty() {
                         return Ok(false);
                     }
-                    bottoms_considering = &mut dummy_set;
+                    bottoms_considering = &dummy_set;
                     top_considering = dummy_top;
+                    bottoms_pool.clear();
                 }
                 Top(top) => {
                     top_considering = dummy_top;
-                    bottoms_considering = &mut dummy_set;
+                    bottoms_considering = &dummy_set;
 
-                    if set.top2bottoms.contains_key(&top) {
-                        let set = set.top2bottoms.get_mut(&top).unwrap();
-                        if !set.is_empty() {
-                            bottoms_considering = set;
-                            top_considering = top;
+                    if let Some(bottoms) = set.top2bottoms.get(&top) {
+                        if bottoms.is_empty() {
+                            continue;
                         }
+                        bottoms_considering = bottoms;
+                        top_considering = top;
+                        tops.remove(&top);
                     }
                 }
                 Bottom(bottom) => {
                     if top_considering == dummy_top {
                         continue;
                     }
-                    bottoms_considering.remove(&bottom);
-                    if !bottoms_considering.is_empty() {
+                    if bottoms_considering.contains(&bottom) {
+                        bottoms_pool.insert(bottom);
+                    }
+                    if bottoms_considering.len() != bottoms_pool.len() {
                         continue;
                     }
-                    bottoms_considering = &mut dummy_set;
+                    bottoms_considering = &dummy_set;
                     top_considering = dummy_top;
-                    if set.is_empty() {
+                    bottoms_pool.clear();
+                    if tops.is_empty() {
                         return Ok(true);
                     }
                 }

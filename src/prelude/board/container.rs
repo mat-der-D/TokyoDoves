@@ -183,7 +183,7 @@ pub struct DoveSet {
 
 impl std::fmt::Debug for DoveSet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_set().entries(self.into_iter()).finish()
+        f.debug_set().entries(*self).finish()
     }
 }
 
