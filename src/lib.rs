@@ -193,10 +193,15 @@ pub use strum;
 pub use strum_macros;
 pub use thiserror;
 
+#[cfg(feature = "analysis")]
 pub mod analysis;
+#[cfg(feature = "analysis")]
 pub mod collections;
 pub mod error;
+
+#[cfg(feature = "game")]
 pub mod game;
+
 mod prelude;
 
 pub use prelude::*;

@@ -19,6 +19,7 @@
 //! - [`Arena`]<br>
 //!     A struct of an arena, where two [`Agent`]s play against.
 
+#[cfg(feature = "analysis")]
 use crate::analysis::{evaluate_board, find_best_actions};
 use crate::error;
 use crate::prelude::{Action, ActionContainer, ActionsFwd, Board, Color, SurroundedStatus};
@@ -607,12 +608,14 @@ impl Agent for RandomAgent {
 }
 
 /// An [`Agent`] who choses a next action based on analysis of the status.
+#[cfg(feature = "analysis")]
 pub struct AnalystAgent {
     depth: usize,
     n: usize,
     declare_about_to_end: bool,
 }
 
+#[cfg(feature = "analysis")]
 impl std::fmt::Debug for AnalystAgent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("AnalystAgent")
@@ -622,12 +625,14 @@ impl std::fmt::Debug for AnalystAgent {
     }
 }
 
+#[cfg(feature = "analysis")]
 impl std::fmt::Display for AnalystAgent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "AnalystAgent")
     }
 }
 
+#[cfg(feature = "analysis")]
 impl AnalystAgent {
     /// Creates an [`AnalystAgent] object.
     ///
@@ -655,6 +660,7 @@ impl AnalystAgent {
     }
 }
 
+#[cfg(feature = "analysis")]
 impl Agent for AnalystAgent {
     /// Choses and performs an action based on analysis of the game.
     ///
@@ -832,10 +838,11 @@ where
     ///
     /// # Examples
     /// ```rust
-    /// use tokyodoves::game::{Arena, AnalystAgent, RandomAgent, Game};
-    ///
+    /// use tokyodoves::game::{Arena, RandomAgent, Game};
+    /// // use tokyodoves::game::AnalystAgent; // available when feature = "analysis"
     /// let red = RandomAgent::new();
-    /// let green = AnalystAgent::new(3, true);
+    /// let green = RandomAgent::new();
+    /// // let green = AnalystAgent::new(3, true); // available when feature = "analysis"
     /// let game = Game::new(true);
     /// let mut arena = Arena::new(red, green, game);
     /// arena.auto_play(true);
