@@ -351,7 +351,7 @@ impl BoardSet {
     }
 
     /// Returns [`Capacity`] required to load all elements specified by `reader`.
-    pub fn required_capacity<R>(reader: R) -> Capacity
+    pub fn required_capacity<R>(reader: R) -> std::io::Result<Capacity>
     where
         R: Read,
     {
@@ -360,7 +360,7 @@ impl BoardSet {
 
     /// Returns [`Capacity`] required to load all elements (`e`) specified by `reader`,
     /// under the condition of `f` (where `f(&e)` returns `true`).
-    pub fn required_capacity_filter<R, F>(reader: R, f: F) -> Capacity
+    pub fn required_capacity_filter<R, F>(reader: R, f: F) -> std::io::Result<Capacity>
     where
         R: Read,
         F: FnMut(&u64) -> bool,
@@ -806,7 +806,7 @@ impl BoardSet {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
-    /// let capacity = BoardSet::required_capacity(File::open(path)?);
+    /// let capacity = BoardSet::required_capacity(File::open(path)?)?;
     /// let mut set = BoardSet::with_capacity(capacity);
     /// set.load(File::open(path)?);
     /// # Ok(())
@@ -1308,20 +1308,24 @@ impl RawBoardSet {
     /// # }
     /// ```
     pub fn new_from_file(path: impl AsRef<std::path::Path>) -> std::io::Result<RawBoardSet> {
-        let capacity = Self::required_capacity(std::fs::File::open(&path)?);
+        let capacity = Self::required_capacity(std::fs::File::open(&path)?)?;
         let mut set = Self::with_capacity(capacity);
         set.load(std::fs::File::open(path)?)?;
         Ok(set)
     }
 
     /// Returns [`Capacity`] required to load all elements specified by `reader`.
-    pub fn required_capacity<R>(reader: R) -> Capacity
+    pub fn required_capacity<R>(reader: R) -> std::io::Result<Capacity>
     where
         R: Read,
     {
         let mut count = HashMap::new();
         let mut top = 0;
-        for fragment in FragmentIter::new(reader) {
+        let mut iter = FragmentIter::new(reader);
+        loop {
+            let Some(fragment) = iter.try_next()? else {
+                break;
+            };
             use Fragment::*;
             match fragment {
                 Delimiter => continue,
@@ -1329,19 +1333,24 @@ impl RawBoardSet {
                 Bottom(_) => *count.entry(top).or_default() += 1,
             }
         }
-        Capacity(count)
+        Ok(Capacity(count))
     }
 
     /// Returns [`Capacity`] required to load all elements (`e`) specified by `reader`,
     /// under the condition of `f` (where `f(&e)` returns `true`).
-    pub fn required_capacity_filter<R, F>(reader: R, mut f: F) -> Capacity
+    pub fn required_capacity_filter<R, F>(reader: R, mut f: F) -> std::io::Result<Capacity>
     where
         R: Read,
         F: FnMut(&u64) -> bool,
     {
         let mut count = HashMap::new();
         let mut top = 0;
-        for fragment in FragmentIter::new(reader) {
+        let mut iter = FragmentIter::new(reader);
+
+        loop {
+            let Some(fragment) = iter.try_next()? else {
+                break;
+            };
             use Fragment::*;
             match fragment {
                 Delimiter => continue,
@@ -1354,7 +1363,7 @@ impl RawBoardSet {
                 }
             }
         }
-        Capacity(count)
+        Ok(Capacity(count))
     }
 
     /// Creates an empty `BoardSet` with at least the specified capacity.
@@ -1901,7 +1910,7 @@ impl RawBoardSet {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
-    /// let capacity = RawBoardSet::required_capacity(File::open(path)?);
+    /// let capacity = RawBoardSet::required_capacity(File::open(path)?)?;
     /// let mut set = RawBoardSet::with_capacity(capacity);
     /// set.load(File::open(path)?);
     /// # Ok(())
