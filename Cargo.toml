@@ -17,10 +17,10 @@ categories = ["game-engines"]
 license = "MIT"
 
 [dependencies]
-array-macro = "2.1.5"
-strum = "0.25"
-strum_macros = "0.25"
-thiserror = "1.0"
+array-macro = "2.1.8"
+strum = "0.25.0"
+strum_macros = "0.25.3"
+thiserror = "1.0.56"
 
 [features]
 default = []
