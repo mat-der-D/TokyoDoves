@@ -17,6 +17,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run tests
       run: cargo test --release --verbose
+    - name: Run tests feature game
+      run: cargo test --release --features game --verbose
+    - name: Run tests feature analysis
+      run: cargo test --release --features analysis --verbose
+    - name: Run tests all features
+      run: cargo test --release --all-features --verbose
 
   doc:
     runs-on: ubuntu-latest
@@ -26,7 +32,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run doc
-      run: cargo doc --no-deps
+      run: cargo doc --no-deps --all-features
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3

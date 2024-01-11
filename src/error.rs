@@ -16,12 +16,16 @@
 //! - [`AnalysisError`]
 //!     - ArgsValidationError: [`ArgsValidationErrorKind`]
 //!     - BoardValueMismatch: [`std::cmp::Ordering`]
+//!
+//! Some of contents are available only when feature "game" or "analysis" is indicated.
 
-use crate::{
-    analysis::BoardValue,
-    game::GameStatus,
-    prelude::{Action, Board, Color, Dove},
-};
+#[cfg(feature = "analysis")]
+use crate::analysis::BoardValue;
+#[cfg(feature = "game")]
+use crate::game::GameStatus;
+#[cfg(feature = "analysis")]
+use crate::prelude::Board;
+use crate::prelude::{Action, Color, Dove};
 
 /// Root of all errors in this crate
 ///
@@ -32,11 +36,13 @@ pub enum Error {
     #[error("BoardError::{0}")]
     BoardError(#[from] BoardError),
 
-    /// Errors associated to the [`game`](`crate::game`) module
+    /// Errors associated to the [`game`](`crate::game`) module ("game" feature required)
+    #[cfg(feature = "game")]
     #[error("GameError::{0}")]
     GameError(#[from] GameError),
 
-    /// Errors associated to the [`analysis`](`crate::analysis`) module
+    /// Errors associated to the [`analysis`](`crate::analysis`) module ("analysis" feature required)
+    #[cfg(feature = "analysis")]
     #[error("AnalysisError::{0}")]
     AnalysisError(#[from] AnalysisError),
 }
@@ -48,6 +54,7 @@ impl Error {
     pub fn as_board_error(&self) -> Option<&BoardError> {
         match self {
             Error::BoardError(err) => Some(err),
+            #[cfg(any(feature = "game", feature = "analysis"))]
             _ => None,
         }
     }
@@ -55,6 +62,7 @@ impl Error {
     /// Returns the value in [`Error::GameError`].
     ///
     /// It returns [`None`] if `self` does not match `Error::GameError`.
+    #[cfg(feature = "game")]
     pub fn as_game_error(&self) -> Option<&GameError> {
         match self {
             Error::GameError(err) => Some(err),
@@ -65,6 +73,7 @@ impl Error {
     /// Returns the value in [`Error::AnalysisError`].
     ///
     /// It returns [`None`] if `self` does not match `Error::AnalysisError`.
+    #[cfg(feature = "analysis")]
     pub fn as_analysis_error(&self) -> Option<&AnalysisError> {
         match self {
             Error::AnalysisError(err) => Some(err),
@@ -217,7 +226,8 @@ impl From<DecodingErrorKind> for Error {
     }
 }
 
-/// Errors associated to [`Game`](`crate::game::Game`)
+/// Errors associated to [`Game`](`crate::game::Game`) ("game" feature required)
+#[cfg(feature = "game")]
 #[derive(Debug, thiserror::Error)]
 pub enum GameError {
     /// Errors on creating [`GameRule`](`crate::game::GameRule`)
@@ -229,19 +239,22 @@ pub enum GameError {
     PlayingError { kind: PlayingErrorKind },
 }
 
-/// Error kinds on creating [`GameRule`](`crate::game::GameRule`)
+/// Error kinds on creating [`GameRule`](`crate::game::GameRule`) ("game" feature required)
+#[cfg(feature = "game")]
 #[derive(Debug)]
 pub enum GameRuleCreateErrorKind {
     InitialBoardError,
 }
 
+#[cfg(feature = "game")]
 impl From<GameRuleCreateErrorKind> for Error {
     fn from(value: GameRuleCreateErrorKind) -> Self {
         GameError::GameRuleCreateError { kind: value }.into()
     }
 }
 
-/// Error kinds on playing games
+/// Error kinds on playing games ("game" feature required)
+#[cfg(feature = "game")]
 #[derive(Debug)]
 pub enum PlayingErrorKind {
     PlayerMismatch,
@@ -249,13 +262,15 @@ pub enum PlayingErrorKind {
     GameFinished(GameStatus),
 }
 
+#[cfg(feature = "game")]
 impl From<PlayingErrorKind> for Error {
     fn from(value: PlayingErrorKind) -> Self {
         GameError::PlayingError { kind: value }.into()
     }
 }
 
-/// Error variants on analysis for games
+/// Error variants on analysis for games ("analysis" feature required)
+#[cfg(feature = "analysis")]
 #[derive(Debug, thiserror::Error)]
 pub enum AnalysisError {
     /// Errors on validating arguments
@@ -267,7 +282,8 @@ pub enum AnalysisError {
     BoardValueMismatch(std::cmp::Ordering),
 }
 
-/// Error kinds on validation of arguments
+/// Error kinds on validation of arguments ("analysis" feature required)
+#[cfg(feature = "analysis")]
 #[derive(Debug)]
 pub enum ArgsValidationErrorKind {
     FinishedGameBoard(Board),
@@ -275,12 +291,14 @@ pub enum ArgsValidationErrorKind {
     DrawJudge,
 }
 
+#[cfg(feature = "analysis")]
 impl From<ArgsValidationErrorKind> for Error {
     fn from(value: ArgsValidationErrorKind) -> Self {
         AnalysisError::ArgsValidationError { kind: value }.into()
     }
 }
 
+#[cfg(feature = "analysis")]
 impl std::fmt::Display for ArgsValidationErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use ArgsValidationErrorKind::*;

@@ -20,6 +20,17 @@ Documentation is hosted on [docs.rs](https://docs.rs/tokyodoves/)
 Alternatively, see [an auto-generated documentation](https://mat-der-d.github.io/tokyodoves/tokyodoves/)
 on the repository.
 
+## Features
+This crate provides three types of features:
+- default (indicate nothing): use only basic entities to play the game
+- game: use convenient entities for playing games additionally
+- analysis: use tools for analysis and some collections additionally
+
+Note that, if you indicate feature = "analysis", 
+your program also uses those that are included when feature = "game".
+
+See the documentation for details.
+
 ## Usage
 
 Simply run:
@@ -28,9 +39,24 @@ Simply run:
 cargo add tokyodoves
 ```
 
+or add an option to select features:
+
+```
+cargo add tokyodoves --features analysis
+```
+
 Alternatively, add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-tokyodoves = "0.1"
+tokyodoves = "1.0.0"
 ```
+
+or
+
+```toml
+[dependencies]
+tokyodoves = { version = "1.0.0", features = ["analysis"] }
+```
+
+if you want to use feature "analysis".
