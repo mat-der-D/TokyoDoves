@@ -1,5 +1,5 @@
 //! A module containing a light [`Board`](`crate::Board`) container
-//! [`BoardSet`] and associated items.
+//! [`BoardSet`] and associated items
 
 use crate::collections::io::{Fragment, FragmentIter};
 use crate::prelude::{Board, BoardBuilder};
@@ -351,7 +351,7 @@ impl BoardSet {
     }
 
     /// Returns [`Capacity`] required to load all elements specified by `reader`.
-    pub fn required_capacity<R>(reader: R) -> Capacity
+    pub fn required_capacity<R>(reader: R) -> std::io::Result<Capacity>
     where
         R: Read,
     {
@@ -360,7 +360,7 @@ impl BoardSet {
 
     /// Returns [`Capacity`] required to load all elements (`e`) specified by `reader`,
     /// under the condition of `f` (where `f(&e)` returns `true`).
-    pub fn required_capacity_filter<R, F>(reader: R, f: F) -> Capacity
+    pub fn required_capacity_filter<R, F>(reader: R, f: F) -> std::io::Result<Capacity>
     where
         R: Read,
         F: FnMut(&u64) -> bool,
@@ -496,6 +496,31 @@ impl BoardSet {
         F: FnMut(&Board) -> bool,
     {
         self.raw.retain(|&h| f(&u64_to_board(h)))
+    }
+
+    /// Removes all loaded values from the set.
+    ///
+    /// It returns `Ok(true)` if some elements in the set are removed.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::BoardSet;
+    /// use tokyodoves::Board;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let mut set = BoardSet::new();
+    /// set.insert(Board::new());
+    /// set.remove_by_loading(File::open(path)?)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn remove_loaded_values<R>(&mut self, reader: R) -> std::io::Result<bool>
+    where
+        R: Read,
+    {
+        self.raw.remove_loaded_values(reader)
     }
 
     /// Clears the set, removing all values.
@@ -781,7 +806,7 @@ impl BoardSet {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
-    /// let capacity = BoardSet::required_capacity(File::open(path)?);
+    /// let capacity = BoardSet::required_capacity(File::open(path)?)?;
     /// let mut set = BoardSet::with_capacity(capacity);
     /// set.load(File::open(path)?);
     /// # Ok(())
@@ -1283,20 +1308,24 @@ impl RawBoardSet {
     /// # }
     /// ```
     pub fn new_from_file(path: impl AsRef<std::path::Path>) -> std::io::Result<RawBoardSet> {
-        let capacity = Self::required_capacity(std::fs::File::open(&path)?);
+        let capacity = Self::required_capacity(std::fs::File::open(&path)?)?;
         let mut set = Self::with_capacity(capacity);
         set.load(std::fs::File::open(path)?)?;
         Ok(set)
     }
 
     /// Returns [`Capacity`] required to load all elements specified by `reader`.
-    pub fn required_capacity<R>(reader: R) -> Capacity
+    pub fn required_capacity<R>(reader: R) -> std::io::Result<Capacity>
     where
         R: Read,
     {
         let mut count = HashMap::new();
         let mut top = 0;
-        for fragment in FragmentIter::new(reader) {
+        let mut iter = FragmentIter::new(reader);
+        loop {
+            let Some(fragment) = iter.try_next()? else {
+                break;
+            };
             use Fragment::*;
             match fragment {
                 Delimiter => continue,
@@ -1304,19 +1333,24 @@ impl RawBoardSet {
                 Bottom(_) => *count.entry(top).or_default() += 1,
             }
         }
-        Capacity(count)
+        Ok(Capacity(count))
     }
 
     /// Returns [`Capacity`] required to load all elements (`e`) specified by `reader`,
     /// under the condition of `f` (where `f(&e)` returns `true`).
-    pub fn required_capacity_filter<R, F>(reader: R, mut f: F) -> Capacity
+    pub fn required_capacity_filter<R, F>(reader: R, mut f: F) -> std::io::Result<Capacity>
     where
         R: Read,
         F: FnMut(&u64) -> bool,
     {
         let mut count = HashMap::new();
         let mut top = 0;
-        for fragment in FragmentIter::new(reader) {
+        let mut iter = FragmentIter::new(reader);
+
+        loop {
+            let Some(fragment) = iter.try_next()? else {
+                break;
+            };
             use Fragment::*;
             match fragment {
                 Delimiter => continue,
@@ -1329,7 +1363,7 @@ impl RawBoardSet {
                 }
             }
         }
-        Capacity(count)
+        Ok(Capacity(count))
     }
 
     /// Creates an empty `BoardSet` with at least the specified capacity.
@@ -1480,6 +1514,61 @@ impl RawBoardSet {
                 let hash = RawBoardSet::u32_u32_to_u64(top, b);
                 f(&hash)
             });
+        }
+    }
+
+    /// Removes all loaded values from the set.
+    ///
+    /// It returns `Ok(true)` if some elements in the set are removed.
+    ///
+    /// # Examples
+    /// ``` ignore
+    /// use std::fs::File;
+    /// use tokyodoves::collections::board_set::RawBoardSet;
+    /// use tokyodoves::Board;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// let path = "/some/path/of/binary/file.tdl";
+    /// let mut set = RawBoardSet::new();
+    /// set.insert(Board::new().to_u64());
+    /// set.remove_by_loading(File::open(path)?)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn remove_loaded_values<R>(&mut self, reader: R) -> std::io::Result<bool>
+    where
+        R: Read,
+    {
+        let mut removed = false;
+        let mut dummy = HashSet::new();
+        let mut bottoms = &mut dummy;
+        let mut is_capturing = false;
+        let mut iter = FragmentIter::new(reader);
+        loop {
+            let Some(fragment) = iter.try_next()? else {
+                return Ok(removed);
+            };
+
+            use Fragment::*;
+            match fragment {
+                Delimiter => continue,
+                Top(top_) => match self.top2bottoms.get_mut(&top_) {
+                    Some(bottoms_) => {
+                        is_capturing = true;
+                        bottoms = bottoms_;
+                    }
+                    None => {
+                        is_capturing = false;
+                        bottoms = &mut dummy;
+                    }
+                },
+                Bottom(bottom_) => {
+                    if !is_capturing {
+                        continue;
+                    }
+                    removed |= bottoms.remove(&bottom_);
+                }
+            }
         }
     }
 
@@ -1821,7 +1910,7 @@ impl RawBoardSet {
     ///
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// let path = "/some/path/of/binary/file.tdl";
-    /// let capacity = RawBoardSet::required_capacity(File::open(path)?);
+    /// let capacity = RawBoardSet::required_capacity(File::open(path)?)?;
     /// let mut set = RawBoardSet::with_capacity(capacity);
     /// set.load(File::open(path)?);
     /// # Ok(())

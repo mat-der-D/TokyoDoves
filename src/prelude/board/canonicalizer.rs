@@ -187,8 +187,15 @@ const fn compose(a: [usize; 16], b: [usize; 16]) -> [usize; 16] {
 /// implement some functions to translate the boards so that the top-left corner
 /// of the minimum rectangle moves to that of 4x4 matrix,
 /// besides `PositionMapper`,
+#[cfg(feature = "analysis")]
 #[derive(Debug, Clone, Copy)]
 pub struct PositionMapper {
+    maps: &'static [[usize; 16]; 8],
+}
+
+#[cfg(not(feature = "analysis"))]
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct PositionMapper {
     maps: &'static [[usize; 16]; 8],
 }
 

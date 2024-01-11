@@ -1,6 +1,6 @@
 [package]
 name = "tokyodoves"
-version = "0.1.7"
+version = "1.0.0"
 authors = ["Smooth Pudding <smooth.pudding.1017@gmail.com>"]
 edition = "2021"
 
@@ -17,7 +17,12 @@ categories = ["game-engines"]
 license = "MIT"
 
 [dependencies]
-array-macro = "2.1.5"
-strum = "0.25"
-strum_macros = "0.25"
-thiserror = "1.0"
+array-macro = "2.1.8"
+strum = "0.25.0"
+strum_macros = "0.25.3"
+thiserror = "1.0.56"
+
+[features]
+default = []
+game = []
+analysis = ["game"]

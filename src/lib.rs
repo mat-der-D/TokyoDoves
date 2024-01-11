@@ -169,6 +169,7 @@
 //! Although the codes in the last section are sufficient to play the game,
 //! this crate provides a [`game`] module,
 //! which lets you to realize this in more short codes.
+//! This module is available if you indicate the feature "game".
 //! See the examples in the [`Game`](`crate::game::Game`) struct of [`game`] module.
 //! This module also provides an [`Arena`](`crate::game::Arena`),
 //! where two [`Agent`](crate::game::Agent`)s play against.
@@ -187,16 +188,32 @@
 //! but also methods to save to/load from a binary file.
 //! See its documentation for more.
 //!
+//! These modules are available if you indicate the feature "analysis".
+//!
+//! # About feature flags
+//! The following three features are available:
+//! - no flag: Only basic board and related entities are included
+//! - "game": Entities related to game playing are included (those which are described in "Play more" section).
+//! - "analysis": Tools for analysis and collections are included (those which are described in "Analyze the game" section).
+//! It also includes those for "game" feature, and [`AnalystAgent`](`game::AnalystAgent`) additionally.
+//!
+//! See "features" page of "The Cargo Book" below for information about how to indicate features:<br>
+//! <https://doc.rust-lang.org/cargo/reference/features.html>
 
 pub use array_macro;
 pub use strum;
 pub use strum_macros;
 pub use thiserror;
 
+#[cfg(feature = "analysis")]
 pub mod analysis;
+#[cfg(feature = "analysis")]
 pub mod collections;
 pub mod error;
+
+#[cfg(feature = "game")]
 pub mod game;
+
 mod prelude;
 
 pub use prelude::*;
