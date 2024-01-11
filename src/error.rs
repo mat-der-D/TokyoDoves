@@ -36,12 +36,12 @@ pub enum Error {
     #[error("BoardError::{0}")]
     BoardError(#[from] BoardError),
 
-    /// Errors associated to the [`game`](`crate::game`) module
+    /// Errors associated to the [`game`](`crate::game`) module ("game" feature required)
     #[cfg(feature = "game")]
     #[error("GameError::{0}")]
     GameError(#[from] GameError),
 
-    /// Errors associated to the [`analysis`](`crate::analysis`) module
+    /// Errors associated to the [`analysis`](`crate::analysis`) module ("analysis" feature required)
     #[cfg(feature = "analysis")]
     #[error("AnalysisError::{0}")]
     AnalysisError(#[from] AnalysisError),
@@ -226,7 +226,7 @@ impl From<DecodingErrorKind> for Error {
     }
 }
 
-/// Errors associated to [`Game`](`crate::game::Game`)
+/// Errors associated to [`Game`](`crate::game::Game`) ("game" feature required)
 #[cfg(feature = "game")]
 #[derive(Debug, thiserror::Error)]
 pub enum GameError {
@@ -239,7 +239,7 @@ pub enum GameError {
     PlayingError { kind: PlayingErrorKind },
 }
 
-/// Error kinds on creating [`GameRule`](`crate::game::GameRule`)
+/// Error kinds on creating [`GameRule`](`crate::game::GameRule`) ("game" feature required)
 #[cfg(feature = "game")]
 #[derive(Debug)]
 pub enum GameRuleCreateErrorKind {
@@ -253,7 +253,7 @@ impl From<GameRuleCreateErrorKind> for Error {
     }
 }
 
-/// Error kinds on playing games
+/// Error kinds on playing games ("game" feature required)
 #[cfg(feature = "game")]
 #[derive(Debug)]
 pub enum PlayingErrorKind {
@@ -269,7 +269,7 @@ impl From<PlayingErrorKind> for Error {
     }
 }
 
-/// Error variants on analysis for games
+/// Error variants on analysis for games ("analysis" feature required)
 #[cfg(feature = "analysis")]
 #[derive(Debug, thiserror::Error)]
 pub enum AnalysisError {
@@ -282,7 +282,7 @@ pub enum AnalysisError {
     BoardValueMismatch(std::cmp::Ordering),
 }
 
-/// Error kinds on validation of arguments
+/// Error kinds on validation of arguments ("analysis" feature required)
 #[cfg(feature = "analysis")]
 #[derive(Debug)]
 pub enum ArgsValidationErrorKind {

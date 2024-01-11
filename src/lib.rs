@@ -191,7 +191,7 @@
 //! These modules are available if you indicate the feature "analysis".
 //!
 //! # About feature flags
-//! The following three types are available:
+//! The following three features are available:
 //! - no flag: Only basic board and related entities are included
 //! - "game": Entities related to game playing are included (those which are described in "Play more" section).
 //! - "analysis": Tools for analysis and collections are included (those which are described in "Analyze the game" section).
