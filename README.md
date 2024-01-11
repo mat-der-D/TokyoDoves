@@ -49,14 +49,14 @@ Alternatively, add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-tokyodoves = "1.0.0"
+tokyodoves = "1.0.2"
 ```
 
 or
 
 ```toml
 [dependencies]
-tokyodoves = { version = "1.0.0", features = ["analysis"] }
+tokyodoves = { version = "1.0.2", features = ["analysis"] }
 ```
 
 if you want to use feature "analysis".
