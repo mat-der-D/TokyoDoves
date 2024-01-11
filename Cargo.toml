@@ -1,6 +1,6 @@
 [package]
 name = "tokyodoves"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Smooth Pudding <smooth.pudding.1017@gmail.com>"]
 edition = "2021"
 
@@ -26,3 +26,6 @@ thiserror = "1.0.56"
 default = []
 game = []
 analysis = ["game"]
+
+[package.metadata.docs.rs]
+all-features = true
