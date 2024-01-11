@@ -1,4 +1,4 @@
-//! Convenient tools to analyze the game.
+//! Convenient tools to analyze the game ("analysis" feature required)
 //!
 //! The following functions are main contents:
 //! - [`evaluate_board`]<br>

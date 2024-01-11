@@ -16,12 +16,8 @@
 //! - [`AnalysisError`]
 //!     - ArgsValidationError: [`ArgsValidationErrorKind`]
 //!     - BoardValueMismatch: [`std::cmp::Ordering`]
-
-// use crate::{
-//     analysis::BoardValue,
-//     game::GameStatus,
-//     prelude::{Action, Board, Color, Dove},
-// };
+//!
+//! Some of contents are available only when feature "game" or "analysis" is indicated.
 
 #[cfg(feature = "analysis")]
 use crate::analysis::BoardValue;

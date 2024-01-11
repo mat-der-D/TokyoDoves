@@ -1,5 +1,5 @@
 //! A module containing a light [`Board`](`crate::Board`) container
-//! [`BoardSet`] and associated items.
+//! [`BoardSet`] and associated items
 
 use crate::collections::io::{Fragment, FragmentIter};
 use crate::prelude::{Board, BoardBuilder};

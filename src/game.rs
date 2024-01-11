@@ -1,4 +1,4 @@
-//! Convenient tools for playing games
+//! Convenient tools for playing games ("game" feature required)
 //!
 //! Main contents:
 //! - [`Game`]<br>
@@ -18,6 +18,9 @@
 //!     by implementing the [`Agent`] trait if you want.
 //! - [`Arena`]<br>
 //!     A struct of an arena, where two [`Agent`]s play against.
+//!
+//! All entities in this module are available when "game" feature is indicated,
+//! except [`AnalystAgent`] which is available when "analysis" feature is indicated.
 
 #[cfg(feature = "analysis")]
 use crate::analysis::{evaluate_board, find_best_actions};
@@ -608,6 +611,7 @@ impl Agent for RandomAgent {
 }
 
 /// An [`Agent`] who choses a next action based on analysis of the status.
+/// This struct is available when "analysis" feature is activated.
 #[cfg(feature = "analysis")]
 pub struct AnalystAgent {
     depth: usize,
